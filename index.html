@@ -169,6 +169,33 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 
 [data-type="te"]{--tc:var(--te)} [data-type="pl"]{--tc:var(--pl)} [data-type="xrd"]{--tc:var(--xrd)}
 
+/* temperature program */
+.fcell{display:flex;flex-direction:column;gap:6px;min-width:0}
+.stepbtn{align-self:flex-start;max-width:100%;border:1px dashed var(--line);background:none;border-radius:6px;padding:4px 8px;font-size:12.5px;color:var(--muted);cursor:pointer;text-align:left;font-family:var(--mono)}
+.stepbtn:not(.on){font-family:var(--sans)}
+.stepbtn:hover{border-color:var(--te);color:var(--te)}
+.stepbtn.on{border-style:solid;border-color:color-mix(in srgb,var(--te) 45%,transparent);background:color-mix(in srgb,var(--te) 9%,transparent);color:var(--te)}
+.modal{position:fixed;inset:0;z-index:30;background:rgba(10,16,22,.5);display:flex;align-items:center;justify-content:center;padding:16px}
+.sheet{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:14px;width:100%;max-width:520px;max-height:calc(100% - 16px);overflow:auto;padding:16px;display:grid;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.sheet-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sheet-h h2{margin:0;font-size:19px}
+.pcount{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px;color:var(--muted)}
+.stepper{display:flex;align-items:center;gap:6px}
+.stepper input{width:56px;text-align:center}
+.stepper .btn{width:36px;padding:6px 0;font-size:16px}
+#progSvg{width:100%;height:auto;background:var(--panel2);border:1px solid var(--line);border-radius:8px}
+#progSvg .pline{fill:none;stroke:var(--te);stroke-width:2.5;stroke-linejoin:round}
+#progSvg .pa{stroke:var(--muted);stroke-width:1}
+#progSvg .pd{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3;opacity:.6}
+#progSvg .pl{fill:var(--ink);font:600 11px var(--mono)}
+#progSvg .pr{fill:var(--muted);font:10px var(--mono)}
+.prow{display:grid;grid-template-columns:40px repeat(3,minmax(0,1fr));gap:6px;align-items:center;margin-bottom:6px}
+.prow .unit{padding:9px 5px;font-size:11.5px}
+.phead{font-size:11px;letter-spacing:.02em;color:var(--muted);margin-bottom:0}
+.pstep{font:600 13px var(--mono);color:var(--te)}
+.pact .spacer{flex:1}
+.params .wide{grid-column:1/-1}
+.progline{font-size:12px!important;color:var(--muted);margin-top:2px!important;line-height:1.5}
 /* phone: bottom tab bar */
 @media (max-width:760px){
   .top .nav{display:none}
@@ -290,6 +317,18 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
   <button role="tab" data-tab="cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendar</button>
 </nav>
 <div class="toast" id="toast" hidden></div>
+<div class="modal" id="progModal" hidden role="dialog" aria-modal="true" aria-labelledby="progTitle" data-type="te">
+  <div class="sheet">
+    <div class="sheet-h"><h2 id="progTitle">Temperature program</h2><button type="button" class="btn icon-x" id="progX" aria-label="Close">✕</button></div>
+    <div class="pcount"><label for="progN">Total steps</label>
+      <div class="stepper"><button type="button" class="btn sm" id="progMinus" aria-label="Fewer steps">−</button><input type="number" id="progN" min="1" max="10" class="num"><button type="button" class="btn sm" id="progPlus" aria-label="More steps">+</button></div></div>
+    <svg id="progSvg" viewBox="0 0 320 130" role="img" aria-label="Temperature profile"></svg>
+    <div class="prow phead"><span>Step</span><span>Temp (°C)</span><span>Ramp (°C/min)</span><span>Soak (s)</span></div>
+    <div id="progRows"></div>
+    <div class="err" id="progErr" hidden></div>
+    <div class="actions pact"><button type="button" class="btn primary" id="progEnter">Enter</button><button type="button" class="btn" id="progCancel">Cancel</button><span class="spacer"></span><button type="button" class="btn sm ghost danger" id="progClear">Remove steps</button></div>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -297,18 +336,23 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 /* ---------- experiment definitions ---------- */
 const P_UNITS=["mbar","Torr","Pa"];
 const TYPES={
-  te:{name:"Thermal evaporation",short:"Evaporation",sub:"Pressure, source T, mass, rates",groups:[
+  te:{name:"Thermal evaporation",short:"Evaporation",sub:"Pressure, T program, mass, rate, QCM",groups:[
     {title:"Chamber",fields:[{k:"basePressure",l:"Base pressure",u:P_UNITS,sci:1,ph:"5e-6"}]},
     {title:"Source temperature",fields:[
-      {k:"tPbI2",l:"PbI₂",d:"T PbI₂",u:"°C"},{k:"tMAI",l:"MAI",d:"T MAI",u:"°C"},
-      {k:"tFAI",l:"FAI",d:"T FAI",u:"°C"},{k:"tCsI",l:"CsI",d:"T CsI",u:"°C"}]},
+      {k:"tPbI2",l:"PbI₂",d:"T PbI₂",u:"°C",prog:1},{k:"tMAI",l:"MAI",d:"T MAI",u:"°C",prog:1},
+      {k:"tFAI",l:"FAI",d:"T FAI",u:"°C",prog:1},{k:"tCsI",l:"CsI",d:"T CsI",u:"°C",prog:1}],
+      hint:"Enter the final temperature, or use “Set temperature steps” to record the ramp program."},
     {title:"Precursor powder mass",fields:[
       {k:"mPbI2",l:"PbI₂",d:"Mass PbI₂",u:["mg","g"]},{k:"mMAI",l:"MAI",d:"Mass MAI",u:["mg","g"]},
       {k:"mFAI",l:"FAI",d:"Mass FAI",u:["mg","g"]},{k:"mCsI",l:"CsI",d:"Mass CsI",u:["mg","g"]}]},
     {title:"Deposition rate",fields:[{k:"rPbI2",l:"PbI₂",d:"Rate PbI₂",u:"Å/s"},{k:"rCsI",l:"CsI",d:"Rate CsI",u:"Å/s"}]},
     {title:"Substrate",fields:[
       {k:"rotation",l:"Rotation speed",u:"rpm"},
-      {k:"shutterPressure",l:"Pressure, substrate shutter open",d:"P shutter open",u:P_UNITS,sci:1,ph:"2e-5"}]}
+      {k:"shutterPressure",l:"Pressure, substrate shutter open",d:"P shutter open",u:P_UNITS,sci:1,ph:"2e-5"}]},
+    {title:"Film",fields:[{k:"thickness",l:"Film thickness",d:"Film thickness",u:["kÅ","nm","Å"]}]},
+    {title:"QCM life at start of evaporation",fields:[
+      {k:"qPbI2",l:"PbI₂",d:"QCM life PbI₂",u:"%"},{k:"qMAI",l:"MAI",d:"QCM life MAI",u:"%"},
+      {k:"qFAI",l:"FAI",d:"QCM life FAI",u:"%"},{k:"qCsI",l:"CsI",d:"QCM life CsI",u:"%"}]}
   ]},
   pl:{name:"PL",short:"PL",sub:"Intensity, collection time",groups:[
     {title:"Measurement",fields:[
@@ -370,7 +414,7 @@ let draft;
 
 function freshDraft(type,date){
   const now=new Date();
-  return {date:date||ymd(now),time:hm(now),sample:"",type:type||lsGet(TKEY,"te"),f:{},extra:[],notes:""};
+  return {date:date||ymd(now),time:hm(now),sample:"",type:type||lsGet(TKEY,"te"),f:{},prog:{},extra:[],notes:""};
 }
 draft=freshDraft();
 
@@ -487,8 +531,11 @@ function renderForm(){
     const unit=Array.isArray(f.u)
       ? `<select class="unit" data-u="${f.k}" id="u_${f.k}" aria-label="${esc(f.l)} unit">${f.u.map(x=>`<option${x===u?" selected":""}>${x}</option>`).join("")}</select>`
       : `<span class="unit">${f.u}</span>`;
-    return `<label class="f"><span class="lab">${f.l}</span><span class="unitwrap"><input class="num" type="text" inputmode="${f.sci?"text":"decimal"}" id="f_${f.k}" data-k="${f.k}" value="${esc(v)}" placeholder="${f.ph||""}">${unit}</span></label>`;
-  }).join("")}</div>${g.fields.some(f=>f.sci)?`<div class="hint">Type pressures like 5e-6 or 5x10^-6.</div>`:""}</div>`).join("");
+    const lab=`<label class="f"><span class="lab">${f.l}${f.prog?" · final":""}</span><span class="unitwrap"><input class="num" type="text" inputmode="${f.sci?"text":"decimal"}" id="f_${f.k}" data-k="${f.k}" value="${esc(v)}" placeholder="${f.ph||""}">${unit}</span></label>`;
+    if(!f.prog) return lab;
+    const pr=(draft.prog||{})[f.k];
+    return `<div class="fcell">${lab}<button type="button" class="stepbtn${pr&&pr.length?" on":""}" data-prog="${f.k}" id="pb_${f.k}">${pr&&pr.length?`${pr.length} step${pr.length>1?"s":""}: ${pr.map(x=>esc(x.t)).join(" → ")}`:"Set temperature steps"}</button></div>`;
+  }).join("")}</div>${g.hint?`<div class="hint">${g.hint}</div>`:""}${g.fields.some(f=>f.sci)?`<div class="hint">Type pressures like 5e-6 or 5x10^-6.</div>`:""}</div>`).join("");
   renderExtra();
   const eb=$("#editBanner");
   if(ui.editing){eb.hidden=false;$("#editText").textContent="Editing entry from "+niceDate(draft.date,true);$("#saveBtn").textContent="Update entry"}
@@ -518,6 +565,7 @@ form.addEventListener("change",e=>{
 });
 form.addEventListener("click",e=>{
   const d=e.target.closest("[data-xdel]"); if(d){draft.extra.splice(+d.dataset.xdel,1);renderExtra()}
+  const pb=e.target.closest("[data-prog]"); if(pb) openProg(pb.dataset.prog);
 });
 $("#addParam").addEventListener("click",()=>{draft.extra.push({k:"",v:""});renderExtra();$("#xk_"+(draft.extra.length-1)).focus()});
 $("#clearBtn").addEventListener("click",()=>{ui.editing=null;draft=freshDraft(draft.type);renderForm()});
@@ -535,10 +583,13 @@ form.addEventListener("submit",async e=>{
     if(Array.isArray(fd.u)) f[fd.k+"_u"]=unitFor(draft.type,fd);
   }
   if(bad){err.textContent=`${bad.l}: enter a number (for example 280, 0.5 or 5e-6).`;err.hidden=false;$("#f_"+bad.k).focus();return}
+  const prog={};
+  for(const fd of fieldsOf(draft.type)){ const pr=(draft.prog||{})[fd.k]; if(fd.prog&&pr&&pr.length){ prog[fd.k]=pr.map(x=>({...x}));
+    if(!f[fd.k]){f[fd.k]=pr[pr.length-1].t;filled++} } }
   const extra=draft.extra.filter(x=>x.k.trim()||x.v.trim()).map(x=>({k:x.k.trim(),v:x.v.trim()}));
   if(!filled&&!extra.length&&!draft.notes.trim()){err.textContent="Fill in at least one parameter or a note before saving.";err.hidden=false;return}
   const now=Date.now(), prev=ui.editing?entries.get(ui.editing):null;
-  const entry={id:ui.editing||uid(),date:draft.date,time:draft.time||"",type:draft.type,sample:draft.sample.trim(),f,extra,notes:draft.notes.trim(),created:prev?prev.created:now,upd:now};
+  const entry={id:ui.editing||uid(),date:draft.date,time:draft.time||"",type:draft.type,sample:draft.sample.trim(),f,...(Object.keys(prog).length?{prog}:{}),extra,notes:draft.notes.trim(),created:prev?prev.created:now,upd:now};
   const wasEdit=!!ui.editing;
   ui.editing=null;
   const keepDate=draft.date;
@@ -555,7 +606,8 @@ function cardHTML(e){
   const T=TYPES[e.type]; if(!T) return "";
   const ps=fieldsOf(e.type).filter(fd=>e.f&&e.f[fd.k]!=null&&e.f[fd.k]!=="").map(fd=>{
     const u=Array.isArray(fd.u)?(e.f[fd.k+"_u"]||fd.u[0]):fd.u;
-    return `<div><dt>${fd.d||fd.l}</dt><dd>${fmtVal(e.f[fd.k],fd.sci)} ${esc(u)}</dd></div>`;
+    const pr=fd.prog&&e.prog&&e.prog[fd.k];
+    return `<div${pr?' class="wide"':""}><dt>${fd.d||fd.l}</dt><dd>${fmtVal(e.f[fd.k],fd.sci)} ${esc(u)}</dd>${pr?`<dd class="progline">${progText(pr)}</dd>`:""}</div>`;
   });
   (e.extra||[]).forEach(x=>ps.push(`<div><dt>${esc(x.k||"Parameter")}</dt><dd>${esc(x.v)}</dd></div>`));
   const confirming=ui.confirmDel===e.id;
@@ -579,7 +631,7 @@ function onCardAction(ev){
   else if(a==="edit"||a==="repeat"){
     const now=new Date();
     draft={date:a==="edit"?e.date:ymd(now),time:a==="edit"?e.time:hm(now),sample:a==="edit"?e.sample:"",type:e.type,
-      f:{...e.f},extra:(e.extra||[]).map(x=>({...x})),notes:a==="edit"?e.notes:""};
+      f:{...e.f},prog:JSON.parse(JSON.stringify(e.prog||{})),extra:(e.extra||[]).map(x=>({...x})),notes:a==="edit"?e.notes:""};
     ui.editing=a==="edit"?id:null; renderForm(); setTab("new");
     if(a==="repeat") toast("Settings copied. Adjust and save as a new entry.");
   }
@@ -633,11 +685,12 @@ function buildCSV(){
   Object.entries(TYPES).forEach(([t,T])=>fieldsOf(t).forEach(fd=>{const key=fd.k; if(seen.has(t+key))return; seen.add(t+key); cols.push({t,fd})}));
   const q=v=>{v=v==null?"":String(v);return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v};
   const head=["Date","Time","Experiment","Sample"];
-  cols.forEach(({t,fd})=>{head.push(`${TYPES[t].short}: ${fd.d||fd.l}`); head.push(`${TYPES[t].short}: ${fd.d||fd.l} unit`)});
+  cols.forEach(({t,fd})=>{head.push(`${TYPES[t].short}: ${fd.d||fd.l}`); head.push(`${TYPES[t].short}: ${fd.d||fd.l} unit`); if(fd.prog) head.push(`${TYPES[t].short}: ${fd.d||fd.l} program`)});
   head.push("Other parameters","Notes");
   const rows=sorted().reverse().map(e=>{
     const r=[e.date,e.time,TYPES[e.type].name,e.sample];
-    cols.forEach(({t,fd})=>{ if(e.type===t&&e.f&&e.f[fd.k]!=null){r.push(e.f[fd.k]);r.push(Array.isArray(fd.u)?(e.f[fd.k+"_u"]||fd.u[0]):fd.u)} else {r.push("");r.push("")} });
+    cols.forEach(({t,fd})=>{ if(e.type===t&&e.f&&e.f[fd.k]!=null){r.push(e.f[fd.k]);r.push(Array.isArray(fd.u)?(e.f[fd.k+"_u"]||fd.u[0]):fd.u)} else {r.push("");r.push("")}
+      if(fd.prog){const pr=e.type===t&&e.prog&&e.prog[fd.k];r.push(pr?pr.map((x,i)=>`Step ${i+1}: ${x.t} °C, ramp ${x.r||"-"} °C/min, soak ${x.s||0} s`).join(" | "):"")} });
     r.push((e.extra||[]).map(x=>`${x.k}=${x.v}`).join("; ")); r.push(e.notes);
     return r.map(q).join(",");
   });
@@ -651,6 +704,79 @@ $("#exportBtn").addEventListener("click",()=>{
 });
 $("#copyCsv").addEventListener("click",()=>{const t=$("#csvText");navigator.clipboard.writeText(t.value).then(()=>toast("CSV copied"),()=>{t.focus();t.select();toast("Press ⌘C / Ctrl+C to copy")})});
 $("#closeCsv").addEventListener("click",()=>$("#csvBox").hidden=true);
+
+/* ---------- temperature program pop-up ---------- */
+function progText(pr){return pr.map((x,i)=>`${i+1}) ${esc(x.t)} °C · ${x.r?esc(x.r)+" °C/min":"ramp –"} · soak ${esc(x.s||"0")} s`).join("<br>")}
+let prog=null; // {k, rows:[{t,r,s}], lastFocus}
+const pm=$("#progModal");
+function fieldDef(k){return fieldsOf(draft.type).find(f=>f.k===k)}
+function openProg(k){
+  const fd=fieldDef(k); if(!fd) return;
+  const cur=(draft.prog||{})[k];
+  const rows=cur&&cur.length?cur.map(x=>({...x})):[{t:(draft.f[k]||"").trim(),r:"",s:"0"}];
+  prog={k,rows,lastFocus:document.activeElement};
+  $("#progTitle").textContent=`${fd.l} temperature program`;
+  $("#progClear").hidden=!(cur&&cur.length);
+  $("#progErr").hidden=true;
+  renderProgRows(); pm.hidden=false; document.body.style.overflow="hidden";
+  setTimeout(()=>{const i=$("#p_t_0");i&&i.focus()},30);
+}
+function closeProg(){pm.hidden=true;document.body.style.overflow="";const f=prog&&prog.lastFocus;prog=null;if(f&&f.focus)try{f.focus()}catch(e){}}
+function renderProgRows(){
+  $("#progN").value=prog.rows.length;
+  $("#progRows").innerHTML=prog.rows.map((x,i)=>`<div class="prow">
+    <span class="pstep">${i+1}${["st","nd","rd"][i]||"th"}</span>
+    <input class="num" type="text" inputmode="decimal" id="p_t_${i}" data-pi="${i}" data-pf="t" value="${esc(x.t)}" aria-label="Step ${i+1} temperature">
+    <input class="num" type="text" inputmode="decimal" id="p_r_${i}" data-pi="${i}" data-pf="r" value="${esc(x.r)}" aria-label="Step ${i+1} ramp rate">
+    <input class="num" type="text" inputmode="decimal" id="p_s_${i}" data-pi="${i}" data-pf="s" value="${esc(x.s)}" aria-label="Step ${i+1} soak time">
+  </div>`).join("");
+  drawProg();
+}
+function setSteps(n){
+  n=Math.max(1,Math.min(10,Math.round(n)||1));
+  while(prog.rows.length<n) prog.rows.push({t:"",r:"",s:"0"});
+  prog.rows.length=n; renderProgRows();
+}
+function drawProg(){
+  const W=320,H=130,L=34,R=10,Tp=16,B=22, rows=prog.rows, n=rows.length;
+  const temps=[25]; rows.forEach(x=>{const v=parseNum(x.t);temps.push(isNaN(v)?temps[temps.length-1]:v)});
+  let lo=Math.min(...temps),hi=Math.max(...temps); if(hi-lo<1){hi+=10;lo-=10}
+  const y=v=>Tp+(H-Tp-B)*(1-(v-lo)/(hi-lo)); const seg=(W-L-R)/n;
+  let pts=[[L,y(temps[0])]], labels="";
+  rows.forEach((x,i)=>{const x0=L+seg*i, xr=x0+seg*0.42, xe=x0+seg, t=temps[i+1];
+    pts.push([xr,y(t)],[xe,y(t)]);
+    labels+=`<text x="${(xr+xe)/2}" y="${y(t)-5}" text-anchor="middle" class="pl">${isNaN(parseNum(x.t))?"?":esc(x.t)+"°"}</text>`;
+    if(x.r) labels+=`<text x="${(x0+xr)/2+4}" y="${(y(temps[i])+y(t))/2+12}" text-anchor="middle" class="pr">${esc(x.r)}°/min</text>`;
+    labels+=`<line x1="${xr}" x2="${xr}" y1="${y(t)}" y2="${H-B}" class="pd"/>`;
+    if(+x.s>0) labels+=`<text x="${(xr+xe)/2}" y="${H-B+14}" text-anchor="middle" class="pr">${esc(x.s)} s</text>`;
+  });
+  $("#progSvg").innerHTML=`<line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" class="pa"/><line x1="${L}" x2="${L}" y1="${Tp-6}" y2="${H-B}" class="pa"/>
+    <text x="${L-4}" y="${y(temps[0])+4}" text-anchor="end" class="pr">RT</text>
+    <polyline points="${pts.map(p=>p.join(",")).join(" ")}" class="pline"/>${labels}`;
+}
+$("#progRows").addEventListener("input",e=>{const t=e.target;if(t.dataset.pi==null)return;prog.rows[+t.dataset.pi][t.dataset.pf]=t.value;t.removeAttribute("aria-invalid");drawProg()});
+$("#progN").addEventListener("change",e=>setSteps(+e.target.value));
+$("#progMinus").addEventListener("click",()=>setSteps(prog.rows.length-1));
+$("#progPlus").addEventListener("click",()=>setSteps(prog.rows.length+1));
+$("#progCancel").addEventListener("click",closeProg);
+$("#progX").addEventListener("click",closeProg);
+pm.addEventListener("click",e=>{if(e.target===pm)closeProg()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!pm.hidden)closeProg()});
+$("#progClear").addEventListener("click",()=>{delete draft.prog[prog.k];const k=prog.k;closeProg();renderForm();toast("Temperature steps removed");const b=$("#pb_"+k);b&&b.focus()});
+$("#progEnter").addEventListener("click",()=>{
+  const err=$("#progErr"); let bad=null;
+  prog.rows.forEach((x,i)=>{x.t=String(x.t).trim();x.r=String(x.r).trim();x.s=String(x.s).trim();
+    if(isNaN(parseNum(x.t))){bad=bad||[`Step ${i+1}: enter the temperature in °C.`,"p_t_"+i]}
+    else if(x.r&&isNaN(parseNum(x.r))){bad=bad||[`Step ${i+1}: ramp must be a number in °C/min.`,"p_r_"+i]}
+    else if(x.s&&isNaN(parseNum(x.s))){bad=bad||[`Step ${i+1}: soak must be a number of seconds.`,"p_s_"+i]}});
+  if(bad){err.textContent=bad[0];err.hidden=false;const el=$("#"+bad[1]);el.setAttribute("aria-invalid","true");el.focus();return}
+  const k=prog.k, fd=fieldDef(k), rows=prog.rows.map(x=>({t:x.t,r:x.r,s:x.s||"0"}));
+  if(!draft.prog) draft.prog={};
+  draft.prog[k]=rows; draft.f[k]=rows[rows.length-1].t;
+  closeProg(); renderForm();
+  toast(`${fd.l}: ${rows.length}-step program, final ${rows[rows.length-1].t} °C`);
+  const b=$("#pb_"+k); b&&b.focus();
+});
 
 /* ---------- toast ---------- */
 let tt; function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2600)}
