@@ -297,11 +297,14 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 /* ---------- experiment definitions ---------- */
 const P_UNITS=["mbar","Torr","Pa"];
 const TYPES={
-  te:{name:"Thermal evaporation",short:"Evaporation",sub:"Pressure, source T, rates",groups:[
+  te:{name:"Thermal evaporation",short:"Evaporation",sub:"Pressure, source T, mass, rates",groups:[
     {title:"Chamber",fields:[{k:"basePressure",l:"Base pressure",u:P_UNITS,sci:1,ph:"5e-6"}]},
     {title:"Source temperature",fields:[
       {k:"tPbI2",l:"PbI₂",d:"T PbI₂",u:"°C"},{k:"tMAI",l:"MAI",d:"T MAI",u:"°C"},
       {k:"tFAI",l:"FAI",d:"T FAI",u:"°C"},{k:"tCsI",l:"CsI",d:"T CsI",u:"°C"}]},
+    {title:"Precursor powder mass",fields:[
+      {k:"mPbI2",l:"PbI₂",d:"Mass PbI₂",u:["mg","g"]},{k:"mMAI",l:"MAI",d:"Mass MAI",u:["mg","g"]},
+      {k:"mFAI",l:"FAI",d:"Mass FAI",u:["mg","g"]},{k:"mCsI",l:"CsI",d:"Mass CsI",u:["mg","g"]}]},
     {title:"Deposition rate",fields:[{k:"rPbI2",l:"PbI₂",d:"Rate PbI₂",u:"Å/s"},{k:"rCsI",l:"CsI",d:"Rate CsI",u:"Å/s"}]},
     {title:"Substrate",fields:[
       {k:"rotation",l:"Rotation speed",u:"rpm"},
