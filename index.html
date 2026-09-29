@@ -169,7 +169,7 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 
 [data-type="te"]{--tc:var(--te)} [data-type="pl"]{--tc:var(--pl)} [data-type="xrd"]{--tc:var(--xrd)}
 
-/* temperature program */
+/* step programs */
 .fcell{display:flex;flex-direction:column;gap:6px;min-width:0}
 .stepbtn{align-self:flex-start;max-width:100%;border:1px dashed var(--line);background:none;border-radius:6px;padding:4px 8px;font-size:12.5px;color:var(--muted);cursor:pointer;text-align:left;font-family:var(--mono)}
 .stepbtn:not(.on){font-family:var(--sans)}
@@ -322,8 +322,8 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
     <div class="sheet-h"><h2 id="progTitle">Temperature program</h2><button type="button" class="btn icon-x" id="progX" aria-label="Close">✕</button></div>
     <div class="pcount"><label for="progN">Total steps</label>
       <div class="stepper"><button type="button" class="btn sm" id="progMinus" aria-label="Fewer steps">−</button><input type="number" id="progN" min="1" max="10" class="num"><button type="button" class="btn sm" id="progPlus" aria-label="More steps">+</button></div></div>
-    <svg id="progSvg" viewBox="0 0 320 130" role="img" aria-label="Temperature profile"></svg>
-    <div class="prow phead"><span>Step</span><span>Temp (°C)</span><span>Ramp (°C/min)</span><span>Soak (s)</span></div>
+    <svg id="progSvg" viewBox="0 0 320 130" role="img" aria-label="Program profile"></svg>
+    <div class="prow phead" id="progHead"></div>
     <div id="progRows"></div>
     <div class="err" id="progErr" hidden></div>
     <div class="actions pact"><button type="button" class="btn primary" id="progEnter">Enter</button><button type="button" class="btn" id="progCancel">Cancel</button><span class="spacer"></span><button type="button" class="btn sm ghost danger" id="progClear">Remove steps</button></div>
@@ -339,13 +339,14 @@ const TYPES={
   te:{name:"Thermal evaporation",short:"Evaporation",sub:"Pressure, T program, mass, rate, QCM",groups:[
     {title:"Chamber",fields:[{k:"basePressure",l:"Base pressure",u:P_UNITS,sci:1,ph:"5e-6"}]},
     {title:"Source temperature",fields:[
-      {k:"tPbI2",l:"PbI₂",d:"T PbI₂",u:"°C",prog:1},{k:"tMAI",l:"MAI",d:"T MAI",u:"°C",prog:1},
-      {k:"tFAI",l:"FAI",d:"T FAI",u:"°C",prog:1},{k:"tCsI",l:"CsI",d:"T CsI",u:"°C",prog:1}],
+      {k:"tPbI2",l:"PbI₂",d:"T PbI₂",u:"°C",prog:"temp"},{k:"tMAI",l:"MAI",d:"T MAI",u:"°C",prog:"temp"},
+      {k:"tFAI",l:"FAI",d:"T FAI",u:"°C",prog:"temp"},{k:"tCsI",l:"CsI",d:"T CsI",u:"°C",prog:"temp"}],
       hint:"Enter the final temperature, or use “Set temperature steps” to record the ramp program."},
     {title:"Precursor powder mass",fields:[
       {k:"mPbI2",l:"PbI₂",d:"Mass PbI₂",u:["mg","g"]},{k:"mMAI",l:"MAI",d:"Mass MAI",u:["mg","g"]},
       {k:"mFAI",l:"FAI",d:"Mass FAI",u:["mg","g"]},{k:"mCsI",l:"CsI",d:"Mass CsI",u:["mg","g"]}]},
-    {title:"Deposition rate",fields:[{k:"rPbI2",l:"PbI₂",d:"Rate PbI₂",u:"Å/s"},{k:"rCsI",l:"CsI",d:"Rate CsI",u:"Å/s"}]},
+    {title:"Deposition rate",fields:[{k:"rPbI2",l:"PbI₂",d:"Rate PbI₂",u:"Å/s",prog:"rate"},{k:"rCsI",l:"CsI",d:"Rate CsI",u:"Å/s",prog:"rate"}],
+      hint:"Enter the final rate, or use “Set rate steps” to record each rate stage."},
     {title:"Substrate",fields:[
       {k:"rotation",l:"Rotation speed",u:"rpm"},
       {k:"shutterPressure",l:"Pressure, substrate shutter open",d:"P shutter open",u:P_UNITS,sci:1,ph:"2e-5"}]},
@@ -534,7 +535,7 @@ function renderForm(){
     const lab=`<label class="f"><span class="lab">${f.l}${f.prog?" · final":""}</span><span class="unitwrap"><input class="num" type="text" inputmode="${f.sci?"text":"decimal"}" id="f_${f.k}" data-k="${f.k}" value="${esc(v)}" placeholder="${f.ph||""}">${unit}</span></label>`;
     if(!f.prog) return lab;
     const pr=(draft.prog||{})[f.k];
-    return `<div class="fcell">${lab}<button type="button" class="stepbtn${pr&&pr.length?" on":""}" data-prog="${f.k}" id="pb_${f.k}">${pr&&pr.length?`${pr.length} step${pr.length>1?"s":""}: ${pr.map(x=>esc(x.t)).join(" → ")}`:"Set temperature steps"}</button></div>`;
+    return `<div class="fcell">${lab}<button type="button" class="stepbtn${pr&&pr.length?" on":""}" data-prog="${f.k}" id="pb_${f.k}">${pr&&pr.length?`${pr.length} step${pr.length>1?"s":""}: ${pr.map(x=>esc(x.t)).join(" → ")}`:PK[f.prog].btn}</button></div>`;
   }).join("")}</div>${g.hint?`<div class="hint">${g.hint}</div>`:""}${g.fields.some(f=>f.sci)?`<div class="hint">Type pressures like 5e-6 or 5x10^-6.</div>`:""}</div>`).join("");
   renderExtra();
   const eb=$("#editBanner");
@@ -607,7 +608,7 @@ function cardHTML(e){
   const ps=fieldsOf(e.type).filter(fd=>e.f&&e.f[fd.k]!=null&&e.f[fd.k]!=="").map(fd=>{
     const u=Array.isArray(fd.u)?(e.f[fd.k+"_u"]||fd.u[0]):fd.u;
     const pr=fd.prog&&e.prog&&e.prog[fd.k];
-    return `<div${pr?' class="wide"':""}><dt>${fd.d||fd.l}</dt><dd>${fmtVal(e.f[fd.k],fd.sci)} ${esc(u)}</dd>${pr?`<dd class="progline">${progText(pr)}</dd>`:""}</div>`;
+    return `<div${pr?' class="wide"':""}><dt>${fd.d||fd.l}</dt><dd>${fmtVal(e.f[fd.k],fd.sci)} ${esc(u)}</dd>${pr?`<dd class="progline">${progText(pr,fd.prog)}</dd>`:""}</div>`;
   });
   (e.extra||[]).forEach(x=>ps.push(`<div><dt>${esc(x.k||"Parameter")}</dt><dd>${esc(x.v)}</dd></div>`));
   const confirming=ui.confirmDel===e.id;
@@ -690,7 +691,7 @@ function buildCSV(){
   const rows=sorted().reverse().map(e=>{
     const r=[e.date,e.time,TYPES[e.type].name,e.sample];
     cols.forEach(({t,fd})=>{ if(e.type===t&&e.f&&e.f[fd.k]!=null){r.push(e.f[fd.k]);r.push(Array.isArray(fd.u)?(e.f[fd.k+"_u"]||fd.u[0]):fd.u)} else {r.push("");r.push("")}
-      if(fd.prog){const pr=e.type===t&&e.prog&&e.prog[fd.k];r.push(pr?pr.map((x,i)=>`Step ${i+1}: ${x.t} °C, ramp ${x.r||"-"} °C/min, soak ${x.s||0} s`).join(" | "):"")} });
+      if(fd.prog){const pr=e.type===t&&e.prog&&e.prog[fd.k];r.push(pr?pr.map((x,i)=>`Step ${i+1}: `+PK[fd.prog].cols.map(c=>`${c.n} ${x[c.f]||"-"} ${c.u}`).join(", ")).join(" | "):"")} });
     r.push((e.extra||[]).map(x=>`${x.k}=${x.v}`).join("; ")); r.push(e.notes);
     return r.map(q).join(",");
   });
@@ -705,17 +706,25 @@ $("#exportBtn").addEventListener("click",()=>{
 $("#copyCsv").addEventListener("click",()=>{const t=$("#csvText");navigator.clipboard.writeText(t.value).then(()=>toast("CSV copied"),()=>{t.focus();t.select();toast("Press ⌘C / Ctrl+C to copy")})});
 $("#closeCsv").addEventListener("click",()=>$("#csvBox").hidden=true);
 
-/* ---------- temperature program pop-up ---------- */
-function progText(pr){return pr.map((x,i)=>`${i+1}) ${esc(x.t)} °C · ${x.r?esc(x.r)+" °C/min":"ramp –"} · soak ${esc(x.s||"0")} s`).join("<br>")}
-let prog=null; // {k, rows:[{t,r,s}], lastFocus}
+/* ---------- step program pop-up (temperature and rate) ---------- */
+const PK={
+  temp:{title:"temperature program",btn:"Set temperature steps",vu:"°C",base:25,baseLabel:"RT",rise:.42,
+    cols:[{f:"t",n:"Temp",h:"Temp (°C)",u:"°C",req:1},{f:"r",n:"Ramp",h:"Ramp (°C/min)",u:"°C/min"},{f:"s",n:"Soak",h:"Soak (s)",u:"s",def:"0"}]},
+  rate:{title:"deposition rate program",btn:"Set rate steps",vu:"Å/s",base:0,baseLabel:"0",rise:.14,
+    cols:[{f:"t",n:"Rate",h:"Rate (Å/s)",u:"Å/s",req:1},{f:"s",n:"Hold",h:"Hold (s)",u:"s"},{f:"k",n:"Thickness",h:"Thick. (kÅ)",u:"kÅ"}]}
+};
+function progText(pr,kind){const K=PK[kind]||PK.temp;return pr.map((x,i)=>`${i+1}) `+K.cols.map((c,j)=>j===0?`${esc(x[c.f])} ${c.u}`:`${c.n.toLowerCase()} ${x[c.f]?esc(x[c.f])+" "+c.u:"–"}`).join(" · ")).join("<br>")}
+let prog=null; // {k, kind, rows, lastFocus}
 const pm=$("#progModal");
 function fieldDef(k){return fieldsOf(draft.type).find(f=>f.k===k)}
+function blankRow(K){const r={};K.cols.forEach(c=>r[c.f]=c.def||"");return r}
 function openProg(k){
   const fd=fieldDef(k); if(!fd) return;
-  const cur=(draft.prog||{})[k];
-  const rows=cur&&cur.length?cur.map(x=>({...x})):[{t:(draft.f[k]||"").trim(),r:"",s:"0"}];
-  prog={k,rows,lastFocus:document.activeElement};
-  $("#progTitle").textContent=`${fd.l} temperature program`;
+  const K=PK[fd.prog]||PK.temp, cur=(draft.prog||{})[k];
+  let rows=cur&&cur.length?cur.map(x=>({...x})):[{...blankRow(K),t:(draft.f[k]||"").trim()}];
+  prog={k,kind:fd.prog,rows,lastFocus:document.activeElement};
+  $("#progTitle").textContent=`${fd.l} ${K.title}`;
+  $("#progHead").innerHTML=`<span>Step</span>`+K.cols.map(c=>`<span>${c.h}</span>`).join("");
   $("#progClear").hidden=!(cur&&cur.length);
   $("#progErr").hidden=true;
   renderProgRows(); pm.hidden=false; document.body.style.overflow="hidden";
@@ -723,38 +732,38 @@ function openProg(k){
 }
 function closeProg(){pm.hidden=true;document.body.style.overflow="";const f=prog&&prog.lastFocus;prog=null;if(f&&f.focus)try{f.focus()}catch(e){}}
 function renderProgRows(){
+  const K=PK[prog.kind];
   $("#progN").value=prog.rows.length;
   $("#progRows").innerHTML=prog.rows.map((x,i)=>`<div class="prow">
     <span class="pstep">${i+1}${["st","nd","rd"][i]||"th"}</span>
-    <input class="num" type="text" inputmode="decimal" id="p_t_${i}" data-pi="${i}" data-pf="t" value="${esc(x.t)}" aria-label="Step ${i+1} temperature">
-    <input class="num" type="text" inputmode="decimal" id="p_r_${i}" data-pi="${i}" data-pf="r" value="${esc(x.r)}" aria-label="Step ${i+1} ramp rate">
-    <input class="num" type="text" inputmode="decimal" id="p_s_${i}" data-pi="${i}" data-pf="s" value="${esc(x.s)}" aria-label="Step ${i+1} soak time">
+    ${K.cols.map(c=>`<input class="num" type="text" inputmode="decimal" id="p_${c.f}_${i}" data-pi="${i}" data-pf="${c.f}" value="${esc(x[c.f]??"")}" aria-label="Step ${i+1} ${c.h}">`).join("")}
   </div>`).join("");
   drawProg();
 }
 function setSteps(n){
   n=Math.max(1,Math.min(10,Math.round(n)||1));
-  while(prog.rows.length<n) prog.rows.push({t:"",r:"",s:"0"});
+  while(prog.rows.length<n) prog.rows.push(blankRow(PK[prog.kind]));
   prog.rows.length=n; renderProgRows();
 }
 function drawProg(){
-  const W=320,H=130,L=34,R=10,Tp=16,B=22, rows=prog.rows, n=rows.length;
-  const temps=[25]; rows.forEach(x=>{const v=parseNum(x.t);temps.push(isNaN(v)?temps[temps.length-1]:v)});
-  let lo=Math.min(...temps),hi=Math.max(...temps); if(hi-lo<1){hi+=10;lo-=10}
+  const K=PK[prog.kind], W=320,H=130,L=34,R=10,Tp=16,B=22, rows=prog.rows, n=rows.length, sfx=prog.kind==="temp"?"°":"";
+  const vals=[K.base]; rows.forEach(x=>{const v=parseNum(x.t);vals.push(isNaN(v)?vals[vals.length-1]:v)});
+  let lo=Math.min(...vals),hi=Math.max(...vals); if(hi-lo<1e-9){hi+=prog.kind==="temp"?10:.1;lo=Math.max(0,lo-(prog.kind==="temp"?10:.1))}
   const y=v=>Tp+(H-Tp-B)*(1-(v-lo)/(hi-lo)); const seg=(W-L-R)/n;
-  let pts=[[L,y(temps[0])]], labels="";
-  rows.forEach((x,i)=>{const x0=L+seg*i, xr=x0+seg*0.42, xe=x0+seg, t=temps[i+1];
+  let pts=[[L,y(vals[0])]], labels="";
+  rows.forEach((x,i)=>{const x0=L+seg*i, xr=x0+seg*K.rise, xe=x0+seg, t=vals[i+1];
     pts.push([xr,y(t)],[xe,y(t)]);
-    labels+=`<text x="${(xr+xe)/2}" y="${y(t)-5}" text-anchor="middle" class="pl">${isNaN(parseNum(x.t))?"?":esc(x.t)+"°"}</text>`;
-    if(x.r) labels+=`<text x="${(x0+xr)/2+4}" y="${(y(temps[i])+y(t))/2+12}" text-anchor="middle" class="pr">${esc(x.r)}°/min</text>`;
+    labels+=`<text x="${(xr+xe)/2}" y="${y(t)-5}" text-anchor="middle" class="pl">${isNaN(parseNum(x.t))?"?":esc(x.t)+sfx}</text>`;
+    if(prog.kind==="temp"&&x.r) labels+=`<text x="${(x0+xr)/2+4}" y="${(y(vals[i])+y(t))/2+12}" text-anchor="middle" class="pr">${esc(x.r)}°/min</text>`;
     labels+=`<line x1="${xr}" x2="${xr}" y1="${y(t)}" y2="${H-B}" class="pd"/>`;
     if(+x.s>0) labels+=`<text x="${(xr+xe)/2}" y="${H-B+14}" text-anchor="middle" class="pr">${esc(x.s)} s</text>`;
+    if(x.k) labels+=`<text x="${(xr+xe)/2}" y="${y(t)+13}" text-anchor="middle" class="pr">${esc(x.k)} kÅ</text>`;
   });
   $("#progSvg").innerHTML=`<line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" class="pa"/><line x1="${L}" x2="${L}" y1="${Tp-6}" y2="${H-B}" class="pa"/>
-    <text x="${L-4}" y="${y(temps[0])+4}" text-anchor="end" class="pr">RT</text>
+    <text x="${L-4}" y="${y(vals[0])+4}" text-anchor="end" class="pr">${K.baseLabel}</text>
     <polyline points="${pts.map(p=>p.join(",")).join(" ")}" class="pline"/>${labels}`;
 }
-$("#progRows").addEventListener("input",e=>{const t=e.target;if(t.dataset.pi==null)return;prog.rows[+t.dataset.pi][t.dataset.pf]=t.value;t.removeAttribute("aria-invalid");drawProg()});
+$("#progRows").addEventListener("input",e=>{const t=e.target;if(t.dataset.pi==null)return;prog.rows[+t.dataset.pi][t.dataset.pf]=t.value;t.removeAttribute("aria-invalid");$("#progErr").hidden=true;drawProg()});
 $("#progN").addEventListener("change",e=>setSteps(+e.target.value));
 $("#progMinus").addEventListener("click",()=>setSteps(prog.rows.length-1));
 $("#progPlus").addEventListener("click",()=>setSteps(prog.rows.length+1));
@@ -762,19 +771,18 @@ $("#progCancel").addEventListener("click",closeProg);
 $("#progX").addEventListener("click",closeProg);
 pm.addEventListener("click",e=>{if(e.target===pm)closeProg()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!pm.hidden)closeProg()});
-$("#progClear").addEventListener("click",()=>{delete draft.prog[prog.k];const k=prog.k;closeProg();renderForm();toast("Temperature steps removed");const b=$("#pb_"+k);b&&b.focus()});
+$("#progClear").addEventListener("click",()=>{delete draft.prog[prog.k];const k=prog.k;closeProg();renderForm();toast("Steps removed");const b=$("#pb_"+k);b&&b.focus()});
 $("#progEnter").addEventListener("click",()=>{
-  const err=$("#progErr"); let bad=null;
-  prog.rows.forEach((x,i)=>{x.t=String(x.t).trim();x.r=String(x.r).trim();x.s=String(x.s).trim();
-    if(isNaN(parseNum(x.t))){bad=bad||[`Step ${i+1}: enter the temperature in °C.`,"p_t_"+i]}
-    else if(x.r&&isNaN(parseNum(x.r))){bad=bad||[`Step ${i+1}: ramp must be a number in °C/min.`,"p_r_"+i]}
-    else if(x.s&&isNaN(parseNum(x.s))){bad=bad||[`Step ${i+1}: soak must be a number of seconds.`,"p_s_"+i]}});
+  const K=PK[prog.kind], err=$("#progErr"); let bad=null;
+  prog.rows.forEach((x,i)=>{K.cols.forEach(c=>{x[c.f]=String(x[c.f]??"").trim(); if(bad) return;
+    if(c.req&&!x[c.f]) bad=[`Step ${i+1}: enter the ${c.n.toLowerCase()} in ${c.u}.`,`p_${c.f}_${i}`];
+    else if(x[c.f]&&isNaN(parseNum(x[c.f]))) bad=[`Step ${i+1}: ${c.n.toLowerCase()} must be a number in ${c.u}.`,`p_${c.f}_${i}`];})});
   if(bad){err.textContent=bad[0];err.hidden=false;const el=$("#"+bad[1]);el.setAttribute("aria-invalid","true");el.focus();return}
-  const k=prog.k, fd=fieldDef(k), rows=prog.rows.map(x=>({t:x.t,r:x.r,s:x.s||"0"}));
+  const k=prog.k, fd=fieldDef(k), rows=prog.rows.map(x=>{const r={};K.cols.forEach(c=>r[c.f]=x[c.f]||c.def||"");return r});
   if(!draft.prog) draft.prog={};
   draft.prog[k]=rows; draft.f[k]=rows[rows.length-1].t;
   closeProg(); renderForm();
-  toast(`${fd.l}: ${rows.length}-step program, final ${rows[rows.length-1].t} °C`);
+  toast(`${fd.l}: ${rows.length}-step program, final ${rows[rows.length-1].t} ${K.vu}`);
   const b=$("#pb_"+k); b&&b.focus();
 });
 
