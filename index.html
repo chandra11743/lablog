@@ -169,6 +169,17 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 
 [data-type="te"]{--tc:var(--te)} [data-type="pl"]{--tc:var(--pl)} [data-type="xrd"]{--tc:var(--xrd)}
 
+/* chemicals + other parameters */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chemchip{border:1px solid var(--line);background:var(--panel);border-radius:99px;padding:7px 14px;font-weight:500;cursor:pointer;color:var(--muted)}
+.chemchip[aria-pressed="true"]{border-color:var(--te);background:color-mix(in srgb,var(--te) 12%,var(--panel));color:var(--te)}
+.chemchip[aria-pressed="true"]::before{content:"✓ "}
+.xcard{border:1px solid var(--line);border-radius:10px;padding:10px;display:grid;gap:8px;background:var(--panel2)}
+.xcard input,.xcard select{background:var(--panel)}
+.xtop{display:flex;gap:8px;align-items:center}
+.xtop select{flex:1}
+.xlabel{flex:1;font-size:13px;color:var(--muted)}
+.xbody{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 /* step programs */
 .fcell{display:flex;flex-direction:column;gap:6px;min-width:0}
 .stepbtn{align-self:flex-start;max-width:100%;border:1px dashed var(--line);background:none;border-radius:6px;padding:4px 8px;font-size:12.5px;color:var(--muted);cursor:pointer;text-align:left;font-family:var(--mono)}
@@ -250,7 +261,12 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
       <div class="card extra">
         <div class="grp-h"><h3>Other parameters</h3><button type="button" class="btn sm" id="addParam">Add parameter</button></div>
         <div id="extraRows" class="extra"></div>
-        <label class="f"><span class="lab">Notes</span><textarea id="fNotes" placeholder="Observations, film colour, anything unusual"></textarea></label>
+        <datalist id="chemList"></datalist>
+      </div>
+
+      <div class="card" style="display:grid;gap:10px">
+        <h3 style="margin:0"><label for="fNotes">Comments</label></h3>
+        <textarea id="fNotes" placeholder="Changes during the process, observations, film colour, anything unusual"></textarea>
       </div>
 
       <div class="err" id="formErr" hidden></div>
@@ -335,36 +351,35 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 "use strict";
 /* ---------- experiment definitions ---------- */
 const P_UNITS=["mbar","Torr","Pa"];
+const CHEMS=[{id:"PbI2",l:"PbI₂"},{id:"MAI",l:"MAI",org:1},{id:"FAI",l:"FAI",org:1},{id:"CsI",l:"CsI"},
+  {id:"SnI2",l:"SnI₂"},{id:"PbBr2",l:"PbBr₂"},{id:"CsBr",l:"CsBr"},{id:"PEABr",l:"PEABr",org:1}];
+const DEF_CHEMS=["PbI2","MAI","FAI","CsI"];
+const perChem=(pre,dl,extra,list)=>(list||CHEMS).map(c=>({k:pre+c.id,l:c.l,d:dl+" "+c.l,chem:c.id,...extra}));
 const TYPES={
   te:{name:"Thermal evaporation",short:"Evaporation",sub:"Pressure, T program, mass, rate, QCM",groups:[
     {title:"Chamber",fields:[{k:"basePressure",l:"Base pressure",u:P_UNITS,sci:1,ph:"5e-6"}]},
-    {title:"Source temperature",fields:[
-      {k:"tPbI2",l:"PbI₂",d:"T PbI₂",u:"°C",prog:"temp"},{k:"tMAI",l:"MAI",d:"T MAI",u:"°C",prog:"temp"},
-      {k:"tFAI",l:"FAI",d:"T FAI",u:"°C",prog:"temp"},{k:"tCsI",l:"CsI",d:"T CsI",u:"°C",prog:"temp"}],
+    {title:"Chemicals in this run",chips:1,fields:[]},
+    {title:"Source temperature",fields:perChem("t","T",{u:"°C",prog:"temp"}),
       hint:"Enter the final temperature, or use “Set temperature steps” to record the ramp program."},
-    {title:"Precursor powder mass",fields:[
-      {k:"mPbI2",l:"PbI₂",d:"Mass PbI₂",u:["mg","g"]},{k:"mMAI",l:"MAI",d:"Mass MAI",u:["mg","g"]},
-      {k:"mFAI",l:"FAI",d:"Mass FAI",u:["mg","g"]},{k:"mCsI",l:"CsI",d:"Mass CsI",u:["mg","g"]}]},
-    {title:"Deposition rate",fields:[{k:"rPbI2",l:"PbI₂",d:"Rate PbI₂",u:"Å/s",prog:"rate"},{k:"rCsI",l:"CsI",d:"Rate CsI",u:"Å/s",prog:"rate"}],
+    {title:"Precursor powder mass",fields:perChem("m","Mass",{u:["mg","g"]})},
+    {title:"Deposition rate",fields:perChem("r","Rate",{u:"Å/s",prog:"rate"},CHEMS.filter(c=>!c.org)),
       hint:"Enter the final rate, or use “Set rate steps” to record each rate stage."},
     {title:"Substrate",fields:[
       {k:"rotation",l:"Rotation speed",u:"rpm"},
       {k:"shutterPressure",l:"Pressure, substrate shutter open",d:"P shutter open",u:P_UNITS,sci:1,ph:"2e-5"}]},
     {title:"Film",fields:[{k:"thickness",l:"Film thickness",d:"Film thickness",u:["kÅ","nm","Å"]}]},
-    {title:"QCM life at start of evaporation",fields:[
-      {k:"qPbI2",l:"PbI₂",d:"QCM life PbI₂",u:"%"},{k:"qMAI",l:"MAI",d:"QCM life MAI",u:"%"},
-      {k:"qFAI",l:"FAI",d:"QCM life FAI",u:"%"},{k:"qCsI",l:"CsI",d:"QCM life CsI",u:"%"}]}
+    {title:"QCM life at start of evaporation",fields:perChem("q","QCM life",{u:"%"})}
   ]},
-  pl:{name:"PL",short:"PL",sub:"Intensity, collection time",groups:[
+  pl:{name:"PL",short:"PL",sub:"Intensity, acquisition time",groups:[
     {title:"Measurement",fields:[
       {k:"intensity",l:"Intensity",u:["mW/cm²","mW","µW","%","counts"]},
-      {k:"collTime",l:"Data collection time",d:"Collection time",u:["s","ms","min"]},
+      {k:"collTime",l:"Data acquisition time",d:"Acquisition time",u:["s","ms","min"]},
       {k:"exWl",l:"Excitation wavelength (optional)",d:"Excitation λ",u:"nm"}]}
   ]},
   xrd:{name:"XRD testing",short:"XRD",sub:"Scan rate, angle, time",groups:[
     {title:"Scan",fields:[
       {k:"scanRate",l:"Scan rate",u:"°/min"},
-      {k:"collTime",l:"Data collection time",d:"Collection time",u:["min","s","h"]},
+      {k:"collTime",l:"Data acquisition time",d:"Acquisition time",u:["min","s","h"]},
       {k:"incAngle",l:"Incident angle ω",d:"Incident ω",u:"°"}]},
     {title:"Range (optional)",fields:[
       {k:"tthStart",l:"2θ start",u:"°"},{k:"tthEnd",l:"2θ end",u:"°"},{k:"step",l:"Step size",u:"°"}]}
@@ -413,9 +428,14 @@ live();
 const ui={tab:"new",filter:"all",q:"",calMonth:null,calDay:ymd(new Date()),editing:null,confirmDel:null};
 let draft;
 
+const CHKEY="perovLabLog.chems";
+function lastChems(){const v=lsGet(CHKEY,null);return Array.isArray(v)&&v.length?v.filter(id=>CHEMS.some(c=>c.id===id)):DEF_CHEMS.slice()}
+const chemOn=f=>!f.chem||(draft.chems||DEF_CHEMS).includes(f.chem);
+function stepSummary(pr){return `${pr.length} step${pr.length>1?"s":""}: ${pr.map(x=>esc(x.t)).join(" → ")}`}
+function fmtChem(s){return esc(String(s||"")).replace(/([A-Za-z\)])(\d+)/g,(m,a,d)=>a+d.split("").map(c=>"₀₁₂₃₄₅₆₇₈₉"[+c]).join(""))}
 function freshDraft(type,date){
   const now=new Date();
-  return {date:date||ymd(now),time:hm(now),sample:"",type:type||lsGet(TKEY,"te"),f:{},prog:{},extra:[],notes:""};
+  return {date:date||ymd(now),time:hm(now),sample:"",type:type||lsGet(TKEY,"te"),chems:lastChems(),f:{},prog:{},extra:[],notes:""};
 }
 draft=freshDraft();
 
@@ -527,7 +547,10 @@ function renderForm(){
   typesEl.querySelectorAll("input").forEach(i=>i.checked=i.value===draft.type);
   const T=TYPES[draft.type];
   const tf=$("#typeFields"); tf.dataset.type=draft.type;
-  tf.innerHTML=T.groups.map(g=>`<div class="group"><h3>${g.title}</h3><div class="row">${g.fields.map(f=>{
+  tf.innerHTML=T.groups.map(g=>{
+   if(g.chips) return `<div class="group"><h3>${g.title}</h3><div class="chips" role="group" aria-label="Chemicals in this run">${CHEMS.map(c=>`<button type="button" class="chemchip" data-chem="${c.id}" id="ch_${c.id}" aria-pressed="${draft.chems.includes(c.id)}">${c.l}</button>`).join("")}</div><div class="hint">Pick the sources you're using. For any other chemical, use Other parameters below.</div></div>`;
+   const fields=g.fields.filter(chemOn); if(!fields.length) return "";
+   return `<div class="group"><h3>${g.title}</h3><div class="row">${fields.map(f=>{
     const u=unitFor(draft.type,f), v=draft.f[f.k]??"";
     const unit=Array.isArray(f.u)
       ? `<select class="unit" data-u="${f.k}" id="u_${f.k}" aria-label="${esc(f.l)} unit">${f.u.map(x=>`<option${x===u?" selected":""}>${x}</option>`).join("")}</select>`
@@ -535,19 +558,41 @@ function renderForm(){
     const lab=`<label class="f"><span class="lab">${f.l}${f.prog?" · final":""}</span><span class="unitwrap"><input class="num" type="text" inputmode="${f.sci?"text":"decimal"}" id="f_${f.k}" data-k="${f.k}" value="${esc(v)}" placeholder="${f.ph||""}">${unit}</span></label>`;
     if(!f.prog) return lab;
     const pr=(draft.prog||{})[f.k];
-    return `<div class="fcell">${lab}<button type="button" class="stepbtn${pr&&pr.length?" on":""}" data-prog="${f.k}" id="pb_${f.k}">${pr&&pr.length?`${pr.length} step${pr.length>1?"s":""}: ${pr.map(x=>esc(x.t)).join(" → ")}`:PK[f.prog].btn}</button></div>`;
-  }).join("")}</div>${g.hint?`<div class="hint">${g.hint}</div>`:""}${g.fields.some(f=>f.sci)?`<div class="hint">Type pressures like 5e-6 or 5x10^-6.</div>`:""}</div>`).join("");
+    return `<div class="fcell">${lab}<button type="button" class="stepbtn${pr&&pr.length?" on":""}" data-prog="${f.k}" id="pb_${f.k}">${pr&&pr.length?stepSummary(pr):PK[f.prog].btn}</button></div>`;
+  }).join("")}</div>${g.hint?`<div class="hint">${g.hint}</div>`:""}${fields.some(f=>f.sci)?`<div class="hint">Type pressures like 5e-6 or 5x10^-6.</div>`:""}</div>`}).join("");
   renderExtra();
   const eb=$("#editBanner");
   if(ui.editing){eb.hidden=false;$("#editText").textContent="Editing entry from "+niceDate(draft.date,true);$("#saveBtn").textContent="Update entry"}
   else{eb.hidden=true;$("#saveBtn").textContent="Save entry"}
   $("#formErr").hidden=true;
 }
+const XT={
+  temp:{label:"Source temperature",short:"T",unit:"°C",prog:"temp",chem:1},
+  rate:{label:"Deposition rate",short:"Rate",unit:"Å/s",prog:"rate",chem:1},
+  mass:{label:"Powder mass",short:"Mass",units:["mg","g"],chem:1},
+  qcm:{label:"QCM life",short:"QCM life",unit:"%",chem:1},
+  value:{label:"Other value"}
+};
+const xTypes=()=>draft.type==="te"?["temp","rate","mass","qcm","value"]:["value"];
+const xT=x=>XT[x&&x.type]||XT.value;
+function xLabel(x,plain){const T=xT(x);return T.chem?`${T.short} ${plain?(x.chem||""):fmtChem(x.chem)}`:(plain?(x.k||"Parameter"):esc(x.k||"Parameter"))}
+function xUnit(x){const T=xT(x);return T.units?(x.u||T.units[0]):(T.unit||"")}
 function renderExtra(){
-  $("#extraRows").innerHTML=draft.extra.map((x,i)=>`<div class="xrow">
-    <input type="text" data-xi="${i}" data-xp="k" id="xk_${i}" value="${esc(x.k)}" placeholder="Name, e.g. Tool factor" aria-label="Parameter name">
-    <input type="text" data-xi="${i}" data-xp="v" id="xv_${i}" value="${esc(x.v)}" placeholder="Value with unit" aria-label="Parameter value">
-    <button type="button" class="btn icon-x" data-xdel="${i}" aria-label="Remove parameter">✕</button></div>`).join("");
+  const types=xTypes();
+  $("#extraRows").innerHTML=draft.extra.map((x,i)=>{
+    if(!types.includes(x.type)) x.type="value";
+    const T=XT[x.type];
+    const sel=types.length>1?`<select id="xt_${i}" data-xi="${i}" data-xp="type" aria-label="Parameter ${i+1} type">${types.map(t=>`<option value="${t}"${t===x.type?" selected":""}>${XT[t].label}</option>`).join("")}</select>`:`<span class="xlabel">Other value</span>`;
+    const who=T.chem?`<label class="f"><span class="lab">Chemical</span><input type="text" id="xc_${i}" data-xi="${i}" data-xp="chem" value="${esc(x.chem||"")}" placeholder="e.g. SnF2" list="chemList" autocomplete="off" autocapitalize="off"></label>`
+      :`<label class="f"><span class="lab">Name</span><input type="text" id="xk_${i}" data-xi="${i}" data-xp="k" value="${esc(x.k||"")}" placeholder="e.g. Tool factor"></label>`;
+    let unit=""; if(T.units){const u=x.u||T.units[0];unit=`<select class="unit" id="xu_${i}" data-xi="${i}" data-xp="u" aria-label="Unit">${T.units.map(o=>`<option${o===u?" selected":""}>${o}</option>`).join("")}</select>`} else if(T.unit) unit=`<span class="unit">${T.unit}</span>`;
+    const val=`<label class="f"><span class="lab">${T.prog?"Final value":"Value"}</span>${unit?`<span class="unitwrap"><input class="num" type="text" inputmode="decimal" id="xv_${i}" data-xi="${i}" data-xp="v" value="${esc(x.v||"")}">${unit}</span>`:`<input type="text" id="xv_${i}" data-xi="${i}" data-xp="v" value="${esc(x.v||"")}" placeholder="Value with unit">`}</label>`;
+    const pr=T.prog&&x.prog&&x.prog.length?x.prog:null;
+    const stepb=T.prog?`<button type="button" class="stepbtn${pr?" on":""}" data-xprog="${i}" id="xpb_${i}">${pr?stepSummary(pr):PK[T.prog].btn}</button>`:"";
+    return `<div class="xcard"><div class="xtop">${sel}<button type="button" class="btn icon-x" data-xdel="${i}" aria-label="Remove parameter ${i+1}">✕</button></div><div class="xbody">${who}${val}</div>${stepb}</div>`;
+  }).join("")+(draft.extra.length?"":`<div class="hint">${draft.type==="te"?"Add a chemical that isn't in the list above (temperature with steps, rate with steps, powder mass or QCM life), or any other value.":"Add any other measured value, e.g. slit width or filter."}</div>`);
+  const names=new Set(CHEMS.map(c=>c.id)); entries.forEach(e=>(e.extra||[]).forEach(x=>x.chem&&names.add(x.chem)));
+  $("#chemList").innerHTML=[...names].map(n=>`<option value="${esc(n)}">`).join("");
 }
 const form=$("#entryForm");
 form.addEventListener("input",e=>{
@@ -557,18 +602,23 @@ form.addEventListener("input",e=>{
   else if(t.id==="fSample") draft.sample=t.value;
   else if(t.id==="fNotes") draft.notes=t.value;
   else if(t.dataset.k){draft.f[t.dataset.k]=t.value; t.removeAttribute("aria-invalid")}
-  else if(t.dataset.xi!=null) draft.extra[+t.dataset.xi][t.dataset.xp]=t.value;
+  else if(t.dataset.xi!=null){draft.extra[+t.dataset.xi][t.dataset.xp]=t.value; t.removeAttribute("aria-invalid")}
 });
 form.addEventListener("change",e=>{
   const t=e.target;
   if(t.name==="etype"){draft.type=t.value;lsSet(TKEY,t.value);renderForm()}
   else if(t.dataset.u){draft.f[t.dataset.u+"_u"]=t.value;unitPref[draft.type+"."+t.dataset.u]=t.value;lsSet(UKEY,unitPref)}
+  else if(t.dataset.xp==="type"){const i=+t.dataset.xi,x=draft.extra[i];x.type=t.value;if(x.prog&&x.progKind!==XT[x.type].prog){delete x.prog;delete x.progKind}renderExtra();const s=$("#xt_"+i);s&&s.focus()}
 });
 form.addEventListener("click",e=>{
   const d=e.target.closest("[data-xdel]"); if(d){draft.extra.splice(+d.dataset.xdel,1);renderExtra()}
-  const pb=e.target.closest("[data-prog]"); if(pb) openProg(pb.dataset.prog);
+  const pb=e.target.closest("[data-prog]"); if(pb) openProg({k:pb.dataset.prog});
+  const xb=e.target.closest("[data-xprog]"); if(xb) openProg({xi:+xb.dataset.xprog});
+  const ch=e.target.closest("[data-chem]"); if(ch){const id=ch.dataset.chem,on=draft.chems.includes(id);
+    draft.chems=on?draft.chems.filter(c=>c!==id):CHEMS.map(c=>c.id).filter(c=>c===id||draft.chems.includes(c));
+    lsSet(CHKEY,draft.chems);renderForm();const b=$("#ch_"+id);b&&b.focus()}
 });
-$("#addParam").addEventListener("click",()=>{draft.extra.push({k:"",v:""});renderExtra();$("#xk_"+(draft.extra.length-1)).focus()});
+$("#addParam").addEventListener("click",()=>{draft.extra.push({type:draft.type==="te"?"temp":"value"});renderExtra();const i=draft.extra.length-1;const el=$("#xt_"+i)||$("#xk_"+i);el&&el.focus()});
 $("#clearBtn").addEventListener("click",()=>{ui.editing=null;draft=freshDraft(draft.type);renderForm()});
 $("#cancelEdit").addEventListener("click",()=>{ui.editing=null;draft=freshDraft(draft.type);renderForm();setTab("log")});
 
@@ -578,6 +628,7 @@ form.addEventListener("submit",async e=>{
   if(!draft.date){err.textContent="Pick a date for this entry.";err.hidden=false;$("#fDate").focus();return}
   const f={}; let bad=null, filled=0;
   for(const fd of fieldsOf(draft.type)){
+    if(!chemOn(fd)) continue;
     const v=(draft.f[fd.k]??"").trim(); if(!v) continue;
     if(isNaN(parseNum(v))){bad=bad||fd; $("#f_"+fd.k).setAttribute("aria-invalid","true"); continue}
     f[fd.k]=v; filled++;
@@ -585,12 +636,23 @@ form.addEventListener("submit",async e=>{
   }
   if(bad){err.textContent=`${bad.l}: enter a number (for example 280, 0.5 or 5e-6).`;err.hidden=false;$("#f_"+bad.k).focus();return}
   const prog={};
-  for(const fd of fieldsOf(draft.type)){ const pr=(draft.prog||{})[fd.k]; if(fd.prog&&pr&&pr.length){ prog[fd.k]=pr.map(x=>({...x}));
+  for(const fd of fieldsOf(draft.type)){ const pr=(draft.prog||{})[fd.k]; if(fd.prog&&chemOn(fd)&&pr&&pr.length){ prog[fd.k]=pr.map(x=>({...x}));
     if(!f[fd.k]){f[fd.k]=pr[pr.length-1].t;filled++} } }
-  const extra=draft.extra.filter(x=>x.k.trim()||x.v.trim()).map(x=>({k:x.k.trim(),v:x.v.trim()}));
-  if(!filled&&!extra.length&&!draft.notes.trim()){err.textContent="Fill in at least one parameter or a note before saving.";err.hidden=false;return}
+  const extra=[]; let xbad=null;
+  draft.extra.forEach((x,i)=>{const T=xT(x), v=String(x.v||"").trim(), n=`Other parameters, row ${i+1}`;
+    if(T.chem){const c=String(x.chem||"").trim(), pr=T.prog&&x.prog&&x.prog.length?x.prog:null;
+      if(!c&&!v&&!pr) return;
+      if(!c){xbad=xbad||[`${n}: enter the chemical name.`,"xc_"+i];return}
+      const val=v||(pr?pr[pr.length-1].t:"");
+      if(!val){xbad=xbad||[`${n}: enter the ${T.label.toLowerCase()} for ${c}.`,"xv_"+i];return}
+      if(isNaN(parseNum(val))){xbad=xbad||[`${n}: ${T.label.toLowerCase()} must be a number.`,"xv_"+i];return}
+      const o={type:x.type,chem:c,v:val}; if(T.units) o.u=x.u||T.units[0]; if(pr){o.prog=pr.map(r=>({...r}));o.progKind=T.prog} extra.push(o);
+    } else {const k=String(x.k||"").trim(); if(!k&&!v) return; extra.push({type:"value",k,v});}
+  });
+  if(xbad){err.textContent=xbad[0];err.hidden=false;const el=$("#"+xbad[1]);if(el){el.setAttribute("aria-invalid","true");el.focus()}return}
+  if(!filled&&!extra.length&&!draft.notes.trim()){err.textContent="Fill in at least one parameter or a comment before saving.";err.hidden=false;return}
   const now=Date.now(), prev=ui.editing?entries.get(ui.editing):null;
-  const entry={id:ui.editing||uid(),date:draft.date,time:draft.time||"",type:draft.type,sample:draft.sample.trim(),f,...(Object.keys(prog).length?{prog}:{}),extra,notes:draft.notes.trim(),created:prev?prev.created:now,upd:now};
+  const entry={id:ui.editing||uid(),date:draft.date,time:draft.time||"",type:draft.type,sample:draft.sample.trim(),...(draft.type==="te"?{chems:[...draft.chems]}:{}),f,...(Object.keys(prog).length?{prog}:{}),extra,notes:draft.notes.trim(),created:prev?prev.created:now,upd:now};
   const wasEdit=!!ui.editing;
   ui.editing=null;
   const keepDate=draft.date;
@@ -610,17 +672,21 @@ function cardHTML(e){
     const pr=fd.prog&&e.prog&&e.prog[fd.k];
     return `<div${pr?' class="wide"':""}><dt>${fd.d||fd.l}</dt><dd>${fmtVal(e.f[fd.k],fd.sci)} ${esc(u)}</dd>${pr?`<dd class="progline">${progText(pr,fd.prog)}</dd>`:""}</div>`;
   });
-  (e.extra||[]).forEach(x=>ps.push(`<div><dt>${esc(x.k||"Parameter")}</dt><dd>${esc(x.v)}</dd></div>`));
+  (e.extra||[]).forEach(x=>{const T=xT(x), pr=T.prog&&x.prog&&x.prog.length?x.prog:null, u=xUnit(x);
+    ps.push(`<div${pr?' class="wide"':""}><dt>${xLabel(x)}</dt><dd>${esc(x.v)}${u?" "+esc(u):""}</dd>${pr?`<dd class="progline">${progText(pr,T.prog)}</dd>`:""}</div>`)});
   const confirming=ui.confirmDel===e.id;
   return `<article class="entry" data-type="${e.type}" data-id="${e.id}">
     <div class="entry-h"><span class="chip">${T.name}</span>${e.time?`<time>${esc(e.time)}</time>`:""}${e.sample?`<span class="sample">${esc(e.sample)}</span>`:""}</div>
     ${ps.length?`<dl class="params">${ps.join("")}</dl>`:""}
-    ${e.notes?`<div class="notes">${esc(e.notes)}</div>`:""}
+    ${e.notes?`<div class="notes"><span class="hint">Comments</span><br>${esc(e.notes)}</div>`:""}
     <div class="actions">${confirming
       ?`<span class="hint">Delete this entry?</span><button class="btn sm danger solid" data-act="del-yes">Delete</button><button class="btn sm" data-act="del-no">Keep</button>`
       :`<button class="btn sm" data-act="edit">Edit</button><button class="btn sm" data-act="repeat" title="Start a new entry with the same settings">Repeat</button><button class="btn sm ghost danger" data-act="del">Delete</button>`}</div>
   </article>`;
 }
+function entryChems(e){if(Array.isArray(e.chems)&&e.chems.length) return [...e.chems];
+  const used=CHEMS.map(c=>c.id).filter(id=>fieldsOf("te").some(fd=>fd.chem===id&&e.f&&e.f[fd.k]!=null&&e.f[fd.k]!==""));
+  return used.length?used:lastChems()}
 function sorted(){return [...entries.values()].filter(e=>TYPES[e.type]).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)||b.created-a.created)}
 function onCardAction(ev){
   const b=ev.target.closest("[data-act]"); if(!b) return;
@@ -632,7 +698,7 @@ function onCardAction(ev){
   else if(a==="edit"||a==="repeat"){
     const now=new Date();
     draft={date:a==="edit"?e.date:ymd(now),time:a==="edit"?e.time:hm(now),sample:a==="edit"?e.sample:"",type:e.type,
-      f:{...e.f},prog:JSON.parse(JSON.stringify(e.prog||{})),extra:(e.extra||[]).map(x=>({...x})),notes:a==="edit"?e.notes:""};
+      chems:entryChems(e),f:{...e.f},prog:JSON.parse(JSON.stringify(e.prog||{})),extra:JSON.parse(JSON.stringify(e.extra||[])),notes:a==="edit"?e.notes:""};
     ui.editing=a==="edit"?id:null; renderForm(); setTab("new");
     if(a==="repeat") toast("Settings copied. Adjust and save as a new entry.");
   }
@@ -643,7 +709,7 @@ $("#dayList").addEventListener("click",onCardAction);
 /* ---------- entries view ---------- */
 function renderLog(){
   const q=ui.q.trim().toLowerCase();
-  const list=sorted().filter(e=>(ui.filter==="all"||e.type===ui.filter)&&(!q||(e.sample+" "+e.notes+" "+(e.extra||[]).map(x=>x.k+" "+x.v).join(" ")).toLowerCase().includes(q)));
+  const list=sorted().filter(e=>(ui.filter==="all"||e.type===ui.filter)&&(!q||(e.sample+" "+e.notes+" "+(e.extra||[]).map(x=>(x.k||"")+" "+(x.chem||"")+" "+(x.v||"")).join(" ")).toLowerCase().includes(q)));
   const el=$("#logList");
   if(!entries.size){el.innerHTML=`<div class="empty"><b>No experiments logged yet</b>Your saved entries appear here, newest first, grouped by day.</div>`;return}
   if(!list.length){el.innerHTML=`<div class="empty"><b>No matching entries</b>Try another type or search term.</div>`;return}
@@ -687,12 +753,13 @@ function buildCSV(){
   const q=v=>{v=v==null?"":String(v);return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v};
   const head=["Date","Time","Experiment","Sample"];
   cols.forEach(({t,fd})=>{head.push(`${TYPES[t].short}: ${fd.d||fd.l}`); head.push(`${TYPES[t].short}: ${fd.d||fd.l} unit`); if(fd.prog) head.push(`${TYPES[t].short}: ${fd.d||fd.l} program`)});
-  head.push("Other parameters","Notes");
+  head.push("Other parameters","Comments");
   const rows=sorted().reverse().map(e=>{
     const r=[e.date,e.time,TYPES[e.type].name,e.sample];
     cols.forEach(({t,fd})=>{ if(e.type===t&&e.f&&e.f[fd.k]!=null){r.push(e.f[fd.k]);r.push(Array.isArray(fd.u)?(e.f[fd.k+"_u"]||fd.u[0]):fd.u)} else {r.push("");r.push("")}
       if(fd.prog){const pr=e.type===t&&e.prog&&e.prog[fd.k];r.push(pr?pr.map((x,i)=>`Step ${i+1}: `+PK[fd.prog].cols.map(c=>`${c.n} ${x[c.f]||"-"} ${c.u}`).join(", ")).join(" | "):"")} });
-    r.push((e.extra||[]).map(x=>`${x.k}=${x.v}`).join("; ")); r.push(e.notes);
+    r.push((e.extra||[]).map(x=>{const T=xT(x),u=xUnit(x),pr=T.prog&&x.prog&&x.prog.length?x.prog:null;
+      return `${xLabel(x,1)}=${x.v}${u?" "+u:""}`+(pr?` [`+pr.map((s,i)=>`Step ${i+1}: `+PK[T.prog].cols.map(c=>`${c.n} ${s[c.f]||"-"} ${c.u}`).join(", ")).join(" | ")+`]`:"")}).join("; ")); r.push(e.notes);
     return r.map(q).join(",");
   });
   return "﻿"+[head.map(q).join(","),...rows].join("\n");
@@ -718,12 +785,14 @@ let prog=null; // {k, kind, rows, lastFocus}
 const pm=$("#progModal");
 function fieldDef(k){return fieldsOf(draft.type).find(f=>f.k===k)}
 function blankRow(K){const r={};K.cols.forEach(c=>r[c.f]=c.def||"");return r}
-function openProg(k){
-  const fd=fieldDef(k); if(!fd) return;
-  const K=PK[fd.prog]||PK.temp, cur=(draft.prog||{})[k];
-  let rows=cur&&cur.length?cur.map(x=>({...x})):[{...blankRow(K),t:(draft.f[k]||"").trim()}];
-  prog={k,kind:fd.prog,rows,lastFocus:document.activeElement};
-  $("#progTitle").textContent=`${fd.l} ${K.title}`;
+function openProg(tg){
+  let kind,label,cur,init;
+  if(tg.xi!=null){const x=draft.extra[tg.xi]; if(!x) return; kind=xT(x).prog; label=String(x.chem||"").trim()||"Chemical"; cur=x.prog&&x.progKind===kind?x.prog:null; init=String(x.v||"").trim()}
+  else {const fd=fieldDef(tg.k); if(!fd) return; kind=fd.prog; label=fd.l; cur=(draft.prog||{})[tg.k]; init=(draft.f[tg.k]||"").trim()}
+  const K=PK[kind]||PK.temp;
+  let rows=cur&&cur.length?cur.map(x=>({...x})):[{...blankRow(K),t:init}];
+  prog={k:tg.k,xi:tg.xi,kind,label,rows,lastFocus:document.activeElement};
+  $("#progTitle").textContent=`${label.replace(/(\d+)/g,d=>d.split("").map(c=>"₀₁₂₃₄₅₆₇₈₉"[+c]).join(""))} ${K.title}`;
   $("#progHead").innerHTML=`<span>Step</span>`+K.cols.map(c=>`<span>${c.h}</span>`).join("");
   $("#progClear").hidden=!(cur&&cur.length);
   $("#progErr").hidden=true;
@@ -771,18 +840,23 @@ $("#progCancel").addEventListener("click",closeProg);
 $("#progX").addEventListener("click",closeProg);
 pm.addEventListener("click",e=>{if(e.target===pm)closeProg()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!pm.hidden)closeProg()});
-$("#progClear").addEventListener("click",()=>{delete draft.prog[prog.k];const k=prog.k;closeProg();renderForm();toast("Steps removed");const b=$("#pb_"+k);b&&b.focus()});
+$("#progClear").addEventListener("click",()=>{const k=prog.k,xi=prog.xi;
+  if(xi!=null){const x=draft.extra[xi];delete x.prog;delete x.progKind;closeProg();renderExtra();toast("Steps removed");const b=$("#xpb_"+xi);b&&b.focus();return}
+  delete draft.prog[k];closeProg();renderForm();toast("Steps removed");const b=$("#pb_"+k);b&&b.focus()});
 $("#progEnter").addEventListener("click",()=>{
   const K=PK[prog.kind], err=$("#progErr"); let bad=null;
   prog.rows.forEach((x,i)=>{K.cols.forEach(c=>{x[c.f]=String(x[c.f]??"").trim(); if(bad) return;
     if(c.req&&!x[c.f]) bad=[`Step ${i+1}: enter the ${c.n.toLowerCase()} in ${c.u}.`,`p_${c.f}_${i}`];
     else if(x[c.f]&&isNaN(parseNum(x[c.f]))) bad=[`Step ${i+1}: ${c.n.toLowerCase()} must be a number in ${c.u}.`,`p_${c.f}_${i}`];})});
   if(bad){err.textContent=bad[0];err.hidden=false;const el=$("#"+bad[1]);el.setAttribute("aria-invalid","true");el.focus();return}
-  const k=prog.k, fd=fieldDef(k), rows=prog.rows.map(x=>{const r={};K.cols.forEach(c=>r[c.f]=x[c.f]||c.def||"");return r});
+  const k=prog.k, xi=prog.xi, kind=prog.kind, label=prog.label, rows=prog.rows.map(x=>{const r={};K.cols.forEach(c=>r[c.f]=x[c.f]||c.def||"");return r});
+  const last=rows[rows.length-1].t;
+  if(xi!=null){const x=draft.extra[xi]; x.prog=rows; x.progKind=kind; x.v=last; closeProg(); renderExtra();
+    toast(`${label}: ${rows.length}-step program, final ${last} ${K.vu}`); const b=$("#xpb_"+xi); b&&b.focus(); return}
   if(!draft.prog) draft.prog={};
-  draft.prog[k]=rows; draft.f[k]=rows[rows.length-1].t;
+  draft.prog[k]=rows; draft.f[k]=last;
   closeProg(); renderForm();
-  toast(`${fd.l}: ${rows.length}-step program, final ${rows[rows.length-1].t} ${K.vu}`);
+  toast(`${label}: ${rows.length}-step program, final ${last} ${K.vu}`);
   const b=$("#pb_"+k); b&&b.focus();
 });
 
