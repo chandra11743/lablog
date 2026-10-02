@@ -169,6 +169,24 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 
 [data-type="te"]{--tc:var(--te)} [data-type="pl"]{--tc:var(--pl)} [data-type="xrd"]{--tc:var(--xrd)}
 
+/* recipes */
+.rec-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:4px 0 12px}
+#recSearch{margin-bottom:12px;max-width:420px}
+.rec-list{display:grid;gap:10px;max-width:760px}
+.rec-item{display:grid;gap:4px;text-align:left;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;cursor:pointer;color:inherit;font:inherit}
+.rec-item:hover{border-color:var(--muted)}
+.rec-item b{font:600 17px/1.25 var(--cond)}
+.rec-meta{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:12.5px;color:var(--muted)}
+.rec-prev{font-size:13.5px;color:var(--muted);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.rec-bar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;margin-bottom:12px}
+.rec-bar b{font:600 18px/1.2 var(--cond);text-align:center}
+.rec-form{display:grid;gap:14px;max-width:760px}
+.rec-doc{max-width:760px;display:grid;gap:14px}
+.rec-doc h2{margin:0;font-size:26px}
+.rec-body{white-space:pre-wrap;line-height:1.65;font-size:15.5px}
+.fab{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom,0px));width:56px;height:56px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);font:400 30px/1 var(--sans);box-shadow:0 6px 18px rgba(0,0,0,.25);cursor:pointer;z-index:12;display:grid;place-items:center}
+.fab:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+@media (min-width:761px){.fab{bottom:28px;right:28px}}
 /* chemicals + other parameters */
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chemchip{border:1px solid var(--line);background:var(--panel);border-radius:99px;padding:7px 14px;font-weight:500;cursor:pointer;color:var(--muted)}
@@ -210,7 +228,7 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 /* phone: bottom tab bar */
 @media (max-width:760px){
   .top .nav{display:none}
-  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--panel);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(3,1fr)}
+  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--panel);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(4,1fr)}
   .tabbar button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11.5px;color:var(--muted);padding:6px 0;cursor:pointer;font-weight:500}
   .tabbar button[aria-selected="true"]{color:var(--accent)}
   .tabbar svg{width:22px;height:22px}
@@ -229,9 +247,10 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
   <div class="top-in">
     <div class="brand"><b>Perovskite Lab Log</b><span id="subtitle">Experiment record</span></div>
     <nav class="nav" role="tablist" aria-label="Sections">
-      <button role="tab" data-tab="new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>New entry</button>
+      <button role="tab" data-tab="new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Home</button>
       <button role="tab" data-tab="log"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Entries</button>
       <button role="tab" data-tab="cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendar</button>
+      <button role="tab" data-tab="rec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H20v-3"/><path d="M8 7h8M8 11h6"/></svg>Recipes</button>
     </nav>
     <button type="button" class="sync" id="sync" data-s="" title="Sync settings"><i></i><span>Not synced</span></button>
   </div>
@@ -319,6 +338,30 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
       </div>
     </div>
   </section>
+  <!-- RECIPES -->
+  <section class="view" id="view-rec" hidden>
+    <div id="recListView">
+      <div class="rec-top"><h2 style="margin:0">Recipes</h2><span class="hint" id="recCount"></span></div>
+      <input type="search" id="recSearch" placeholder="Search recipes" aria-label="Search recipes" hidden>
+      <div id="recList" class="rec-list"></div>
+    </div>
+    <div id="recDetail" hidden></div>
+    <form id="recForm" class="rec-form" hidden novalidate autocomplete="off">
+      <div class="rec-bar"><button type="button" class="btn sm ghost" id="recCancel">‹ Back</button><b id="recFormTitle">New recipe</b><span></span></div>
+      <div class="card" style="display:grid;gap:12px">
+        <label class="f"><span class="lab">Title of experiment</span><input type="text" id="rTitle" placeholder="e.g. FAPbI₃ co-evaporation, 2-step PbI₂ ramp"></label>
+        <div class="row">
+          <label class="f"><span class="lab">Experiment type (optional)</span><select id="rCat"><option value="">—</option><option value="te">Thermal evaporation</option><option value="pl">PL</option><option value="xrd">XRD</option><option value="other">Other</option></select></label>
+          <label class="f"><span class="lab">Date (optional)</span><input type="date" id="rDate"></label>
+        </div>
+        <label class="f"><span class="lab">Learned from (optional)</span><input type="text" id="rSource" placeholder="Person, paper or lab manual"></label>
+        <label class="f"><span class="lab">Procedure</span><textarea id="rBody" rows="14" placeholder="1. Load PbI₂ and FAI into the crucibles&#10;2. Pump down to below 5e-6 mbar&#10;3. Ramp PbI₂ to 320 °C at 13 °C/min…"></textarea></label>
+      </div>
+      <div class="err" id="recErr" hidden></div>
+      <div class="savebar"><button type="submit" class="btn primary" id="recSave">Save recipe</button><button type="button" class="btn ghost" id="recCancel2">Cancel</button></div>
+    </form>
+    <button type="button" class="fab" id="recAdd" aria-label="New recipe" title="New recipe">+</button>
+  </section>
   <!-- SYNC -->
   <section class="view" id="view-sync" hidden>
     <h2>Sync between phone and Mac</h2>
@@ -328,9 +371,10 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 </main>
 
 <nav class="tabbar" role="tablist" aria-label="Sections">
-  <button role="tab" data-tab="new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>New entry</button>
+  <button role="tab" data-tab="new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Home</button>
   <button role="tab" data-tab="log"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Entries</button>
   <button role="tab" data-tab="cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendar</button>
+      <button role="tab" data-tab="rec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H20v-3"/><path d="M8 7h8M8 11h6"/></svg>Recipes</button>
 </nav>
 <div class="toast" id="toast" hidden></div>
 <div class="modal" id="progModal" hidden role="dialog" aria-modal="true" aria-labelledby="progTitle" data-type="te">
@@ -357,7 +401,7 @@ const DEF_CHEMS=["PbI2","MAI","FAI","CsI"];
 const perChem=(pre,dl,extra,list)=>(list||CHEMS).map(c=>({k:pre+c.id,l:c.l,d:dl+" "+c.l,chem:c.id,...extra}));
 const TYPES={
   te:{name:"Thermal evaporation",short:"Evaporation",sub:"Pressure, T program, mass, rate, QCM",groups:[
-    {title:"Chamber",fields:[{k:"basePressure",l:"Base pressure",u:P_UNITS,sci:1,ph:"5e-6"}]},
+    {title:"Chamber",fields:[{k:"pRvMv",l:"Pressure at RV → MV",d:"P at RV → MV",u:P_UNITS,sci:1,ph:"5e-2"},{k:"basePressure",l:"Base pressure",u:P_UNITS,sci:1,ph:"5e-6"}]},
     {title:"Chemicals in this run",chips:1,fields:[]},
     {title:"Source temperature",fields:perChem("t","T",{u:"°C",prog:"temp"}),
       hint:"Enter the final temperature, or use “Set temperature steps” to record the ramp program."},
@@ -526,7 +570,8 @@ $("#sync").addEventListener("click",()=>setTab("sync"));
 function setTab(t){
   ui.tab=t;
   document.querySelectorAll("[data-tab]").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.tab===t)));
-  ["new","log","cal","sync"].forEach(v=>$("#view-"+v).hidden=v!==t);
+  ["new","log","cal","rec","sync"].forEach(v=>$("#view-"+v).hidden=v!==t);
+  if(t==="rec"){rec.mode="list";rec.id=null;rec.pushed=false}
   if(t==="sync") renderSyncBox();
   renderLists();
   window.scrollTo(0,0);
@@ -744,7 +789,7 @@ $("#newOnDay").addEventListener("click",()=>{ui.editing=null;draft=freshDraft(dr
 
 function renderToday(){const t=ymd(new Date());const es=sorted().filter(e=>e.date===t);$("#todayList").innerHTML=es.length?es.map(cardHTML).join(""):`<div class="empty">Entries you save today show up here.</div>`}
 $("#todayList").addEventListener("click",onCardAction);
-function renderLists(){ renderToday(); if(ui.tab==="log") renderLog(); if(ui.tab==="cal") renderCal(); }
+function renderLists(){ renderToday(); if(ui.tab==="log") renderLog(); if(ui.tab==="cal") renderCal(); if(ui.tab==="rec"&&rec.mode!=="edit") renderRec(); }
 
 /* ---------- CSV export ---------- */
 function buildCSV(){
@@ -858,6 +903,68 @@ $("#progEnter").addEventListener("click",()=>{
   closeProg(); renderForm();
   toast(`${label}: ${rows.length}-step program, final ${last} ${K.vu}`);
   const b=$("#pb_"+k); b&&b.focus();
+});
+
+/* ---------- recipes ---------- */
+const REC_CAT={te:"Thermal evaporation",pl:"PL",xrd:"XRD",other:"Other"};
+const rec={mode:"list",id:null,pushed:false,confirmDel:false,q:""};
+const recipes=()=>Object.values(store.entries).filter(e=>e&&!e.deleted&&e.type==="recipe");
+function recShow(){ $("#recListView").hidden=rec.mode!=="list"; $("#recDetail").hidden=rec.mode!=="view"; $("#recForm").hidden=rec.mode!=="edit"; $("#recAdd").hidden=rec.mode!=="list"; }
+function recMeta(r){return [r.cat&&REC_CAT[r.cat]?`<span class="chip" data-type="${r.cat==="other"?"":r.cat}" style="${r.cat==="other"?"--tc:var(--muted)":""}">${REC_CAT[r.cat]}</span>`:"",r.date?`<span>${niceDate(r.date,true)}</span>`:"",r.source?`<span>From ${esc(r.source)}</span>`:""].filter(Boolean).join("")}
+function renderRec(){
+  if(rec.mode==="view"){const r=store.entries[rec.id]; if(!r||r.deleted||r.type!=="recipe"){rec.mode="list"} }
+  recShow();
+  if(rec.mode==="list"){
+    const all=recipes().sort((a,b)=>(b.upd||0)-(a.upd||0)), q=rec.q.trim().toLowerCase();
+    const list=all.filter(r=>!q||(r.title+" "+(r.body||"")+" "+(r.source||"")).toLowerCase().includes(q));
+    $("#recCount").textContent=all.length?`${all.length} recipe${all.length>1?"s":""}`:"";
+    $("#recSearch").hidden=all.length<4;
+    $("#recList").innerHTML=!all.length?`<div class="empty"><b>No recipes yet</b>Tap + to write down an experimental procedure you have learned and follow.</div>`
+      :!list.length?`<div class="empty"><b>No matching recipes</b>Try another word.</div>`
+      :list.map(r=>`<button type="button" class="rec-item" data-rec="${r.id}"><b>${esc(r.title)}</b>${recMeta(r)?`<span class="rec-meta">${recMeta(r)}</span>`:""}${r.body?`<span class="rec-prev">${esc(r.body.split("\n").filter(Boolean).slice(0,2).join(" · "))}</span>`:""}</button>`).join("");
+  } else if(rec.mode==="view"){
+    const r=store.entries[rec.id];
+    $("#recDetail").innerHTML=`<div class="rec-bar"><button type="button" class="btn sm ghost" data-ract="back">‹ Recipes</button><span></span><span></span></div>
+      <article class="rec-doc">
+        <h2>${esc(r.title)}</h2>
+        ${recMeta(r)?`<div class="rec-meta">${recMeta(r)}</div>`:""}
+        <div class="card rec-body">${r.body?esc(r.body):'<span class="hint">No procedure written yet. Tap Edit to add the steps.</span>'}</div>
+        <div class="actions">${rec.confirmDel
+          ?`<span class="hint">Delete this recipe?</span><button type="button" class="btn sm danger solid" data-ract="del-yes">Delete</button><button type="button" class="btn sm" data-ract="del-no">Keep</button>`
+          :`<button type="button" class="btn primary sm" data-ract="edit">Edit</button><button type="button" class="btn sm ghost danger" data-ract="del">Delete</button>`}</div>
+        <div class="hint">Last updated ${new Date(r.upd||r.created||Date.now()).toLocaleString()}</div>
+      </article>`;
+  }
+}
+function recGo(mode,id){
+  if(rec.mode==="list"&&mode!=="list"&&!rec.pushed){try{history.pushState({rec:1},"")}catch(e){} rec.pushed=true}
+  rec.mode=mode; rec.id=id||null; rec.confirmDel=false;
+  if(mode==="edit") fillRecForm(); renderRec(); window.scrollTo(0,0);
+}
+function recBack(){ if(rec.pushed){rec.pushed=false;try{history.back();return}catch(e){}} rec.mode="list";rec.id=null;renderRec() }
+window.addEventListener("popstate",()=>{ if(ui.tab==="rec"&&rec.mode!=="list"){rec.pushed=false;rec.mode="list";rec.id=null;renderRec();window.scrollTo(0,0)} });
+function fillRecForm(){
+  const r=rec.id?store.entries[rec.id]:null;
+  $("#recFormTitle").textContent=r?"Edit recipe":"New recipe";
+  $("#rTitle").value=r?r.title:""; $("#rCat").value=r?(r.cat||""):""; $("#rDate").value=r?(r.date||""):""; $("#rSource").value=r?(r.source||""):""; $("#rBody").value=r?(r.body||""):"";
+  $("#recErr").hidden=true; setTimeout(()=>$("#rTitle").focus(),30);
+}
+$("#recAdd").addEventListener("click",()=>recGo("edit",null));
+$("#recList").addEventListener("click",e=>{const b=e.target.closest("[data-rec]");if(b)recGo("view",b.dataset.rec)});
+$("#recSearch").addEventListener("input",e=>{rec.q=e.target.value;renderRec()});
+$("#recDetail").addEventListener("click",e=>{const b=e.target.closest("[data-ract]");if(!b)return;const a=b.dataset.ract;
+  if(a==="back") recBack();
+  else if(a==="edit"){rec.mode="edit";rec.confirmDel=false;fillRecForm();renderRec();window.scrollTo(0,0)}
+  else if(a==="del"){rec.confirmDel=true;renderRec()}
+  else if(a==="del-no"){rec.confirmDel=false;renderRec()}
+  else if(a==="del-yes"){const id=rec.id;rec.confirmDel=false;remove(id);toast("Recipe deleted");recBack()}});
+function recCancel(){ if(rec.id&&store.entries[rec.id]&&!store.entries[rec.id].deleted){rec.mode="view";renderRec();window.scrollTo(0,0)} else recBack() }
+$("#recCancel").addEventListener("click",recCancel); $("#recCancel2").addEventListener("click",recCancel);
+$("#recForm").addEventListener("submit",e=>{e.preventDefault();
+  const title=$("#rTitle").value.trim(); if(!title){const er=$("#recErr");er.textContent="Give the recipe a title.";er.hidden=false;$("#rTitle").focus();return}
+  const now=Date.now(), prev=rec.id?store.entries[rec.id]:null;
+  const r={id:prev?prev.id:"r"+uid(),type:"recipe",title,cat:$("#rCat").value,date:$("#rDate").value,source:$("#rSource").value.trim(),body:$("#rBody").value.replace(/\s+$/,""),created:prev&&prev.created||now,upd:now};
+  rec.id=r.id; rec.mode="view"; put(r); renderRec(); window.scrollTo(0,0); toast(prev?"Recipe updated":"Recipe saved");
 });
 
 /* ---------- toast ---------- */
