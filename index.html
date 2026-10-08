@@ -207,7 +207,13 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 .stepbtn.on{border-style:solid;border-color:color-mix(in srgb,var(--te) 45%,transparent);background:color-mix(in srgb,var(--te) 9%,transparent);color:var(--te)}
 .modal{position:fixed;inset:0;z-index:30;background:rgba(10,16,22,.5);display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;overscroll-behavior:contain}
 @media (min-height:700px) and (min-width:700px){.modal{align-items:center}}
-.subnew{display:flex;gap:8px;align-items:center}.subnew input{flex:1;min-width:0}
+.subnew{display:flex;gap:8px;align-items:center;margin-top:8px}.subnew input{flex:1;min-width:0}
+.subs legend{margin-bottom:6px}
+.subgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px}
+.subbox{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer;font:500 13.5px var(--mono);background:var(--panel);min-width:0}
+.subbox span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.5;padding-bottom:2px}
+.subbox input{width:18px;height:18px;margin:0;flex:none;accent-color:var(--te)}
+.subbox:has(input:checked){border-color:var(--te);background:color-mix(in srgb,var(--te) 10%,var(--panel))}
 .sheet{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:14px;width:100%;max-width:520px;margin:auto 0;padding:16px;display:grid;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
 .sheet-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .sheet-h h2{margin:0;font-size:19px}
@@ -271,13 +277,14 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
           <label class="f"><span class="lab">Time</span><input type="time" id="fTime"></label>
           <label class="f"><span class="lab">Sample ID</span><input type="text" id="fSample" placeholder="e.g. S-0926-A"></label>
         </div>
-        <div class="row">
-          <label class="f"><span class="lab">Substrate</span><select id="fSub"></select></label>
-        </div>
-        <div class="subnew" id="subNew" hidden>
-          <input type="text" id="subNewIn" placeholder="New substrate, e.g. FTO" aria-label="New substrate name" enterkeyhint="done">
-          <button type="button" class="btn sm primary" id="subNewAdd">Add</button><button type="button" class="btn sm" id="subNewCancel">Cancel</button>
-        </div>
+        <fieldset class="subs" style="border:0;padding:0;margin:0">
+          <legend class="lab">Substrates <span class="hint" id="subCount"></span></legend>
+          <div class="subgrid" id="subGrid"></div>
+          <div class="subnew">
+            <input type="text" id="subNewIn" placeholder="Add new substrate, e.g. FTO" aria-label="New substrate name" enterkeyhint="done">
+            <button type="button" class="btn sm" id="subNewAdd">＋ Add</button>
+          </div>
+        </fieldset>
         <div class="hint" id="dateHint">Date and time are filled from your device calendar. Pick a day in Calendar to log for another date.</div>
       </div>
 
@@ -489,14 +496,16 @@ function stepSummary(pr){return `${pr.length} step${pr.length>1?"s":""}: ${pr.ma
 function fmtChem(s){return esc(String(s||"")).replace(/([A-Za-z\)])(\d+)/g,(m,a,d)=>a+d.split("").map(c=>"₀₁₂₃₄₅₆₇₈₉"[+c]).join(""))}
 const SUBS=["Si(110)_3","Si(110)_5","Si(100)_3","Si(100)_300","KCl","Glass","ITO"];
 const SUBKEY="perovLabLog.subs", SUBLAST="perovLabLog.subLast";
+const subsOf=e=>Array.isArray(e.subs)?e.subs:(e.substrate?[e.substrate]:[]);
+function lastSubs(){const v=lsGet(SUBLAST,[]);return Array.isArray(v)?v:(v?[v]:[])}
 function subList(){const out=[...SUBS], add=v=>{v=String(v||"").trim(); if(v&&!out.some(x=>x.toLowerCase()===v.toLowerCase())) out.push(v)};
-  (lsGet(SUBKEY,[])||[]).forEach(add); (typeof entries!=="undefined"&&entries?[...entries.values()]:[]).forEach(e=>add(e.substrate)); if(draft) add(draft.substrate); return out}
-function renderSub(){const sel=$("#fSub"), cur=draft.substrate||"";
-  sel.innerHTML=`<option value="">— Select substrate —</option>`+subList().map(v=>`<option value="${esc(v)}"${v===cur?" selected":""}>${esc(v)}</option>`).join("")+`<option value="__new">＋ Add new substrate…</option>`;
-  sel.value=cur}
+  (lsGet(SUBKEY,[])||[]).forEach(add); (typeof entries!=="undefined"&&entries?[...entries.values()]:[]).forEach(e=>subsOf(e).forEach(add)); if(draft) (draft.subs||[]).forEach(add); return out}
+function renderSub(){const cur=draft.subs||[];
+  $("#subGrid").innerHTML=subList().map((v,i)=>`<label class="subbox"><input type="checkbox" data-sub="${esc(v)}"${cur.includes(v)?" checked":""}><span>${esc(v)}</span></label>`).join("");
+  $("#subCount").textContent=cur.length?`· ${cur.length} selected`:""}
 function freshDraft(type,date){
   const now=new Date();
-  return {date:date||ymd(now),time:hm(now),sample:"",substrate:lsGet(SUBLAST,""),type:type||lsGet(TKEY,"te"),chems:lastChems(),f:{},prog:{},extra:[],notes:""};
+  return {date:date||ymd(now),time:hm(now),sample:"",subs:lastSubs(),type:type||lsGet(TKEY,"te"),chems:lastChems(),f:{},prog:{},extra:[],notes:""};
 }
 draft=freshDraft();
 
@@ -605,7 +614,7 @@ function unitFor(t,f){
   return draft.f[f.k+"_u"]||unitPref[t+"."+f.k]||f.u[0];
 }
 function renderForm(){
-  $("#fDate").value=draft.date; $("#fTime").value=draft.time; $("#fSample").value=draft.sample; $("#fNotes").value=draft.notes; renderSub(); $("#subNew").hidden=true;
+  $("#fDate").value=draft.date; $("#fTime").value=draft.time; $("#fSample").value=draft.sample; $("#fNotes").value=draft.notes; renderSub();
   typesEl.querySelectorAll("input").forEach(i=>i.checked=i.value===draft.type);
   const T=TYPES[draft.type];
   const tf=$("#typeFields"); tf.dataset.type=draft.type;
@@ -657,16 +666,17 @@ function renderExtra(){
   $("#chemList").innerHTML=[...names].map(n=>`<option value="${esc(n)}">`).join("");
 }
 const form=$("#entryForm");
-$("#fSub").addEventListener("change",e=>{const v=e.target.value;
-  if(v==="__new"){e.target.value=draft.substrate||"";$("#subNew").hidden=false;$("#subNewIn").value="";$("#subNewIn").focus();return}
-  draft.substrate=v; lsSet(SUBLAST,v); $("#subNew").hidden=true});
+$("#subGrid").addEventListener("change",e=>{const v=e.target.dataset.sub; if(v==null) return;
+  const set=new Set(draft.subs||[]); e.target.checked?set.add(v):set.delete(v);
+  draft.subs=subList().filter(x=>set.has(x)); lsSet(SUBLAST,draft.subs); $("#subCount").textContent=draft.subs.length?`· ${draft.subs.length} selected`:""});
 function addSub(){const v=$("#subNewIn").value.trim(); if(!v){$("#subNewIn").focus();return}
   const ex=subList().find(x=>x.toLowerCase()===v.toLowerCase()), name=ex||v;
   if(!ex){const c=lsGet(SUBKEY,[])||[];c.push(name);lsSet(SUBKEY,c)}
-  draft.substrate=name; lsSet(SUBLAST,name); renderSub(); $("#subNew").hidden=true; toast(ex?`${name} selected`:`${name} added to substrates`)}
+  if(!(draft.subs||[]).includes(name)) draft.subs=[...(draft.subs||[]),name];
+  lsSet(SUBLAST,draft.subs); $("#subNewIn").value=""; renderSub(); toast(ex?`${name} ticked`:`${name} added and ticked`)}
 $("#subNewAdd").addEventListener("click",addSub);
 $("#subNewIn").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();addSub()}});
-$("#subNewCancel").addEventListener("click",()=>{$("#subNew").hidden=true});
+
 form.addEventListener("input",e=>{
   const t=e.target;
   if(t.id==="fDate") draft.date=t.value;
@@ -724,7 +734,7 @@ form.addEventListener("submit",async e=>{
   if(xbad){err.textContent=xbad[0];err.hidden=false;const el=$("#"+xbad[1]);if(el){el.setAttribute("aria-invalid","true");el.focus()}return}
   if(!filled&&!extra.length&&!draft.notes.trim()){err.textContent="Fill in at least one parameter or a comment before saving.";err.hidden=false;return}
   const now=Date.now(), prev=ui.editing?entries.get(ui.editing):null;
-  const entry={id:ui.editing||uid(),date:draft.date,time:draft.time||"",type:draft.type,sample:draft.sample.trim(),...(draft.substrate?{substrate:draft.substrate}:{}),...(draft.type==="te"?{chems:[...draft.chems]}:{}),f,...(Object.keys(prog).length?{prog}:{}),extra,notes:draft.notes.trim(),created:prev?prev.created:now,upd:now};
+  const entry={id:ui.editing||uid(),date:draft.date,time:draft.time||"",type:draft.type,sample:draft.sample.trim(),...(draft.subs&&draft.subs.length?{subs:[...draft.subs]}:{}),...(draft.type==="te"?{chems:[...draft.chems]}:{}),f,...(Object.keys(prog).length?{prog}:{}),extra,notes:draft.notes.trim(),created:prev?prev.created:now,upd:now};
   const wasEdit=!!ui.editing;
   ui.editing=null;
   const keepDate=draft.date;
@@ -748,7 +758,7 @@ function cardHTML(e){
     ps.push(`<div${pr?' class="wide"':""}><dt>${xLabel(x)}</dt><dd>${esc(x.v)}${u?" "+esc(u):""}</dd>${pr?`<dd class="progline">${progText(pr,T.prog)}</dd>`:""}</div>`)});
   const confirming=ui.confirmDel===e.id;
   return `<article class="entry" data-type="${e.type}" data-id="${e.id}">
-    <div class="entry-h"><span class="chip">${T.name}</span>${e.time?`<time>${esc(e.time)}</time>`:""}${e.sample?`<span class="sample">${esc(e.sample)}</span>`:""}${e.substrate?`<span class="chip sub">${esc(e.substrate)}</span>`:""}</div>
+    <div class="entry-h"><span class="chip">${T.name}</span>${e.time?`<time>${esc(e.time)}</time>`:""}${e.sample?`<span class="sample">${esc(e.sample)}</span>`:""}${subsOf(e).map(x=>`<span class="chip sub">${esc(x)}</span>`).join("")}</div>
     ${ps.length?`<dl class="params">${ps.join("")}</dl>`:""}
     ${e.notes?`<div class="notes"><span class="hint">Comments</span><br>${esc(e.notes)}</div>`:""}
     <div class="actions">${confirming
@@ -769,7 +779,7 @@ function onCardAction(ev){
   else if(a==="del-yes"){ui.confirmDel=null;remove(id);toast("Entry deleted")}
   else if(a==="edit"||a==="repeat"){
     const now=new Date();
-    draft={date:a==="edit"?e.date:ymd(now),time:a==="edit"?e.time:hm(now),sample:a==="edit"?e.sample:"",substrate:e.substrate||"",type:e.type,
+    draft={date:a==="edit"?e.date:ymd(now),time:a==="edit"?e.time:hm(now),sample:a==="edit"?e.sample:"",subs:[...subsOf(e)],type:e.type,
       chems:entryChems(e),f:{...e.f},prog:JSON.parse(JSON.stringify(e.prog||{})),extra:JSON.parse(JSON.stringify(e.extra||[])),notes:a==="edit"?e.notes:""};
     ui.editing=a==="edit"?id:null; renderForm(); setTab("new");
     if(a==="repeat") toast("Settings copied. Adjust and save as a new entry.");
@@ -781,7 +791,7 @@ $("#dayList").addEventListener("click",onCardAction);
 /* ---------- entries view ---------- */
 function renderLog(){
   const q=ui.q.trim().toLowerCase();
-  const list=sorted().filter(e=>(ui.filter==="all"||e.type===ui.filter)&&(!q||(e.sample+" "+(e.substrate||"")+" "+e.notes+" "+(e.extra||[]).map(x=>(x.k||"")+" "+(x.chem||"")+" "+(x.v||"")).join(" ")).toLowerCase().includes(q)));
+  const list=sorted().filter(e=>(ui.filter==="all"||e.type===ui.filter)&&(!q||(e.sample+" "+subsOf(e).join(" ")+" "+e.notes+" "+(e.extra||[]).map(x=>(x.k||"")+" "+(x.chem||"")+" "+(x.v||"")).join(" ")).toLowerCase().includes(q)));
   const el=$("#logList");
   if(!entries.size){el.innerHTML=`<div class="empty"><b>No experiments logged yet</b>Your saved entries appear here, newest first, grouped by day.</div>`;return}
   if(!list.length){el.innerHTML=`<div class="empty"><b>No matching entries</b>Try another type or search term.</div>`;return}
@@ -823,11 +833,11 @@ function buildCSV(){
   const cols=[]; const seen=new Set();
   Object.entries(TYPES).forEach(([t,T])=>fieldsOf(t).forEach(fd=>{const key=fd.k; if(seen.has(t+key))return; seen.add(t+key); cols.push({t,fd})}));
   const q=v=>{v=v==null?"":String(v);return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v};
-  const head=["Date","Time","Experiment","Sample","Substrate"];
+  const head=["Date","Time","Experiment","Sample","Substrates"];
   cols.forEach(({t,fd})=>{head.push(`${TYPES[t].short}: ${fd.d||fd.l}`); head.push(`${TYPES[t].short}: ${fd.d||fd.l} unit`); if(fd.prog) head.push(`${TYPES[t].short}: ${fd.d||fd.l} program`)});
   head.push("Other parameters","Comments");
   const rows=sorted().reverse().map(e=>{
-    const r=[e.date,e.time,TYPES[e.type].name,e.sample,e.substrate||""];
+    const r=[e.date,e.time,TYPES[e.type].name,e.sample,subsOf(e).join("; ")];
     cols.forEach(({t,fd})=>{ if(e.type===t&&e.f&&e.f[fd.k]!=null){r.push(e.f[fd.k]);r.push(Array.isArray(fd.u)?(e.f[fd.k+"_u"]||fd.u[0]):fd.u)} else {r.push("");r.push("")}
       if(fd.prog){const pr=e.type===t&&e.prog&&e.prog[fd.k];r.push(pr?pr.map((x,i)=>`Step ${i+1}: `+PK[fd.prog].cols.map(c=>`${c.n} ${x[c.f]||"-"} ${c.u}`).join(", ")).join(" | "):"")} });
     r.push((e.extra||[]).map(x=>{const T=xT(x),u=xUnit(x),pr=T.prog&&x.prog&&x.prog.length?x.prog:null;
