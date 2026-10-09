@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-XcSXqYykNHZTYsHv4BgBRt/cN8+NCTVIlpIOVaSzWhU='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0E6E6B">
 <meta name="description" content="Log thermal evaporation, PL and XRD experiments.">
@@ -479,7 +481,11 @@ function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 
 /* ---------- state ---------- */
 const LKEY="perovLabLog.v1", UKEY="perovLabLog.units", TKEY="perovLabLog.lastType";
-let store=lsGet(LKEY,null); if(!store||typeof store.entries!=="object") store={entries:{}};
+const BAD_ID=new Set(["__proto__","constructor","prototype"]);
+const okId=id=>typeof id==="string"&&/^[A-Za-z0-9_-]{1,64}$/.test(id)&&!BAD_ID.has(id);
+function cleanEntries(src){const out={}; if(!src||typeof src!=="object") return out;
+  for(const id of Object.keys(src)){const e=src[id]; if(!okId(id)||!e||typeof e!=="object"||Array.isArray(e)) continue; e.id=id; out[id]=e} return out}
+let store=lsGet(LKEY,null); if(!store||typeof store.entries!=="object") store={entries:{}}; store.entries=cleanEntries(store.entries);
 for(const [id,p] of Object.entries(store.pending||{})) store.entries[id]=p.deleted?{id,deleted:true,upd:Date.now()}:p;
 delete store.pending;
 let unitPref=lsGet(UKEY,{});
@@ -516,10 +522,11 @@ function put(e){store.entries[e.id]=e;commit();scheduleCloud()}
 function remove(id){store.entries[id]={id,deleted:true,upd:Date.now()};commit();scheduleCloud()}
 
 const CKEY="perovLabLog.cloud";
-function cloudCfg(){return lsGet(CKEY,null)}
+const okCloud=o=>!!(o&&typeof o.u==="string"&&/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]{20,200}\/exec$/.test(o.u)&&typeof o.k==="string"&&/^[A-Za-z0-9_-]{16,128}$/.test(o.k));
+function cloudCfg(){const c=lsGet(CKEY,null);return okCloud(c)?c:null}
 function cloudOn(){const c=cloudCfg();return !!(c&&c.u&&c.k)}
 function connCode(c){return "LAB1-"+btoa(JSON.stringify({u:c.u,k:c.k}))}
-function parseCode(t){const m=String(t||"").replace(/\s+/g,"").match(/LAB1-([A-Za-z0-9+/=]+)/);if(!m)return null;try{const o=JSON.parse(atob(m[1]));return o&&o.u&&o.k?o:null}catch(e){return null}}
+function parseCode(t){const m=String(t||"").replace(/\s+/g,"").match(/LAB1-([A-Za-z0-9+/=]+)/);if(!m)return null;try{const o=JSON.parse(atob(m[1]));return okCloud(o)?{u:o.u,k:o.k}:null}catch(e){return null}}
 let cState="off",cErr="",cBusy=false,cAgain=false,cManualWait=false,cDirty=true,cRev=null,cFull=0,cTimer=null;
 function setSync(s,txt){const el=$("#sync");el.dataset.s=s;el.querySelector("span").textContent=txt}
 function showSyncState(){
@@ -530,7 +537,7 @@ function showSyncState(){
   if(ui.tab==="sync") renderSyncBox();
 }
 function mergeRemote(data){
-  let n=0; const rem=(data&&data.entries)||{};
+  let n=0; const rem=cleanEntries(data&&data.entries);
   for(const id in rem){const r=rem[id],l=store.entries[id]; if(!r) continue; if(!l||(r.upd||0)>(l.upd||0)){store.entries[id]=r;n++}}
   for(const id in store.entries){const l=store.entries[id],r=rem[id]; if(!r||(l.upd||0)>(r.upd||0)) cDirty=true}
   return n;
@@ -567,7 +574,7 @@ setInterval(()=>{ if(cloudOn()&&document.visibilityState==="visible") cloudSync(
 window.addEventListener("focus",()=>{ if(cloudOn()) cloudSync(false) });
 window.addEventListener("online",()=>{ if(cloudOn()) cloudSync(false) });
 
-let discArm=false;
+let discArm=false, pendingCode="";
 function renderSyncBox(){
   const box=$("#syncBox"); if(!box) return;
   if(cloudOn()){
@@ -584,8 +591,9 @@ function renderSyncBox(){
   } else {
     box.innerHTML=`<div>Paste your connection code to keep this device in sync with your other devices. The code starts with <code>LAB1-</code>.</div>
       <div class="xrow" style="grid-template-columns:1fr auto"><input type="text" id="cCode" placeholder="LAB1-…" autocomplete="off" aria-label="Connection code"><button class="btn primary" id="cConnect">Connect</button></div>`;
+    if(pendingCode) $("#cCode").value=pendingCode;
     $("#cConnect").onclick=async()=>{const o=parseCode($("#cCode").value);if(!o){toast("That code doesn't look right. It starts with LAB1-");return}
-      lsSet(CKEY,o);cRev=null;cDirty=true;cState="busy";showSyncState();
+      pendingCode="";lsSet(CKEY,o);cRev=null;cDirty=true;cState="busy";showSyncState();
       if(await cloudSync(false)) toast("Connected, syncing automatically");
       else if(/wrong sync key/i.test(cErr)){try{localStorage.removeItem(CKEY)}catch(e){}cState="off";showSyncState();toast("That code has the wrong key. Copy it again from your other device.")}};
   }
@@ -757,7 +765,7 @@ function cardHTML(e){
   (e.extra||[]).forEach(x=>{const T=xT(x), pr=T.prog&&x.prog&&x.prog.length?x.prog:null, u=xUnit(x);
     ps.push(`<div${pr?' class="wide"':""}><dt>${xLabel(x)}</dt><dd>${esc(x.v)}${u?" "+esc(u):""}</dd>${pr?`<dd class="progline">${progText(pr,T.prog)}</dd>`:""}</div>`)});
   const confirming=ui.confirmDel===e.id;
-  return `<article class="entry" data-type="${e.type}" data-id="${e.id}">
+  return `<article class="entry" data-type="${esc(e.type)}" data-id="${esc(e.id)}">
     <div class="entry-h"><span class="chip">${T.name}</span>${e.time?`<time>${esc(e.time)}</time>`:""}${e.sample?`<span class="sample">${esc(e.sample)}</span>`:""}${subsOf(e).map(x=>`<span class="chip sub">${esc(x)}</span>`).join("")}</div>
     ${ps.length?`<dl class="params">${ps.join("")}</dl>`:""}
     ${e.notes?`<div class="notes"><span class="hint">Comments</span><br>${esc(e.notes)}</div>`:""}
@@ -832,7 +840,7 @@ function renderLists(){ renderToday(); if(ui.tab==="log") renderLog(); if(ui.tab
 function buildCSV(){
   const cols=[]; const seen=new Set();
   Object.entries(TYPES).forEach(([t,T])=>fieldsOf(t).forEach(fd=>{const key=fd.k; if(seen.has(t+key))return; seen.add(t+key); cols.push({t,fd})}));
-  const q=v=>{v=v==null?"":String(v);return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v};
+  const q=v=>{v=v==null?"":String(v); if(/^[=+@\t\r]/.test(v)||/^-[^0-9.]/.test(v)) v="'"+v; return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v};
   const head=["Date","Time","Experiment","Sample","Substrates"];
   cols.forEach(({t,fd})=>{head.push(`${TYPES[t].short}: ${fd.d||fd.l}`); head.push(`${TYPES[t].short}: ${fd.d||fd.l} unit`); if(fd.prog) head.push(`${TYPES[t].short}: ${fd.d||fd.l} program`)});
   head.push("Other parameters","Comments");
@@ -947,7 +955,7 @@ const REC_CAT={te:"Thermal evaporation",pl:"PL",xrd:"XRD",other:"Other"};
 const rec={mode:"list",id:null,pushed:false,confirmDel:false,q:""};
 const recipes=()=>Object.values(store.entries).filter(e=>e&&!e.deleted&&e.type==="recipe");
 function recShow(){ $("#recListView").hidden=rec.mode!=="list"; $("#recDetail").hidden=rec.mode!=="view"; $("#recForm").hidden=rec.mode!=="edit"; $("#recAdd").hidden=rec.mode!=="list"; }
-function recMeta(r){return [r.cat&&REC_CAT[r.cat]?`<span class="chip" data-type="${r.cat==="other"?"":r.cat}" style="${r.cat==="other"?"--tc:var(--muted)":""}">${REC_CAT[r.cat]}</span>`:"",r.date?`<span>${niceDate(r.date,true)}</span>`:"",r.source?`<span>From ${esc(r.source)}</span>`:""].filter(Boolean).join("")}
+function recMeta(r){return [r.cat&&Object.hasOwn(REC_CAT,r.cat)?`<span class="chip" data-type="${r.cat==="other"?"":r.cat}" style="${r.cat==="other"?"--tc:var(--muted)":""}">${REC_CAT[r.cat]}</span>`:"",r.date?`<span>${niceDate(r.date,true)}</span>`:"",r.source?`<span>From ${esc(r.source)}</span>`:""].filter(Boolean).join("")}
 function renderRec(){
   if(rec.mode==="view"){const r=store.entries[rec.id]; if(!r||r.deleted||r.type!=="recipe"){rec.mode="list"} }
   recShow();
@@ -958,7 +966,7 @@ function renderRec(){
     $("#recSearch").hidden=all.length<4;
     $("#recList").innerHTML=!all.length?`<div class="empty"><b>No recipes yet</b>Tap + to write down an experimental procedure you have learned and follow.</div>`
       :!list.length?`<div class="empty"><b>No matching recipes</b>Try another word.</div>`
-      :list.map(r=>`<button type="button" class="rec-item" data-rec="${r.id}"><b>${esc(r.title)}</b>${recMeta(r)?`<span class="rec-meta">${recMeta(r)}</span>`:""}${r.body?`<span class="rec-prev">${esc(r.body.split("\n").filter(Boolean).slice(0,2).join(" · "))}</span>`:""}</button>`).join("");
+      :list.map(r=>`<button type="button" class="rec-item" data-rec="${esc(r.id)}"><b>${esc(r.title)}</b>${recMeta(r)?`<span class="rec-meta">${recMeta(r)}</span>`:""}${r.body?`<span class="rec-prev">${esc(r.body.split("\n").filter(Boolean).slice(0,2).join(" · "))}</span>`:""}</button>`).join("");
   } else if(rec.mode==="view"){
     const r=store.entries[rec.id];
     $("#recDetail").innerHTML=`<div class="rec-bar"><button type="button" class="btn sm ghost" data-ract="back">‹ Recipes</button><span></span><span></span></div>
@@ -1013,7 +1021,11 @@ renderForm(); setTab("new");
 /* One-tap connect: opening the app with #LAB1-… saves the code on this device and removes it from the address bar */
 (function(){const h=decodeURIComponent(location.hash||"");if(!/LAB1-/.test(h))return;const o=parseCode(h);
   try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}
-  if(o){lsSet(CKEY,o);cRev=null;cDirty=true;setTimeout(()=>toast("Sync connected on this device"),600)}})();
+  if(!o){setTimeout(()=>toast("That sync link isn't valid, so it was ignored."),600);return}
+  const c=cloudCfg();
+  if(c&&c.u===o.u&&c.k===o.k){setTimeout(()=>toast("This device is already synced"),600);return}
+  if(c){setTimeout(()=>toast("This device already syncs with another account. Disconnect it in Sync first to use this link."),600);return}
+  pendingCode=connCode(o); setTab("sync"); setTimeout(()=>toast("Check the sync code, then tap Connect"),600)})();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 showSyncState(); if(cloudOn()) cloudSync(false);
 if("serviceWorker" in navigator && location.protocol.startsWith("http")){
