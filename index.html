@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-1Hk3DBdpf1zonfhi3j5+ggFeln2uFxU4DqQKDNL3eYQ='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-49WNdMBTwNbKzcbJ/TQDrlzj+F4iuY6/RjqxCG+7f1Q='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0E6E6B">
@@ -77,7 +77,7 @@ h3{font:600 12px/1.2 var(--sans);text-transform:uppercase;letter-spacing:.08em;c
 .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px}
 form{display:grid;gap:14px;max-width:720px}
 .row{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
-label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);min-width:0}
+label.f,div.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);min-width:0}
 label.f .lab{display:flex;justify-content:space-between;gap:6px}
 input,select,textarea{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 10px;min-width:0;width:100%}
 textarea{min-height:76px;resize:vertical}
@@ -164,7 +164,11 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 [data-type="te"],[data-type="dep"]{--tc:var(--te)} [data-type="pl"],[data-type="opt"]{--tc:var(--pl)} [data-type="xrd"],[data-type="xray"]{--tc:var(--xrd)} [data-type="em"]{--tc:var(--em)} [data-type="spm"]{--tc:var(--spm)} [data-type="sur"]{--tc:var(--sur)} [data-type="elec"]{--tc:var(--elec)} [data-type="dev"]{--tc:var(--dev)} [data-type="oth"]{--tc:var(--muted)}
 [data-kind="xray"]{--sc:var(--xrd)} [data-kind="opt"]{--sc:var(--pl)} [data-kind="em"]{--sc:var(--em)} [data-kind="spm"]{--sc:var(--spm)} [data-kind="sur"]{--sc:var(--sur)} [data-kind="elec"]{--sc:var(--elec)} [data-kind="dev"]{--sc:var(--dev)} [data-kind="oth"]{--sc:var(--muted)}
 .chip-btn.grp[aria-pressed="true"],.chip-btn.tech[aria-pressed="true"]{border-color:var(--tc);color:var(--tc);background:color-mix(in srgb,var(--tc) 10%,var(--panel))}
-.chip-btn.tech,.chip-btn.grp{font-family:var(--sans)} #techFilter{width:auto;max-width:180px}
+.chip-btn.tech,.chip-btn.grp{font-family:var(--sans)}
+.pickf{display:grid;gap:6px;align-content:start}.pickf>.f{margin:0}.picks{gap:6px}.picks .chip-btn{padding:4px 12px;min-height:30px;font-family:var(--sans)}
+.picks .chip-btn[aria-pressed="true"]{border-color:var(--sc);color:var(--sc);background:color-mix(in srgb,var(--sc) 10%,var(--panel))}
+.wide2{grid-column:1/-1}.segf{width:100%}.segf button{flex:1}
+.calc output{display:flex;align-items:center;min-height:40px;padding:0 10px;font-family:var(--mono);font-weight:600;color:var(--sc);flex:1;border:1px dashed var(--line);border-radius:8px 0 0 8px;background:var(--panel2)} #techFilter{width:auto;max-width:180px}
 
 /* recipes */
 .rec-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:4px 0 12px}
@@ -356,8 +360,9 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
           <label class="f"><span class="lab">Date</span><input type="date" id="fDate" required></label>
           <label class="f"><span class="lab">Time</span><input type="time" id="fTime"></label>
           <label class="f"><span class="lab">Sample ID</span><input type="text" id="fSample" placeholder="e.g. S-0926-A" autocapitalize="characters"></label>
+          <label class="f" id="devNoBox" hidden><span class="lab">Device no. on this sample</span><input type="text" id="fDevNo" placeholder="e.g. D1" autocapitalize="characters" autocomplete="off"></label>
         </div>
-        <fieldset class="subs" style="border:0;padding:0;margin:0">
+        <fieldset class="subs" id="subsBox" style="border:0;padding:0;margin:0">
           <legend class="lab">Substrates <span class="hint" id="subCount"></span></legend>
           <div class="subgrid" id="subGrid"></div>
           <div class="subnew">
@@ -653,19 +658,32 @@ const TECH={
   other:{n:"Other",g:"oth",sub:"Name the technique",groups:[
     {title:"Technique",fields:[TX("tech","Technique name","e.g. NMR, XAS, PDS"),TX("instr","Instrument (optional)","")]}]},
   /* device testing */
-  tft:{n:"TFT",g:"dev",sub:"Thin-film transistor: transfer & output",groups:[
-    {title:"Device",fields:[TX("devId","Device / pixel ID","e.g. D3-L50"),TX("arch","Architecture","e.g. bottom-gate top-contact"),TX("diel","Dielectric","e.g. SiO₂ 300 nm / Al₂O₃"),F("ci","Dielectric capacitance","nF/cm²"),TX("sd","Source/drain electrodes","e.g. Au 50 nm"),F("L","Channel length L","µm"),F("W","Channel width W",["µm","mm"])]},
-    {title:"Conditions",fields:[TX("atm","Atmosphere","e.g. N₂ glovebox / vacuum / air"),F("temp","Temperature",["°C","K"]),TX("light","Illumination","e.g. dark"),TX("smu","Instrument","e.g. Keithley 4200")]},
-    {title:"Transfer sweep",fields:[F("vgStart","V_GS start","V"),F("vgEnd","V_GS end","V"),F("vgStep","V_GS step","V"),TX("vds","V_DS","e.g. −1 V, −40 V"),TX("dir","Sweep direction","e.g. forward + reverse"),TX("rateT","Sweep rate / delay","e.g. 0.5 V/s, pulsed")]},
-    {title:"Output sweep",fields:[F("vdStart","V_DS start","V"),F("vdEnd","V_DS end","V"),TX("vgSet","V_GS values","e.g. 0, −10, −20, −30 V")]},
-    {title:"Results (optional)",fields:[F("mu","Mobility (sat.)","cm²/V·s"),F("muLin","Mobility (lin.)","cm²/V·s"),F("vth","V_th","V"),F("onoff","On/off ratio",null,{sci:1,ph:"1e5"}),F("ss","Subthreshold swing","V/dec"),F("hyst","Hysteresis ΔV","V"),F("ion","I_on",["A","mA","µA"],{sci:1}),F("ioff","I_off",["A","nA","pA"],{sci:1})]}]},
+  tft:{n:"TFT",g:"dev",sub:"Thin-film transistor: transfer, output, bias stress",groups:[
+    {title:"Device",fields:[
+      TX("diel","Dielectric layer","e.g. SiO2",{pick:["SiO2","Al2O3","HfO2","ZrO2","PMMA"]}),
+      F("tox","Dielectric thickness",["nm","µm"],{d:"Dielectric t"}),
+      F("k","Dielectric constant (k)",null,{d:"k"}),
+      {k:"ci",l:"Cᵢ (auto: ε₀k / t)",d:"Cᵢ",u:"nF/cm²",calc:"ci",txt:1},
+      F("L","Channel length L","µm"),F("W","Channel width W","µm"),
+      TX("elec","Electrode material","e.g. Au",{pick:["Au","Ag","Ti"],d:"Electrodes"})]},
+    {title:"I–V · Transfer",short:"Transfer",tog:"mTr",hint:"V_GS sweep, V_DS constant",fields:[
+      F("vgStart","V_GS start","V"),F("vgEnd","V_GS end","V"),F("vgStep","V_GS step","V"),F("vds","V_DS (constant)","V",{d:"V_DS"}),
+      {k:"trMode",l:"Gate sweep",seg:["Without pulsing","Pulsed"],txt:1,d:"Sweep"},
+      F("pw","Pulse width",["ms","µs","s"],{when:["trMode","Pulsed"]}),F("pp","Pulse period",["ms","µs","s"],{when:["trMode","Pulsed"]}),F("vbase","Base voltage between pulses","V",{when:["trMode","Pulsed"],d:"Base V"})]},
+    {title:"I–V · Output",short:"Output",tog:"mOut",hint:"V_GS stepped, V_DS swept",fields:[
+      F("vgsStart","V_GS from","V",{d:"V_GS from"}),F("vgsEnd","V_GS to","V",{d:"V_GS to"}),F("vgsStep","V_GS step","V"),
+      F("vdStart","V_DS start","V"),F("vdEnd","V_DS end","V"),F("vdStep","V_DS step","V")]},
+    {title:"I–V · Bias stress",short:"Bias stress",tog:"mBs",hint:"Constant gate (and drain) bias over time",fields:[
+      F("bsVg","Stress V_GS","V"),F("bsVd","Stress V_DS","V"),F("bsTime","Total stress time",["s","min","h"],{d:"Stress time"}),
+      F("bsInt","Measured every",["s","min"],{d:"Interval"}),F("bsRec","Recovery time (optional)",["s","min","h"],{d:"Recovery"})]},
+    {title:"Conditions",fields:[TX("light","Illumination","e.g. dark / 1 sun / 532 nm"),TX("atm","Atmosphere","e.g. N₂ glovebox / vacuum / air")]}]},
   pd:{n:"Photodetector",g:"dev",sub:"Responsivity, detectivity, speed",groups:[
-    {title:"Device",fields:[TX("devId","Device / pixel ID","e.g. PD-2"),TX("type","Type","photodiode / photoconductor / phototransistor"),TX("stack","Stack / electrodes","e.g. ITO/SnO₂/PVK/Spiro/Au"),F("area","Active area",["cm²","mm²"]),F("gap","Channel / gap (lateral)","µm")]},
+    {title:"Device",fields:[TX("type","Type","photodiode / photoconductor / phototransistor"),TX("stack","Stack / electrodes","e.g. ITO/SnO₂/PVK/Spiro/Au"),F("area","Active area",["cm²","mm²"]),F("gap","Channel / gap (lateral)","µm")]},
     {title:"Illumination",fields:[TX("src","Light source","e.g. 532 nm laser, LED, AM1.5"),F("wl","Wavelength","nm"),F("pd","Power density",["mW/cm²","µW/cm²","nW/cm²"]),TX("mod","Modulation","e.g. chopper 10 Hz, pulsed")]},
     {title:"Conditions",fields:[F("bias","Bias",["V","mV"]),TX("atm","Atmosphere","e.g. N₂ / air"),TX("smu","Instrument","e.g. Keithley 2450, oscilloscope")]},
     {title:"Results (optional)",fields:[F("idark","Dark current",["A","nA","pA"],{sci:1}),F("iph","Photocurrent",["A","µA","nA"],{sci:1}),F("resp","Responsivity R",["A/W","mA/W"]),F("dstar","Detectivity D*","Jones",{sci:1,ph:"1e12"}),F("eqe","EQE","%"),F("ldr","LDR","dB"),F("rise","Rise time",["µs","ms","ns"]),F("fall","Fall time",["µs","ms","ns"]),F("f3db","−3 dB bandwidth",["kHz","Hz","MHz"]),F("onoff","On/off ratio",null,{sci:1})]}]},
   devo:{n:"Other device",g:"dev",sub:"Solar cell, LED, memristor…",groups:[
-    {title:"Device",fields:[TX("tech","Device type","e.g. solar cell J–V, LED, memristor"),TX("devId","Device / pixel ID",""),TX("stack","Stack",""),F("area","Active area",["cm²","mm²"])]},
+    {title:"Device",fields:[TX("tech","Device type","e.g. solar cell J–V, LED, memristor"),TX("stack","Stack",""),F("area","Active area",["cm²","mm²"])]},
     {title:"Test",fields:[TX("test","Measurement","e.g. J–V, EQE, stability"),TX("cond","Conditions","e.g. AM1.5G 100 mW/cm², N₂")]},
     {title:"Results (optional)",fields:[TX("res","Key results","e.g. PCE 18.2 %, Voc 1.10 V")]}]}
 };
@@ -680,6 +698,15 @@ const LTKEY="perovLabLog.lastTech";
 function lastTech(g){const m=obj(lsGet(LTKEY,{})); const t=g?m[g]:m._; return TECH[t]&&(!g||TECH[t].g===g)&&(g||TECH[t].g!=="dev")?t:(g?TECH_ORDER[g][0]:"xrd")}
 function rememberTech(t){if(!TECH[t]) return; const m=obj(lsGet(LTKEY,{})); if(TECH[t].g!=="dev") m._=t; m[TECH[t].g]=t; lsSet(LTKEY,m)}
 const fieldsOf=t=>TYPES[t]?TYPES[t].groups.flatMap(g=>g.fields):[];
+/* fields that apply given the current values: measurement toggles (g.tog) and conditional fields (fd.when) */
+const grpOn=(g,f)=>!g.tog||f[g.tog]==="1";
+const fdOn=(fd,f)=>!fd.when||f[fd.when[0]]===fd.when[1];
+const visFields=(t,f)=>TYPES[t]?TYPES[t].groups.filter(g=>grpOn(g,f)).flatMap(g=>g.fields.filter(fd=>fdOn(fd,f)).map(fd=>({...fd,gs:g.short}))):[];
+const segVal=(fd,f)=>fd.seg.includes(f[fd.k])?f[fd.k]:fd.seg[0];
+const sig=x=>{const r=Number(x.toPrecision(3)); return String(r)};
+const CALC={ci:f=>{const t=parseNum(T_(f.tox)), k=parseNum(T_(f.k)); if(!(t>0)||!(k>0)) return ""; const nm=f.tox_u==="µm"?t*1000:t; return sig(885.4187*k/nm)}};
+const DIEL_K={SiO2:"3.9",Al2O3:"9",HfO2:"25",ZrO2:"25",PMMA:"3.6"};
+const nextDev=v=>{v=T_(v); const m=/^(.*?)(\d+)$/.exec(v); return m?m[1]+String(+m[2]+1).padStart(m[2].length,"0"):v};
 /* step programs (temperature and rate pop-up) */
 const PK={
   temp:{title:"temperature program",btn:"Set temperature steps",vu:"°C",base:25,baseLabel:"RT",rise:.42,
@@ -972,13 +999,14 @@ function stageBrief(s){
 
 /* ---------- form rendering ---------- */
 function renderForm(){
-  $("#fDate").value=draft.date; $("#fTime").value=draft.time; $("#fSample").value=draft.sample; $("#fNotes").value=draft.notes; renderSub();
+  $("#fDate").value=draft.date; $("#fTime").value=draft.time; $("#fSample").value=draft.sample; $("#fNotes").value=draft.notes; renderSub(); sampleMode();
   renderKind(); renderTypeFields(); renderExtra(); renderLists_dl();
   const eb=$("#editBanner");
   if(ui.editing){eb.hidden=false;$("#editText").textContent="Editing entry from "+niceDate(draft.date,true);$("#saveBtn").textContent="Update entry"}
   else{eb.hidden=true;$("#saveBtn").textContent="Save entry"}
   $("#formErr").hidden=true; dateHint();
 }
+function sampleMode(){const dev=secOf(draft.type)==="dev"; $("#devNoBox").hidden=!dev; $("#subsBox").hidden=dev; $("#fDevNo").value=dev?str(draft.f.devId):""}
 function dateHint(){$("#dateHint").textContent=draft.date===ymd(new Date())?"Date and time are filled in automatically. Pick another day in Calendar to log for that date.":"Logging for "+niceDate(draft.date,true)+"."}
 function renderKind(){
   const sec=secOf(draft.type);
@@ -1064,8 +1092,19 @@ function spinBody(s,i,P){
 }
 function annHTML(s,P){const a=s.ann;
   return `<div class="grp"><label class="check"><input type="checkbox" data-p="${P}.ann.on"${a.on?" checked":""}><span>${s.kind==="spin"?"Final annealing after all steps":"Annealed after this stage"}</span></label>${a.on?`<div class="row">${fld({p:`${P}.ann.t`,v:a.t,l:ANN_F[0].l,u:"°C"})}${fld({p:`${P}.ann.time`,v:a.time,l:ANN_F[1].l,u:ANN_F[1].u,up:`${P}.ann.timeU`,uv:a.timeU,uk:"timeU"})}</div>`:""}</div>`}
-function flatHTML(t){
-  return `<section class="card stage" data-kind="${grpOf(t)}"><div class="stage-h"><span class="stage-t"><b>${KINDS[t].name}</b><small>${TECH_GROUPS[grpOf(t)].name} · ${KINDS[t].sub}</small></span></div>${TYPES[t].groups.map(g=>`<div class="grp"><h4>${g.title}</h4><div class="row">${g.fields.map(fd=>fld({p:"f."+fd.k,v:draft.f[fd.k],l:fd.l,u:fd.u,up:"f."+fd.k+"_u",uv:draft.f[fd.k+"_u"],uk:t+"."+fd.k,txt:fd.txt,ph:fd.ph,sci:fd.sci})).join("")}</div></div>`).join("")}</section>`;
+function flatFld(t,fd){const f=draft.f;
+  if(fd.seg){const v=segVal(fd,f); f[fd.k]=v;
+    return `<div class="f wide2"><span class="lab">${esc(fd.l)}</span><div class="seg segf" role="group" aria-label="${esc(fd.l)}">${fd.seg.map(o=>`<button type="button" data-seg="${fd.k}" data-v="${esc(o)}" aria-pressed="${o===v}">${esc(o)}</button>`).join("")}</div></div>`}
+  if(fd.calc){const v=CALC[fd.calc](f); f[fd.k]=v;
+    return `<div class="f"><span class="lab">${esc(fd.l)}</span><span class="unitwrap calc"><output id="calc_${fd.k}">${v?esc(v):"—"}</output><span class="unit">${esc(fd.u)}</span></span></div>`}
+  const h=fld({p:"f."+fd.k,v:f[fd.k],l:fd.l,u:fd.u,up:"f."+fd.k+"_u",uv:f[fd.k+"_u"],uk:t+"."+fd.k,txt:fd.txt,ph:fd.ph,sci:fd.sci});
+  if(!fd.pick) return h;
+  return `<div class="f pickf">${h}<div class="chips picks">${fd.pick.map(o=>`<button type="button" class="chip-btn" data-pick="${fd.k}" data-v="${esc(o)}" aria-pressed="${T_(f[fd.k])===o}">${fmtChem(o)}</button>`).join("")}</div></div>`;
+}
+function flatHTML(t){const f=draft.f;
+  return `<section class="card stage" data-kind="${grpOf(t)}"><div class="stage-h"><span class="stage-t"><b>${KINDS[t].name}</b><small>${TECH_GROUPS[grpOf(t)].name} · ${KINDS[t].sub}</small></span></div>${TYPES[t].groups.map(g=>{const on=grpOn(g,f);
+    const head=g.tog?`<label class="check"><input type="checkbox" data-p="f.${g.tog}"${on?" checked":""}><span><b>${esc(g.title)}</b>${g.hint?` <small class="muted">· ${esc(g.hint)}</small>`:""}</span></label>`:`<h4>${g.title}</h4>`;
+    return `<div class="grp">${head}${on?`<div class="row">${g.fields.filter(fd=>fdOn(fd,f)).map(fd=>flatFld(t,fd)).join("")}</div>`:""}</div>`}).join("")}</section>`;
 }
 function renderExtra(){
   $("#extraRows").innerHTML=draft.extra.map((x,i)=>`<div class="xrow">${fld({p:`extra.${i}.k`,v:x.k,l:"Name",txt:1,ph:"e.g. Tool factor",list:"xList"})}${fld({p:`extra.${i}.v`,v:x.v,l:"Value (with unit)",txt:1,ph:"e.g. 1.2"})}<button type="button" class="btn icon-x" data-del="extra.${i}" aria-label="Remove parameter ${i+1}">✕</button></div>`).join("")
@@ -1100,16 +1139,18 @@ form.addEventListener("input",e=>{
   if(t.id==="fDate"){draft.date=t.value;dateHint()}
   else if(t.id==="fTime") draft.time=t.value;
   else if(t.id==="fSample") draft.sample=t.value;
+  else if(t.id==="fDevNo") draft.f.devId=t.value;
   else if(t.id==="fNotes") draft.notes=t.value;
-  else if(t.dataset.p&&t.type!=="checkbox"&&t.tagName==="INPUT"){setPath(draft,t.dataset.p,t.value); t.removeAttribute("aria-invalid"); $("#formErr").hidden=true}
+  else if(t.dataset.p&&t.type!=="checkbox"&&t.tagName==="INPUT"){setPath(draft,t.dataset.p,t.value); t.removeAttribute("aria-invalid"); $("#formErr").hidden=true; updCalc()}
   else return;
   touch();
 });
 form.addEventListener("change",e=>{
   const t=e.target;
-  if(t.tagName==="SELECT"&&t.dataset.p){setPath(draft,t.dataset.p,t.value); if(t.dataset.uk){unitPref["u."+t.dataset.uk]=t.value;lsSet(UKEY,unitPref)} touch()}
-  else if(t.type==="checkbox"&&t.dataset.p){setPath(draft,t.dataset.p,t.checked); touch(); rerender(t.dataset.p)}
+  if(t.tagName==="SELECT"&&t.dataset.p){setPath(draft,t.dataset.p,t.value); if(t.dataset.uk){unitPref["u."+t.dataset.uk]=t.value;lsSet(UKEY,unitPref)} updCalc(); touch()}
+  else if(t.type==="checkbox"&&t.dataset.p){setPath(draft,t.dataset.p,t.dataset.p.startsWith("f.")?(t.checked?"1":""):t.checked); touch(); rerender(t.dataset.p)}
 });
+function updCalc(){if(draft.type==="dep") return; fieldsOf(draft.type).forEach(fd=>{if(!fd.calc) return; const v=CALC[fd.calc](draft.f); draft.f[fd.k]=v; const o=document.getElementById("calc_"+fd.k); if(o) o.textContent=v||"—"})}
 /* re-draw the stage area but keep the page where it is */
 function rerender(focusP){const y=window.scrollY; renderTypeFields(); renderKind(); window.scrollTo(0,y);
   if(focusP){const el=document.querySelector(`[data-p="${CSS.escape(focusP)}"]`); if(el&&el.type==="checkbox") try{el.focus({preventScroll:true})}catch(e){}}}
@@ -1133,6 +1174,8 @@ form.addEventListener("click",e=>{
   if(b=q("[data-disarm]")){ui.arm=null;clearTimeout(armT);rerender();return}
   if(b=q("[data-kindsel]")){const v=b.dataset.kindsel; if(v==="dep") draft.type="dep"; else if(v==="dev"){if(secOf(draft.type)!=="dev") draft.type=lastTech("dev")} else if(secOf(draft.type)!=="char") draft.type=lastTech(); lsSet(TKEY,draft.type); touch(); renderForm(); return}
   if(b=q("[data-grp]")){draft.type=lastTech(b.dataset.grp); rememberTech(draft.type); lsSet(TKEY,draft.type); touch(); renderForm(); return}
+  if(b=q("[data-seg]")){draft.f[b.dataset.seg]=b.dataset.v; touch(); rerender(); return}
+  if(b=q("[data-pick]")){const k=b.dataset.pick, v=b.dataset.v; draft.f[k]=T_(draft.f[k])===v?"":v; if(k==="diel"&&draft.f[k]&&DIEL_K[v]&&!T_(draft.f.k)) draft.f.k=DIEL_K[v]; touch(); rerender(); return}
   if(b=q("[data-tech]")){const t=b.dataset.tech; if(!TECH[t]) return; draft.type=t; rememberTech(t); lsSet(TKEY,t); touch(); renderForm(); return}
   if(b=q("[data-route]")){setRoute(b.dataset.route);return}
   if(b=q("[data-flow]")){draft.stages=stagesFor("hyb",draft.stages,b.dataset.flow.split(",")); ui.col.clear(); touch(); rerender(); return}
@@ -1179,7 +1222,7 @@ function numIssues(d){
     else s.sol.forEach((x,j)=>{const m=`${n}solution ${j+1} `; chk(`${P}.sol.${j}.conc`,m+"concentration",x.conc); chk(`${P}.sol.${j}.vol`,m+"volume",x.vol);
       if(x.ann.on){chk(`${P}.sol.${j}.ann.t`,m+"annealing temperature",x.ann.t); chk(`${P}.sol.${j}.ann.time`,m+"annealing time",x.ann.time)}});
     if(s.kind==="te"&&s.ann.on){chk(`${P}.ann.t`,n+"annealing temperature",s.ann.t);chk(`${P}.ann.time`,n+"annealing time",s.ann.time)}});
-  else fieldsOf(d.type).forEach(fd=>{if(!fd.txt) chk("f."+fd.k,fd.l,d.f[fd.k])});
+  else visFields(d.type,d.f).forEach(fd=>{if(!fd.txt) chk("f."+fd.k,(fd.gs?fd.gs+" ":"")+fd.l,d.f[fd.k])});
   return out;
 }
 function buildDep(d){
@@ -1212,18 +1255,24 @@ form.addEventListener("submit",async e=>{
   const bad=numIssues(draft); if(bad.length) return fail(`${bad[0][1][0].toUpperCase()+bad[0][1].slice(1)}: enter a number (for example 280, 0.5 or 5e-6).`,bad[0][0]);
   let body, filled=0;
   if(draft.type==="dep"){const r=buildDep(draft); body=r.out; filled=r.filled}
-  else {const f={}; fieldsOf(draft.type).forEach(fd=>{const x=T_(draft.f[fd.k]); if(!x) return; f[fd.k]=x; filled++; if(Array.isArray(fd.u)) f[fd.k+"_u"]=fd.u.includes(draft.f[fd.k+"_u"])?draft.f[fd.k+"_u"]:uPref(draft.type+"."+fd.k,fd.u)}); body={f}}
+  else {const f={}; TYPES[draft.type].groups.forEach(g=>{if(g.tog&&draft.f[g.tog]==="1") f[g.tog]="1"});
+    if(secOf(draft.type)==="dev"&&T_(draft.f.devId)){f.devId=T_(draft.f.devId); filled++}
+    visFields(draft.type,draft.f).forEach(fd=>{const x=fd.calc?CALC[fd.calc](draft.f):T_(draft.f[fd.k]); if(!x) return; f[fd.k]=x; if(!fd.seg&&!fd.calc) filled++; if(Array.isArray(fd.u)) f[fd.k+"_u"]=fd.u.includes(draft.f[fd.k+"_u"])?draft.f[fd.k+"_u"]:uPref(draft.type+"."+fd.k,fd.u)}); body={f}}
   const extra=draft.extra.map(x=>({k:T_(x.k),v:T_(x.v)})).filter(x=>x.k||x.v);
   if(!filled&&!extra.length&&!T_(draft.notes)) return fail("Fill in at least one value or a comment before saving.");
   const now=Date.now(), prev=ui.editing?entries.get(ui.editing):null;
-  const entry={id:ui.editing||uid(),date:draft.date,time:draft.time||"",type:draft.type,sample:T_(draft.sample),...(draft.subs&&draft.subs.length?{subs:[...draft.subs]}:{}),...body,extra,notes:draft.notes.trim(),created:prev&&prev.created||now,upd:now};
+  const entry={id:ui.editing||uid(),date:draft.date,time:draft.time||"",type:draft.type,sample:T_(draft.sample),...(draft.subs&&draft.subs.length&&secOf(draft.type)!=="dev"?{subs:[...draft.subs]}:{}),...body,extra,notes:draft.notes.trim(),created:prev&&prev.created||now,upd:now};
   if(entry.type==="dep"){lsSet(RKEY,entry.route); if(entry.route==="hyb") lsSet(HKEY,entry.stages.map(s=>s.kind))}
   const wasEdit=!!ui.editing;
   ui.editing=null; ui.col.clear(); dropDraft();
   const keepDate=draft.date;
+  const old=draft;
   draft=freshDraft(entry.type, keepDate!==ymd(new Date())?keepDate:null);
+  /* device testing: next device on the same sample keeps the sample and settings */
+  let nx="";
+  if(!wasEdit&&secOf(entry.type)==="dev"){draft.sample=old.sample; draft.f={...old.f}; draft.extra=old.extra.map(x=>({...x})); nx=nextDev(old.f.devId); draft.f.devId=nx; draft.touched=true; saveDraft()}
   renderForm();
-  toast(wasEdit?"Entry updated":`${entry.type==="dep"?ROUTES[entry.route].name:kindName(entry)} saved for ${niceDate(entry.date)}`);
+  toast(wasEdit?"Entry updated":`${entry.type==="dep"?ROUTES[entry.route].name:kindName(entry)}${entry.f&&entry.f.devId?" device "+entry.f.devId:""} saved for ${niceDate(entry.date)}${nx&&nx!==entry.f.devId?". Next: device "+nx:""}`);
   if(wasEdit) setTab("log"); else window.scrollTo(0,0);
   await put(entry);
 });
@@ -1247,7 +1296,7 @@ function stageItems(s){
   (s.x||[]).forEach(x=>{if(T_(x.k)||T_(x.v)) it.push({l:T_(x.k)||"Other",v:T_(x.v)||"—",u:""})});
   return it;
 }
-function flatItems(e){const f=obj(e.f);return fieldsOf(e.type).filter(fd=>T_(f[fd.k])&&!((e.type==="other"||e.type==="devo")&&fd.k==="tech")).map(fd=>({l:fd.d||fd.l,v:T_(f[fd.k]),u:unitOf(str(f[fd.k+"_u"]),fd.u)}))}
+function flatItems(e){const f=obj(e.f);return visFields(e.type,f).filter(fd=>T_(f[fd.k])&&!((e.type==="other"||e.type==="devo")&&fd.k==="tech")).map(fd=>({l:(fd.gs?fd.gs+" · ":"")+(fd.d||fd.l),v:T_(f[fd.k]),u:Array.isArray(fd.u)?unitOf(str(f[fd.k+"_u"]),fd.u):(fd.u||"")}))}
 const itemHTML=x=>`<div${x.prog?' class="wide"':""}><dt>${fmtChem(x.l)}</dt><dd${x.muted?' class="muted"':""}>${x.sci?fmtVal(x.v,1):esc(x.v)}${x.u?" "+esc(x.u):""}</dd>${x.prog?`<dd class="progline">${progText(x.prog,x.kind)}</dd>`:""}</div>`;
 const extraHTML=list=>list.length?`<dl class="params">${list.map(x=>`<div><dt>${esc(x.k||"Other")}</dt><dd>${esc(x.v)}</dd></div>`).join("")}</dl>`:"";
 
@@ -1267,7 +1316,7 @@ function cardHTML(e){
   }
   const confirming=ui.confirmDel===e.id;
   return `<article class="entry" data-type="${grpOf(k)}" data-id="${esc(e.id)}">
-    <div class="entry-h">${head}${e.time?`<time>${esc(e.time)}</time>`:""}${e.sample?`<span class="sample">${esc(e.sample)}</span>`:""}${subsOf(e).map(x=>`<span class="chip sub">${esc(x)}</span>`).join("")}</div>
+    <div class="entry-h">${head}${e.time?`<time>${esc(e.time)}</time>`:""}${e.sample?`<span class="sample">${esc(e.sample)}</span>`:""}${T_(obj(e.f).devId)&&k!=="dep"?`<span class="chip sub">Device ${esc(T_(obj(e.f).devId))}</span>`:""}${subsOf(e).map(x=>`<span class="chip sub">${esc(x)}</span>`).join("")}</div>
     ${sum}${body}
     ${e.notes?`<div class="notes">${esc(e.notes)}</div>`:""}
     <div class="actions">${confirming
@@ -1285,9 +1334,10 @@ function onCardAction(ev){
   else if(a==="del-yes"){ui.confirmDel=null;remove(id);toast("Entry deleted")}
   else if(a==="edit"||a==="repeat"){
     const now=new Date(), k=kindOf(e), ed=a==="edit";
-    const base={date:ed?str(e.date):ymd(now),time:ed?str(e.time):hm(now),sample:ed?str(e.sample):"",subs:[...subsOf(e)],type:k,notes:ed?String(e.notes||""):"",touched:true,f:{},extra:[]};
+    const base={date:ed?str(e.date):ymd(now),time:ed?str(e.time):hm(now),sample:ed||secOf(k)==="dev"?str(e.sample):"",subs:[...subsOf(e)],type:k,notes:ed?String(e.notes||""):"",touched:true,f:{},extra:[]};
     if(k==="dep"){const d=depOf(e); draft={...base,route:d.route,stages:d.stages.length?JSON.parse(JSON.stringify(d.stages)):stagesFor(d.route,[]),extra:d.extra}}
     else {const r=ROUTES[lsGet(RKEY,"co")]?lsGet(RKEY,"co"):"co"; draft={...base,route:r,stages:stagesFor(r,[]),f:Object.fromEntries(Object.entries(obj(e.f)).map(([k2,v])=>[k2,str(v)])),extra:normExtra(e.extra)}}
+    if(!ed&&secOf(k)==="dev") draft.f.devId=nextDev(draft.f.devId);
     ui.editing=ed?id:null; ui.col.clear(); saveDraft(); renderForm(); setTab("new");
     if(!ed) toast("Settings copied. Adjust and save as a new entry.");
   }
@@ -1297,7 +1347,7 @@ $("#dayList").addEventListener("click",onCardAction);
 
 /* ---------- entries view ---------- */
 function searchText(e){
-  const p=[e.sample,subsOf(e).join(" "),e.notes];
+  const p=[e.sample,subsOf(e).join(" "),e.notes,obj(e.f).devId];
   if(kindOf(e)==="dep"){const d=depOf(e); p.push(ROUTES[d.route].name); d.stages.forEach(s=>{p.push(STAGE_NAME[s.kind]); if(s.kind==="te") s.src.forEach(c=>p.push(c.chem,chemPlain(c.chem))); else s.sol.forEach(x=>{p.push(x.name,x.solv); x.prog.forEach(r=>p.push(r.asName))}); s.x.forEach(x=>p.push(x.k,x.v))}); d.extra.forEach(x=>p.push(x.k,x.v))}
   else {const k=kindOf(e); p.push(kindName(e),TECH_GROUPS[grpOf(k)].name,SEC_NAME[secOf(k)]); fieldsOf(k).forEach(fd=>{if(fd.txt) p.push(obj(e.f)[fd.k])}); normExtra(e.extra).forEach(x=>p.push(x.k,x.v))}
   return p.map(str).join(" ").toLowerCase();
@@ -1356,7 +1406,7 @@ function buildCSV(){
   for(let i=1;i<=nS;i++) head.push(`Stage ${i}`);
   head.push("Measurement","Other parameters","Comments");
   const rows=list.map(e=>{const k=kindOf(e), d=dmap.get(e.id);
-    const r=[e.date,e.time,SEC_NAME[secOf(k)],d?ROUTES[d.route].name+(d.stages.length>1?" ("+d.stages.map(s=>STAGE_SHORT[s.kind]).join(" → ")+")":""):kindName(e),e.sample,subsOf(e).join("; ")];
+    const r=[e.date,e.time,SEC_NAME[secOf(k)],d?ROUTES[d.route].name+(d.stages.length>1?" ("+d.stages.map(s=>STAGE_SHORT[s.kind]).join(" → ")+")":""):kindName(e),e.sample+(T_(obj(e.f).devId)&&k!=="dep"?" · device "+T_(obj(e.f).devId):""),subsOf(e).join("; ")];
     for(let i=0;i<nS;i++) r.push(d&&d.stages[i]?stageText(d.stages[i]):"");
     r.push(d?"":flatItems(e).map(x=>`${x.l} ${x.v}${x.u?" "+x.u:""}`).join("; "));
     r.push((d?d.extra:normExtra(e.extra)).map(x=>`${x.k}=${x.v}`).join("; ")); r.push(e.notes);
