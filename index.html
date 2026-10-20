@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-XcSXqYykNHZTYsHv4BgBRt/cN8+NCTVIlpIOVaSzWhU='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-vs3oS6/2Y/d0PboU1CjQS+/FjrENqooAj5qEuHtdPx8='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0E6E6B">
-<meta name="description" content="Log thermal evaporation, PL and XRD experiments.">
+<meta name="description" content="Log perovskite depositions (co-evaporation, sequential evaporation, spin coating, hybrid), PL and XRD.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -20,7 +20,7 @@
   --bg:#EDF0F2; --panel:#FFFFFF; --panel2:#F6F8F9; --ink:#14202B; --muted:#5B6975; --line:#D5DCE1;
   --accent:#0E6E6B; --accent-ink:#FFFFFF;
   --te:#B45A22; --pl:#7045C8; --xrd:#1D68B0;
-  --danger:#B3261E; --ok:#2E7D4F; --warn:#9A6A00;
+  --danger:#B3261E; --ok:#2E7D4F; --warn:#9A6A00; --spin:#3C7D23;
   --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   --cond:"IBM Plex Sans Condensed","IBM Plex Sans",-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -32,7 +32,7 @@
     --bg:#0F151A; --panel:#172027; --panel2:#1C272F; --ink:#E4EAEE; --muted:#93A2AD; --line:#2A3640;
     --accent:#3FB8B1; --accent-ink:#06201F;
     --te:#E08A52; --pl:#A68BF0; --xrd:#62A6E8;
-    --danger:#F2877F; --ok:#6CC592; --warn:#E3B341;
+    --danger:#F2877F; --ok:#6CC592; --warn:#E3B341; --spin:#8BC86B;
   }
 }
 :root[data-theme="dark"]{
@@ -40,7 +40,7 @@
   --bg:#0F151A; --panel:#172027; --panel2:#1C272F; --ink:#E4EAEE; --muted:#93A2AD; --line:#2A3640;
   --accent:#3FB8B1; --accent-ink:#06201F;
   --te:#E08A52; --pl:#A68BF0; --xrd:#62A6E8;
-  --danger:#F2877F; --ok:#6CC592; --warn:#E3B341;
+  --danger:#F2877F; --ok:#6CC592; --warn:#E3B341; --spin:#8BC86B;
 }
 [hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
@@ -90,15 +90,6 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 .hint{font-size:12px;color:var(--muted)}
 .err{font-size:12px;color:var(--danger)}
 
-.types{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.types label{position:relative;cursor:pointer}
-.types input{position:absolute;opacity:0;pointer-events:none}
-.types span{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);height:100%}
-.types b{font-weight:600;font-size:14px}
-.types small{font-size:11.5px;color:var(--muted)}
-.types input:checked+span{border-color:var(--tc);box-shadow:inset 0 0 0 1px var(--tc);background:color-mix(in srgb,var(--tc) 9%,var(--panel))}
-.types input:checked+span b{color:var(--tc)}
-.types input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
 
 .group{border-top:1px solid var(--line);padding-top:12px;display:grid;gap:10px}
 .group:first-child{border-top:0;padding-top:0}
@@ -170,7 +161,7 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 .csvbox{margin-top:12px}
 .csvbox textarea{font-family:var(--mono);font-size:12px;min-height:160px}
 
-[data-type="te"]{--tc:var(--te)} [data-type="pl"]{--tc:var(--pl)} [data-type="xrd"]{--tc:var(--xrd)}
+[data-type="te"],[data-type="dep"]{--tc:var(--te)} [data-type="pl"]{--tc:var(--pl)} [data-type="xrd"]{--tc:var(--xrd)}
 
 /* recipes */
 .rec-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:4px 0 12px}
@@ -211,7 +202,7 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 @media (min-height:700px) and (min-width:700px){.modal{align-items:center}}
 .subnew{display:flex;gap:8px;align-items:center;margin-top:8px}.subnew input{flex:1;min-width:0}
 .subs legend{margin-bottom:6px}
-.subgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px}
+.subgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px}
 .subbox{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer;font:500 13.5px var(--mono);background:var(--panel);min-width:0}
 .subbox span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.5;padding-bottom:2px}
 .subbox input{width:18px;height:18px;margin:0;flex:none;accent-color:var(--te)}
@@ -236,6 +227,74 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 .pact .spacer{flex:1}
 .params .wide{grid-column:1/-1}
 .progline{font-size:12px!important;color:var(--muted);margin-top:2px!important;line-height:1.5}
+/* ---- v12: experiment chooser, stages ---- */
+.stack{display:grid;gap:12px}
+.card>h3,.card .grp-h h3{margin:0}
+.kinds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.kind{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);cursor:pointer;min-width:0}
+.kind b{font-size:15px}.kind small{font-size:11.5px;color:var(--muted);line-height:1.3}
+.kind[aria-pressed="true"]{border-color:var(--tc);box-shadow:inset 0 0 0 1px var(--tc);background:color-mix(in srgb,var(--tc) 10%,var(--panel))}
+.kind[aria-pressed="true"] b{color:var(--tc)}
+.lab2{font-size:13px;color:var(--muted);margin-bottom:-4px}
+.routes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.route{display:flex;gap:10px;align-items:flex-start;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);cursor:pointer;min-width:0}
+.route b{display:block;font-size:14px;line-height:1.25}.route small{display:block;font-size:11.5px;color:var(--muted);line-height:1.3;margin-top:2px}
+.ricon{flex:none;width:32px;height:32px;border-radius:8px;display:grid;place-items:center;background:var(--panel);color:var(--muted);border:1px solid var(--line)}
+.ricon svg{width:19px;height:19px}
+.route[aria-pressed="true"]{border-color:var(--te);box-shadow:inset 0 0 0 1px var(--te);background:color-mix(in srgb,var(--te) 9%,var(--panel))}
+.route[aria-pressed="true"] .ricon{color:var(--te);border-color:color-mix(in srgb,var(--te) 45%,transparent)}
+.route[aria-pressed="true"] b{color:var(--te)}
+.chip-btn{border:1px solid var(--line);background:var(--panel);border-radius:99px;padding:7px 14px;font:500 13.5px var(--mono);cursor:pointer;color:var(--muted)}
+.chip-btn[aria-pressed="true"]{border-color:var(--te);color:var(--te);background:color-mix(in srgb,var(--te) 10%,var(--panel))}
+.stagenav{display:flex;align-items:center;gap:6px;flex-wrap:wrap;position:sticky;top:calc(57px + env(safe-area-inset-top,0px));z-index:4;background:var(--bg);padding:8px 0;margin:-6px 0}
+.navpill{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel);border-radius:99px;padding:3px 10px 3px 3px;font:500 13px var(--sans);cursor:pointer;color:var(--ink)}
+.navpill small{color:var(--muted)}
+.navpill .stage-n{width:22px;height:22px;font-size:12px}
+.arr{color:var(--muted)}
+[data-kind="te"]{--sc:var(--te)} [data-kind="spin"]{--sc:var(--spin)} [data-kind="pl"]{--sc:var(--pl)} [data-kind="xrd"]{--sc:var(--xrd)} [data-kind="x"]{--sc:var(--muted)}
+.stage{border-left:4px solid var(--sc);display:grid;gap:14px;scroll-margin-top:110px}
+.stage-h{display:flex;align-items:center;gap:8px;min-width:0}
+.confirm{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:color-mix(in srgb,var(--danger) 10%,var(--panel));border:1px solid color-mix(in srgb,var(--danger) 40%,var(--line));font-size:14px}
+.confirm span{flex:1 1 180px}
+.stage-tog{flex:1;display:flex;align-items:center;gap:10px;border:0;background:none;padding:0;text-align:left;cursor:pointer;min-width:0;color:inherit}
+.stage-n{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--sc);color:var(--panel);font:600 13px var(--mono)}
+.stage-t{display:flex;flex-direction:column;min-width:0;flex:1}
+.stage-t b{font:600 17px/1.2 var(--cond)}
+.stage-t small{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chev{color:var(--muted);font-size:13px;padding:4px}
+.stage-tools{display:flex;gap:4px;flex:none}
+.btn.icon{width:34px;padding:5px 0;text-align:center}
+.btn:disabled{opacity:.35;cursor:default}
+.stage>.seg{justify-self:start}
+.grp{display:grid;gap:10px;border-top:1px solid var(--line);padding-top:12px}
+.grp h4{margin:0;font:600 12px/1.2 var(--sans);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.srcs{display:grid;gap:8px}
+.src{border:1px solid var(--line);border-radius:10px;padding:10px;display:grid;gap:10px;background:var(--panel2)}
+.src input,.src select{background:var(--panel)}
+.src-h{display:flex;align-items:center;gap:8px;min-height:30px}
+.src-h b{font-size:15px}
+.src-h .spacer{flex:1}
+.layer-n{font:600 12px var(--mono);color:var(--sc);text-transform:uppercase;letter-spacing:.04em}
+.row.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.row.as{grid-template-columns:repeat(2,minmax(0,1fr))}.row.as>:first-child{grid-column:1/-1}
+.check{display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer;min-height:30px}
+.check input{width:20px;height:20px;accent-color:var(--sc,var(--accent));margin:0;flex:none}
+.addstage{display:flex;gap:8px;flex-wrap:wrap}
+.chemchip.add{color:var(--ink)}
+.chemchip[aria-pressed="true"]{border-color:var(--sc);color:var(--sc);background:color-mix(in srgb,var(--sc) 12%,var(--panel))}
+.stepbtn:hover{border-color:var(--sc);color:var(--sc)}
+.stepbtn.on{border-color:color-mix(in srgb,var(--sc) 45%,transparent);background:color-mix(in srgb,var(--sc) 9%,transparent);color:var(--sc)}
+.xrow{align-items:end}
+.savebar{position:sticky;bottom:0;z-index:3;padding:14px 0 12px;background:linear-gradient(to bottom,transparent,var(--bg) 40%)}
+/* entry cards */
+.flow{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:12.5px}
+.fstep{border:1px solid color-mix(in srgb,var(--sc) 50%,transparent);color:var(--sc);border-radius:99px;padding:1px 8px;font-weight:600}
+.brief{font-family:var(--mono);font-size:13px;line-height:1.55;overflow-wrap:anywhere}
+.more summary{cursor:pointer;color:var(--accent);font-size:13.5px;font-weight:500;padding:2px 0}
+.more[open] summary{margin-bottom:10px}
+.dstage{border-left:3px solid var(--sc);padding-left:10px;margin-bottom:12px}
+.dstage h5{margin:0 0 6px;font:600 13px var(--sans);color:var(--sc)}
+.params dd.muted{color:var(--muted)}
 /* phone: bottom tab bar */
 @media (max-width:760px){
   .top .nav{display:none}
@@ -244,8 +303,10 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
   .tabbar button[aria-selected="true"]{color:var(--accent)}
   .tabbar svg{width:22px;height:22px}
   main{padding-bottom:96px}
-  .types{grid-template-columns:1fr}
-  .types span{flex-direction:row;justify-content:space-between;align-items:center}
+  .kinds{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .kind small{display:none}
+  .savebar{bottom:calc(62px + env(safe-area-inset-bottom,0px))}
+  .route{padding:9px 10px}
   .savebar .primary{flex:1}
 }
 @media (min-width:761px){.tabbar{display:none}.toast{bottom:24px}}
@@ -268,16 +329,23 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 </header>
 
 <main>
-  <!-- NEW ENTRY -->
+  <!-- HOME: new entry -->
   <section class="view" id="view-new">
     <form id="entryForm" novalidate autocomplete="off">
       <div class="banner" id="editBanner" hidden><span id="editText">Editing entry</span><button type="button" class="btn sm" id="cancelEdit">Cancel edit</button></div>
 
-      <div class="card" style="display:grid;gap:12px">
+      <section class="card stack" aria-labelledby="hExp">
+        <h3 id="hExp">Experiment</h3>
+        <div class="kinds" id="kinds" role="group" aria-label="Experiment type"></div>
+        <div id="routeBox" class="stack"></div>
+      </section>
+
+      <section class="card stack" aria-labelledby="hSample">
+        <h3 id="hSample">Sample</h3>
         <div class="row">
           <label class="f"><span class="lab">Date</span><input type="date" id="fDate" required></label>
           <label class="f"><span class="lab">Time</span><input type="time" id="fTime"></label>
-          <label class="f"><span class="lab">Sample ID</span><input type="text" id="fSample" placeholder="e.g. S-0926-A"></label>
+          <label class="f"><span class="lab">Sample ID</span><input type="text" id="fSample" placeholder="e.g. S-0926-A" autocapitalize="characters"></label>
         </div>
         <fieldset class="subs" style="border:0;padding:0;margin:0">
           <legend class="lab">Substrates <span class="hint" id="subCount"></span></legend>
@@ -287,31 +355,28 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
             <button type="button" class="btn sm" id="subNewAdd">＋ Add</button>
           </div>
         </fieldset>
-        <div class="hint" id="dateHint">Date and time are filled from your device calendar. Pick a day in Calendar to log for another date.</div>
-      </div>
+        <div class="hint" id="dateHint"></div>
+      </section>
 
-      <fieldset class="types" id="types" style="border:0;padding:0;margin:0">
-        <legend class="hint" style="margin-bottom:8px;padding:0">Experiment type</legend>
-      </fieldset>
+      <nav class="stagenav" id="stageNav" aria-label="Jump to stage" hidden></nav>
+      <div id="typeFields" class="stack"></div>
 
-      <div class="card typefields" id="typeFields"></div>
+      <section class="card stack">
+        <div class="grp-h"><h3>Other parameters</h3><button type="button" class="btn sm" id="addParam">＋ Add</button></div>
+        <div id="extraRows" class="stack"></div>
+      </section>
 
-      <div class="card extra">
-        <div class="grp-h"><h3>Other parameters</h3><button type="button" class="btn sm" id="addParam">Add parameter</button></div>
-        <div id="extraRows" class="extra"></div>
-        <datalist id="chemList"></datalist>
-      </div>
-
-      <div class="card" style="display:grid;gap:10px">
-        <h3 style="margin:0"><label for="fNotes">Comments</label></h3>
+      <section class="card stack">
+        <h3><label for="fNotes">Comments</label></h3>
         <textarea id="fNotes" placeholder="Changes during the process, observations, film colour, anything unusual"></textarea>
-      </div>
+      </section>
 
-      <div class="err" id="formErr" hidden></div>
+      <div class="err" id="formErr" role="alert" hidden></div>
       <div class="savebar">
         <button type="submit" class="btn primary" id="saveBtn">Save entry</button>
         <button type="button" class="btn ghost" id="clearBtn">Clear form</button>
       </div>
+      <datalist id="chemList"></datalist><datalist id="solvList"></datalist><datalist id="asList"></datalist>
     </form>
     <aside class="aside"><h3>Logged today</h3><div id="todayList" class="list"></div></aside>
   </section>
@@ -321,16 +386,16 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
     <div class="toolbar">
       <div class="seg" id="filterSeg" role="group" aria-label="Filter by type">
         <button data-f="all" aria-pressed="true">All</button>
-        <button data-f="te" aria-pressed="false">Evaporation</button>
+        <button data-f="dep" aria-pressed="false">Deposition</button>
         <button data-f="pl" aria-pressed="false">PL</button>
         <button data-f="xrd" aria-pressed="false">XRD</button>
       </div>
-      <input type="search" id="search" placeholder="Search sample or notes">
+      <input type="search" id="search" placeholder="Search sample, chemical, solvent…">
       <span class="spacer"></span>
       <button class="btn sm" id="exportBtn">Export CSV</button>
     </div>
     <div id="csvBox" class="csvbox" hidden>
-      <div class="hint" style="margin-bottom:6px">Download isn't available here. Copy the CSV below and paste it into Excel or a .csv file.</div>
+      <div class="hint" style="margin-bottom:6px">Copy the CSV below and paste it into Excel or a .csv file.</div>
       <textarea id="csvText" readonly></textarea>
       <div class="actions" style="margin-top:8px"><button class="btn sm" id="copyCsv">Copy CSV</button><button class="btn sm ghost" id="closeCsv">Close</button></div>
     </div>
@@ -348,7 +413,7 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
         </div>
         <div class="grid7" id="calGrid"></div>
         <div class="legend">
-          <span data-type="te"><i></i>Evaporation</span><span data-type="pl"><i></i>PL</span><span data-type="xrd"><i></i>XRD</span>
+          <span data-type="dep"><i></i>Deposition</span><span data-type="pl"><i></i>PL</span><span data-type="xrd"><i></i>XRD</span>
         </div>
       </div>
       <div>
@@ -368,9 +433,9 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
     <form id="recForm" class="rec-form" hidden novalidate autocomplete="off">
       <div class="rec-bar"><button type="button" class="btn sm ghost" id="recCancel">‹ Back</button><b id="recFormTitle">New recipe</b><span></span></div>
       <div class="card" style="display:grid;gap:12px">
-        <label class="f"><span class="lab">Title of experiment</span><input type="text" id="rTitle" placeholder="e.g. FAPbI₃ co-evaporation, 2-step PbI₂ ramp"></label>
+        <label class="f"><span class="lab">Title of experiment</span><input type="text" id="rTitle" placeholder="e.g. FAPbI₃ co-evaporation, 2-step spin coating with CB"></label>
         <div class="row">
-          <label class="f"><span class="lab">Experiment type (optional)</span><select id="rCat"><option value="">—</option><option value="te">Thermal evaporation</option><option value="pl">PL</option><option value="xrd">XRD</option><option value="other">Other</option></select></label>
+          <label class="f"><span class="lab">Experiment type (optional)</span><select id="rCat"><option value="">—</option><option value="co">Co-evaporation</option><option value="seq">Sequential evaporation</option><option value="spin">Spin coating</option><option value="hyb">Hybrid</option><option value="pl">PL</option><option value="xrd">XRD</option><option value="other">Other</option></select></label>
           <label class="f"><span class="lab">Date (optional)</span><input type="date" id="rDate"></label>
         </div>
         <label class="f"><span class="lab">Learned from (optional)</span><input type="text" id="rSource" placeholder="Person, paper or lab manual"></label>
@@ -393,10 +458,10 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
   <button role="tab" data-tab="new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Home</button>
   <button role="tab" data-tab="log"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Entries</button>
   <button role="tab" data-tab="cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendar</button>
-      <button role="tab" data-tab="rec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H20v-3"/><path d="M8 7h8M8 11h6"/></svg>Recipes</button>
+  <button role="tab" data-tab="rec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H20v-3"/><path d="M8 7h8M8 11h6"/></svg>Recipes</button>
 </nav>
-<div class="toast" id="toast" hidden></div>
-<div class="modal" id="progModal" hidden role="dialog" aria-modal="true" aria-labelledby="progTitle" data-type="te">
+<div class="toast" id="toast" role="status" hidden></div>
+<div class="modal" id="progModal" hidden role="dialog" aria-modal="true" aria-labelledby="progTitle" data-type="dep">
   <div class="sheet">
     <div class="sheet-h"><h2 id="progTitle">Temperature program</h2><button type="button" class="btn icon-x" id="progX" aria-label="Close">✕</button></div>
     <div class="pcount"><label for="progN">Total steps</label>
@@ -409,6 +474,7 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
   </div>
 </div>
 
+
 <script>
 (function(){
 "use strict";
@@ -416,30 +482,61 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 const P_UNITS=["mbar","Torr","Pa"];
 const CHEMS=[{id:"PbI2",l:"PbI₂"},{id:"MAI",l:"MAI",org:1},{id:"FAI",l:"FAI",org:1},{id:"CsI",l:"CsI"},
   {id:"SnI2",l:"SnI₂"},{id:"PbBr2",l:"PbBr₂"},{id:"CsBr",l:"CsBr"},{id:"PEABr",l:"PEABr",org:1}];
-const DEF_CHEMS=["PbI2","MAI","FAI","CsI"];
-const perChem=(pre,dl,extra,list)=>(list||CHEMS).map(c=>({k:pre+c.id,l:c.l,d:dl+" "+c.l,chem:c.id,...extra}));
+const DEF_CHEMS=["PbI2","MAI","FAI","CsI"], DEF_SEQ=["PbI2","FAI"];
+const chemById=id=>CHEMS.find(c=>c.id===id);
+/* what kind of entry */
+const KINDS={
+  dep:{name:"Deposition",sub:"Evaporation, spin coating, hybrid"},
+  pl:{name:"PL",sub:"Intensity, acquisition time"},
+  xrd:{name:"XRD",sub:"Scan rate, angle, time"}
+};
+/* deposition routes; a route is a chain of stages (te = thermal evaporation, spin = spin coating) */
+const ROUTES={
+  co:{name:"Co-evaporation",short:"Co-evap",sub:"Single step, all sources together",flow:["te"]},
+  seq:{name:"Sequential evaporation",short:"Sequential",sub:"One chemical after another",flow:["te"]},
+  spin:{name:"Spin coating",short:"Spin",sub:"Solution, spin steps, anti-solvent, anneal",flow:["spin"]},
+  hyb:{name:"Hybrid",short:"Hybrid",sub:"Spin coating + thermal evaporation",flow:["spin","te"]}
+};
+const HYB_PRESETS=[["spin","te"],["te","spin"],["spin","te","spin"]];
+const STAGE_NAME={te:"Thermal evaporation",spin:"Spin coating"}, STAGE_SHORT={te:"TE",spin:"Spin"};
+const TE_MODE={co:"Co-evaporation",seq:"Sequential"};
+/* thermal evaporation: stage-level fields */
+const TE_F=[
+  {g:"chamber",k:"pRvMv",l:"Pressure at RV → MV",d:"P at RV → MV",u:P_UNITS,sci:1,ph:"5e-2"},
+  {g:"chamber",k:"basePressure",l:"Base pressure",u:P_UNITS,sci:1,ph:"5e-6"},
+  {g:"sub",k:"rotation",l:"Substrate rotation",d:"Rotation",u:"rpm"},
+  {g:"sub",k:"shutterPressure",l:"Pressure, shutter open",d:"P shutter open",u:P_UNITS,sci:1,ph:"2e-5"},
+  {g:"sub",k:"thickness",l:"Film thickness",d:"Film thickness",u:["kÅ","nm","Å"]}
+];
+/* thermal evaporation: per source (co) or per layer (sequential) */
+const SRC_F=[
+  {k:"t",l:"Temperature",d:"T",u:"°C",prog:"temp"},
+  {k:"m",l:"Powder mass",d:"mass",u:["mg","g"]},
+  {k:"r",l:"Deposition rate",d:"rate",u:"Å/s",prog:"rate",noOrg:1},
+  {k:"q",l:"QCM life at start",d:"QCM life",u:"%"},
+  {k:"k",l:"Layer thickness",d:"layer thickness",u:["kÅ","nm","Å"],seq:1}
+];
+/* spin coating */
+const SOL_F=[
+  {k:"name",l:"Solution / precursor",txt:1,ph:"e.g. PbI2 + FAI"},
+  {k:"conc",l:"Concentration",u:["M","mg/mL","wt%"]},
+  {k:"solv",l:"Solvent",txt:1,ph:"e.g. DMF:DMSO 4:1",list:"solvList"},
+  {k:"vol",l:"Volume dropped",d:"volume",u:"µL"}
+];
+const STEP_F=[{k:"rpm",l:"Speed",u:"rpm"},{k:"ramp",l:"Ramp",u:"rpm/s"},{k:"time",l:"Time",u:"s"}];
+const AS_F=[{k:"asName",l:"Anti-solvent",txt:1,ph:"e.g. Chlorobenzene",list:"asList"},{k:"asVol",l:"Volume",u:"µL"},{k:"asAt",l:"Dropped at",u:"s"}];
+const ANN_F=[{k:"t",l:"Annealing temperature",d:"Anneal T",u:"°C"},{k:"time",l:"Annealing time",d:"Anneal time",u:["min","s","h"],uk:"timeU"}];
+const SOLVENTS=["DMF","DMSO","DMF:DMSO 4:1","DMF:DMSO 9:1","GBL","NMP","2-ME","IPA","Chlorobenzene","Ethanol"];
+const ANTISOLV=["Chlorobenzene","Toluene","Diethyl ether","Ethyl acetate","Anisole","Chloroform"];
+/* characterisation (flat fields) */
 const TYPES={
-  te:{name:"Thermal evaporation",short:"Evaporation",sub:"Pressure, T program, mass, rate, QCM",groups:[
-    {title:"Chamber",fields:[{k:"pRvMv",l:"Pressure at RV → MV",d:"P at RV → MV",u:P_UNITS,sci:1,ph:"5e-2"},{k:"basePressure",l:"Base pressure",u:P_UNITS,sci:1,ph:"5e-6"}]},
-    {title:"Chemicals in this run",chips:1,fields:[]},
-    {title:"Source temperature",fields:perChem("t","T",{u:"°C",prog:"temp"}),
-      hint:"Enter the final temperature, or use “Set temperature steps” to record the ramp program."},
-    {title:"Precursor powder mass",fields:perChem("m","Mass",{u:["mg","g"]})},
-    {title:"Deposition rate",fields:perChem("r","Rate",{u:"Å/s",prog:"rate"},CHEMS.filter(c=>!c.org)),
-      hint:"Enter the final rate, or use “Set rate steps” to record each rate stage."},
-    {title:"Substrate",fields:[
-      {k:"rotation",l:"Rotation speed",u:"rpm"},
-      {k:"shutterPressure",l:"Pressure, substrate shutter open",d:"P shutter open",u:P_UNITS,sci:1,ph:"2e-5"}]},
-    {title:"Film",fields:[{k:"thickness",l:"Film thickness",d:"Film thickness",u:["kÅ","nm","Å"]}]},
-    {title:"QCM life at start of evaporation",fields:perChem("q","QCM life",{u:"%"})}
-  ]},
-  pl:{name:"PL",short:"PL",sub:"Intensity, acquisition time",groups:[
+  pl:{groups:[
     {title:"Measurement",fields:[
       {k:"intensity",l:"Intensity",u:["mW/cm²","mW","µW","%","counts"]},
       {k:"collTime",l:"Data acquisition time",d:"Acquisition time",u:["s","ms","min"]},
       {k:"exWl",l:"Excitation wavelength (optional)",d:"Excitation λ",u:"nm"}]}
   ]},
-  xrd:{name:"XRD",short:"XRD",sub:"Scan rate, angle, time",groups:[
+  xrd:{groups:[
     {title:"Scan",fields:[
       {k:"scanRate",l:"Scan rate",u:"°/s"},
       {k:"collTime",l:"Data acquisition time",d:"Acquisition time",u:["min","s","h"]},
@@ -448,7 +545,14 @@ const TYPES={
       {k:"tthStart",l:"2θ start",u:"°"},{k:"tthEnd",l:"2θ end",u:"°"},{k:"step",l:"Step size",u:"°"}]}
   ]}
 };
-const fieldsOf=t=>TYPES[t].groups.flatMap(g=>g.fields);
+const fieldsOf=t=>TYPES[t]?TYPES[t].groups.flatMap(g=>g.fields):[];
+/* step programs (temperature and rate pop-up) */
+const PK={
+  temp:{title:"temperature program",btn:"Set temperature steps",vu:"°C",base:25,baseLabel:"RT",rise:.42,
+    cols:[{f:"t",n:"Temp",h:"Temp (°C)",u:"°C",req:1},{f:"r",n:"Ramp",h:"Ramp (°C/min)",u:"°C/min"},{f:"s",n:"Soak",h:"Soak (s)",u:"s",def:"0"}]},
+  rate:{title:"deposition rate program",btn:"Set rate steps",vu:"Å/s",base:0,baseLabel:"0",rise:.14,
+    cols:[{f:"t",n:"Rate",h:"Rate (Å/s)",u:"Å/s",req:1},{f:"s",n:"Hold",h:"Hold (s)",u:"s"},{f:"k",n:"Thickness",h:"Thick. (kÅ)",u:"kÅ"}]}
+};
 
 /* ---------- helpers ---------- */
 const $=s=>document.querySelector(s);
@@ -478,9 +582,49 @@ function fmtVal(v,sci){
 }
 function lsGet(k,def){try{const v=localStorage.getItem(k);return v==null?def:JSON.parse(v)}catch(e){return def}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+/* ---------- data shapes (everything read from storage or sync goes through these) ---------- */
+const str=v=>v==null?"":String(v).slice(0,600);
+const arr=v=>Array.isArray(v)?v:[];
+const obj=v=>v&&typeof v==="object"&&!Array.isArray(v)?v:{};
+const T_=v=>str(v).trim();
+function normRows(rows,kind){const K=PK[kind];return arr(rows).slice(0,10).map(r=>{r=obj(r);const o={};K.cols.forEach(c=>o[c.f]=str(r[c.f]));return o}).filter(r=>r.t!=="")}
+const blankSrc=chem=>({chem:chem||"",t:"",tP:[],m:"",mU:"",r:"",rP:[],q:"",k:"",kU:""});
+const blankSol=()=>({name:"",conc:"",concU:"",solv:"",vol:""});
+const blankStep=()=>({rpm:"",ramp:"",time:"",as:false,asName:"",asVol:"",asAt:""});
+function normSrc(s){s=obj(s);return {chem:T_(s.chem),t:str(s.t),tP:normRows(s.tP,"temp"),m:str(s.m),mU:str(s.mU),r:str(s.r),rP:normRows(s.rP,"rate"),q:str(s.q),k:str(s.k),kU:str(s.kU)}}
+function normAnn(a,def){a=obj(a);return {on:a.on==null?!!def:!!a.on,t:str(a.t),time:str(a.time),timeU:str(a.timeU)}}
+function normStage(s){s=obj(s);
+  if(s.kind==="spin") return {kind:"spin",
+    sol:arr(s.sol).slice(0,10).map(x=>{x=obj(x);return {name:str(x.name),conc:str(x.conc),concU:str(x.concU),solv:str(x.solv),vol:str(x.vol)}}),
+    steps:arr(s.steps).slice(0,10).map(x=>{x=obj(x);return {rpm:str(x.rpm),ramp:str(x.ramp),time:str(x.time),as:!!x.as,asName:str(x.asName),asVol:str(x.asVol),asAt:str(x.asAt)}}),
+    ann:normAnn(s.ann,false)};
+  const f={},sf=obj(s.f); TE_F.forEach(fd=>{f[fd.k]=str(sf[fd.k]); if(Array.isArray(fd.u)) f[fd.k+"_u"]=str(sf[fd.k+"_u"])});
+  return {kind:"te",mode:s.mode==="seq"?"seq":"co",f,src:arr(s.src).slice(0,30).map(normSrc),ann:normAnn(s.ann,false)};
+}
+const normExtra=x=>arr(x).slice(0,60).map(o=>{o=obj(o);return {k:str(o.k),v:str(o.v)}}).filter(o=>o.k||o.v);
+const kindOf=e=>e.type==="te"?"dep":e.type;
+/* entries saved before v12 (type "te", flat fields) are shown and edited as a co-evaporation stage */
+function legacyChems(e){const f=obj(e.f); if(Array.isArray(e.chems)&&e.chems.length) return e.chems.filter(id=>chemById(id));
+  return CHEMS.map(c=>c.id).filter(id=>["t","m","r","q"].some(p=>f[p+id]!=null&&f[p+id]!==""))}
+function teToDep(e){
+  const f=obj(e.f), P=obj(e.prog), st={kind:"te",mode:"co",f:{},src:[],ann:{on:false}};
+  TE_F.forEach(fd=>{if(f[fd.k]!=null) st.f[fd.k]=f[fd.k]; if(f[fd.k+"_u"]) st.f[fd.k+"_u"]=f[fd.k+"_u"]});
+  legacyChems(e).forEach(id=>st.src.push({chem:id,t:f["t"+id],tP:P["t"+id],m:f["m"+id],mU:f["m"+id+"_u"],r:f["r"+id],rP:P["r"+id],q:f["q"+id]}));
+  const rest=[];
+  arr(e.extra).forEach(x=>{x=obj(x); const map={temp:["t","tP"],rate:["r","rP"],mass:["m"],qcm:["q"]}[x.type], c=T_(x.chem);
+    if(!map||!c){ if(x.k||x.v) rest.push({k:str(x.k),v:str(x.v)}); return}
+    let s=st.src.find(s=>String(s.chem).toLowerCase()===c.toLowerCase()); if(!s){s={chem:c};st.src.push(s)}
+    s[map[0]]=x.v; if(map[1]&&x.prog) s[map[1]]=x.prog; if(x.type==="mass"&&x.u) s.mU=x.u});
+  return {route:"co",stages:[normStage(st)],extra:normExtra(rest)};
+}
+function depOf(e){
+  if(e.type==="te") return teToDep(e);
+  const stages=arr(e.stages).slice(0,8).map(normStage);
+  return {route:ROUTES[e.route]?e.route:"co",stages,extra:normExtra(e.extra)};
+}
 
 /* ---------- state ---------- */
-const LKEY="perovLabLog.v1", UKEY="perovLabLog.units", TKEY="perovLabLog.lastType";
+const LKEY="perovLabLog.v1", UKEY="perovLabLog.units", TKEY="perovLabLog.lastType", RKEY="perovLabLog.lastRoute", HKEY="perovLabLog.lastFlow", DKEY="perovLabLog.draft", SEQKEY="perovLabLog.seqChems", CCKEY="perovLabLog.customChems";
 const BAD_ID=new Set(["__proto__","constructor","prototype"]);
 const okId=id=>typeof id==="string"&&/^[A-Za-z0-9_-]{1,64}$/.test(id)&&!BAD_ID.has(id);
 function cleanEntries(src){const out={}; if(!src||typeof src!=="object") return out;
@@ -488,32 +632,62 @@ function cleanEntries(src){const out={}; if(!src||typeof src!=="object") return 
 let store=lsGet(LKEY,null); if(!store||typeof store.entries!=="object") store={entries:{}}; store.entries=cleanEntries(store.entries);
 for(const [id,p] of Object.entries(store.pending||{})) store.entries[id]=p.deleted?{id,deleted:true,upd:Date.now()}:p;
 delete store.pending;
-let unitPref=lsGet(UKEY,{});
+let unitPref=obj(lsGet(UKEY,{}));
 let entries=new Map();
-function live(){entries=new Map(Object.entries(store.entries).filter(([id,e])=>e&&!e.deleted&&TYPES[e.type]))}
+function live(){entries=new Map(Object.entries(store.entries).filter(([id,e])=>e&&!e.deleted&&KINDS[kindOf(e)]))}
 live();
-const ui={tab:"new",filter:"all",q:"",calMonth:null,calDay:ymd(new Date()),editing:null,confirmDel:null};
+const ui={tab:"new",filter:"all",q:"",calMonth:null,calDay:ymd(new Date()),editing:null,confirmDel:null,col:new Set()};
 let draft;
 
 const CHKEY="perovLabLog.chems";
-function lastChems(){const v=lsGet(CHKEY,null);return Array.isArray(v)&&v.length?v.filter(id=>CHEMS.some(c=>c.id===id)):DEF_CHEMS.slice()}
-const chemOn=f=>!f.chem||(draft.chems||DEF_CHEMS).includes(f.chem);
+function lastChems(){const v=lsGet(CHKEY,null);return Array.isArray(v)&&v.length?v.filter(id=>typeof id==="string").slice(0,12):DEF_CHEMS.slice()}
+function lastSeq(){const v=lsGet(SEQKEY,null);return Array.isArray(v)&&v.length?v.filter(id=>typeof id==="string").slice(0,12):DEF_SEQ.slice()}
+function lastFlow(){const v=lsGet(HKEY,null);return Array.isArray(v)&&v.length&&v.length<=6&&v.every(k=>k==="te"||k==="spin")?v:HYB_PRESETS[0]}
+function customChems(){return arr(lsGet(CCKEY,[])).filter(x=>typeof x==="string").slice(0,30)}
 function stepSummary(pr){return `${pr.length} step${pr.length>1?"s":""}: ${pr.map(x=>esc(x.t)).join(" → ")}`}
 function fmtChem(s){return esc(String(s||"")).replace(/([A-Za-z\)])(\d+)/g,(m,a,d)=>a+d.split("").map(c=>"₀₁₂₃₄₅₆₇₈₉"[+c]).join(""))}
+const chemPlain=s=>{const c=chemById(s);return c?c.l:String(s||"")};
+const isOrg=s=>{const c=chemById(s);return !!(c&&c.org)};
 const SUBS=["Si(110)_3","Si(110)_5","Si(100)_3","Si(100)_300","KCl","Glass","ITO"];
 const SUBKEY="perovLabLog.subs", SUBLAST="perovLabLog.subLast";
-const subsOf=e=>Array.isArray(e.subs)?e.subs:(e.substrate?[e.substrate]:[]);
+const subsOf=e=>Array.isArray(e.subs)?e.subs.map(str):(e.substrate?[str(e.substrate)]:[]);
 function lastSubs(){const v=lsGet(SUBLAST,[]);return Array.isArray(v)?v:(v?[v]:[])}
 function subList(){const out=[...SUBS], add=v=>{v=String(v||"").trim(); if(v&&!out.some(x=>x.toLowerCase()===v.toLowerCase())) out.push(v)};
   (lsGet(SUBKEY,[])||[]).forEach(add); (typeof entries!=="undefined"&&entries?[...entries.values()]:[]).forEach(e=>subsOf(e).forEach(add)); if(draft) (draft.subs||[]).forEach(add); return out}
 function renderSub(){const cur=draft.subs||[];
   $("#subGrid").innerHTML=subList().map((v,i)=>`<label class="subbox"><input type="checkbox" data-sub="${esc(v)}"${cur.includes(v)?" checked":""}><span>${esc(v)}</span></label>`).join("");
   $("#subCount").textContent=cur.length?`· ${cur.length} selected`:""}
-function freshDraft(type,date){
-  const now=new Date();
-  return {date:date||ymd(now),time:hm(now),sample:"",subs:lastSubs(),type:type||lsGet(TKEY,"te"),chems:lastChems(),f:{},prog:{},extra:[],notes:""};
+
+function newStage(kind,mode){
+  if(kind==="spin") return {kind:"spin",sol:[blankSol()],steps:[blankStep()],ann:{on:true,t:"",time:"",timeU:""}};
+  const m=mode==="seq"?"seq":"co";
+  return {kind:"te",mode:m,f:{},src:(m==="seq"?lastSeq():lastChems()).map(blankSrc),ann:{on:false,t:"",time:"",timeU:""}};
 }
-draft=freshDraft();
+/* build the stages for a route, re-using stages already filled in (matched by kind, in order) */
+function stagesFor(route,old,flow){
+  const pool={te:[],spin:[]}; (old||[]).forEach(s=>pool[s.kind]&&pool[s.kind].push(s));
+  const fl=route==="hyb"?(flow||lastFlow()):ROUTES[route].flow;
+  return fl.map(k=>{let s=pool[k].shift()||newStage(k,route==="seq"?"seq":"co");
+    if(k==="te"&&route!=="hyb") setMode(s,route==="seq"?"seq":"co");
+    return s});
+}
+function srcHasData(c){return ["t","m","r","q","k"].some(k=>T_(c[k]))||!!(c.tP&&c.tP.length)||!!(c.rP&&c.rP.length)}
+function setMode(s,m){ if(s.mode===m) return; s.mode=m; if(!s.src.some(srcHasData)) s.src=(m==="seq"?lastSeq():lastChems()).map(blankSrc) }
+function freshDraft(type,date){
+  const now=new Date(); let t=type||lsGet(TKEY,"dep"); if(t==="te"||!KINDS[t]) t="dep";
+  const r=lsGet(RKEY,"co"), route=ROUTES[r]?r:"co";
+  return {date:date||ymd(now),time:hm(now),sample:"",subs:lastSubs(),type:t,route,stages:stagesFor(route,[]),f:{},extra:[],notes:"",touched:false};
+}
+function normDraft(d){d=obj(d); const t=KINDS[d.type]?d.type:"dep", route=ROUTES[d.route]?d.route:"co";
+  const stages=arr(d.stages).slice(0,8).map(normStage);
+  return {date:/^\d{4}-\d{2}-\d{2}$/.test(d.date)?d.date:ymd(new Date()),time:str(d.time),sample:str(d.sample),subs:arr(d.subs).map(str),type:t,route,
+    stages:stages.length?stages:stagesFor(route,[]),f:Object.fromEntries(Object.entries(obj(d.f)).filter(([k])=>/^[A-Za-z0-9_]+$/.test(k)).map(([k,v])=>[k,str(v)])),
+    extra:arr(d.extra).slice(0,60).map(o=>{o=obj(o);return {k:str(o.k),v:str(o.v)}}),notes:String(d.notes==null?"":d.notes).slice(0,20000),touched:!!d.touched}}
+/* unsaved form survives closing the app */
+let dTimer=null;
+function saveDraft(){clearTimeout(dTimer);dTimer=setTimeout(()=>lsSet(DKEY,{d:draft,editing:ui.editing}),300)}
+function dropDraft(){clearTimeout(dTimer);try{localStorage.removeItem(DKEY)}catch(e){}}
+(function(){const s=lsGet(DKEY,null); if(s&&s.d&&s.d.touched){draft=normDraft(s.d); if(s.editing&&entries.has(s.editing)) ui.editing=s.editing} else draft=freshDraft()})();
 
 /* ---------- storage / cloud sync ---------- */
 function persist(){lsSet(LKEY,store)}
@@ -599,7 +773,6 @@ function renderSyncBox(){
   }
 }
 $("#sync").addEventListener("click",()=>setTab("sync"));
-
 /* ---------- tabs ---------- */
 function setTab(t){
   ui.tab=t;
@@ -612,172 +785,318 @@ function setTab(t){
 }
 document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
 
-/* ---------- form ---------- */
-const typesEl=$("#types");
-typesEl.insertAdjacentHTML("beforeend",Object.entries(TYPES).map(([k,t])=>
-  `<label data-type="${k}"><input type="radio" name="etype" value="${k}" id="type_${k}"><span><b>${t.name}</b><small>${t.sub}</small></span></label>`).join(""));
-
-function unitFor(t,f){
-  if(!Array.isArray(f.u)) return f.u;
-  return draft.f[f.k+"_u"]||unitPref[t+"."+f.k]||f.u[0];
+/* ---------- form building blocks ---------- */
+const form=$("#entryForm");
+function getPath(o,p){return String(p).split(".").reduce((a,k)=>a==null?undefined:a[k],o)}
+function setPath(o,p,v){const ks=String(p).split("."); if(ks.some(k=>!/^[A-Za-z0-9_]+$/.test(k)||BAD_ID.has(k))) return;
+  let a=o; for(let i=0;i<ks.length-1;i++){a=a[ks[i]]; if(a==null||typeof a!=="object") return} a[ks[ks.length-1]]=v}
+const pid=p=>"i_"+String(p).replace(/[^A-Za-z0-9]/g,"_");
+const uPref=(key,list)=>{const v=unitPref["u."+key];return list.includes(v)?v:list[0]};
+const unitOf=(v,u)=>Array.isArray(u)?(u.includes(v)?v:u[0]):(u||"");
+/* one labelled input, optionally with a fixed unit or a unit picker */
+function fld(o){
+  const id=pid(o.p); let unit="";
+  if(Array.isArray(o.u)){const cur=o.u.includes(o.uv)?o.uv:uPref(o.uk,o.u); if(cur!==o.uv&&o.up) setPath(draft,o.up,cur);
+    unit=`<select class="unit" data-p="${o.up}" data-uk="${esc(o.uk)}" aria-label="${esc(o.l)} unit">${o.u.map(x=>`<option${x===cur?" selected":""}>${esc(x)}</option>`).join("")}</select>`}
+  else if(o.u) unit=`<span class="unit">${esc(o.u)}</span>`;
+  const inp=`<input type="text"${o.txt?' autocapitalize="off"':` class="num" inputmode="${o.sci?"text":"decimal"}"`} id="${id}" data-p="${o.p}" value="${esc(o.v)}" placeholder="${esc(o.ph||"")}"${o.list?` list="${o.list}"`:""} autocomplete="off">`;
+  return `<label class="f"><span class="lab">${esc(o.l)}</span>${unit?`<span class="unitwrap">${inp}${unit}</span>`:inp}</label>`;
 }
+const ICON={
+  co:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20h16"/><path d="M6 4l4 12M12 4v12M18 4l-4 12"/></svg>',
+  seq:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20h16M4 15.5h16M4 11h16"/><path d="M12 3v4.5M9.5 5.5L12 8l2.5-2.5"/></svg>',
+  spin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="17" rx="8.5" ry="3"/><path d="M12 3v7M9.5 7.5L12 10l2.5-2.5"/></svg>',
+  hyb:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="18" rx="8.5" ry="2.6"/><path d="M7 4l2 9M17 4l-2 9"/><path d="M12 4v6"/></svg>'
+};
+function stageBrief(s){
+  const p=[];
+  if(s.kind==="te"){
+    s.src.forEach(c=>{const pr=c.tP&&c.tP.length?c.tP:null, t=T_(c.t)||(pr?pr[pr.length-1].t:""); p.push(chemPlain(c.chem)+(t?` ${t} °C`:""))});
+    const th=T_(s.f.thickness); if(th) p.push(`${th} ${unitOf(s.f.thickness_u,TE_F[4].u)}`);
+    if(!s.src.length) p.push("no sources yet");
+  } else {
+    s.sol.forEach(x=>{const a=[T_(x.conc)&&`${T_(x.conc)} ${unitOf(x.concU,SOL_F[1].u)}`,T_(x.name)].filter(Boolean).join(" "); if(a) p.push(a)});
+    const rpm=s.steps.map(x=>T_(x.rpm)).filter(Boolean); if(rpm.length) p.push(rpm.join("/")+" rpm");
+    s.steps.forEach(x=>{if(x.as) p.push((T_(x.asName)||"anti-solvent")+(T_(x.asAt)?` @ ${T_(x.asAt)} s`:""))});
+  }
+  if(s.ann.on&&(T_(s.ann.t)||T_(s.ann.time))) p.push("anneal "+[T_(s.ann.t)&&`${T_(s.ann.t)} °C`,T_(s.ann.time)&&`${T_(s.ann.time)} ${unitOf(s.ann.timeU,ANN_F[1].u)}`].filter(Boolean).join(", "));
+  return p.join(" · ");
+}
+
+/* ---------- form rendering ---------- */
 function renderForm(){
   $("#fDate").value=draft.date; $("#fTime").value=draft.time; $("#fSample").value=draft.sample; $("#fNotes").value=draft.notes; renderSub();
-  typesEl.querySelectorAll("input").forEach(i=>i.checked=i.value===draft.type);
-  const T=TYPES[draft.type];
-  const tf=$("#typeFields"); tf.dataset.type=draft.type;
-  tf.innerHTML=T.groups.map(g=>{
-   if(g.chips) return `<div class="group"><h3>${g.title}</h3><div class="chips" role="group" aria-label="Chemicals in this run">${CHEMS.map(c=>`<button type="button" class="chemchip" data-chem="${c.id}" id="ch_${c.id}" aria-pressed="${draft.chems.includes(c.id)}">${c.l}</button>`).join("")}</div><div class="hint">Pick the sources you're using. For any other chemical, use Other parameters below.</div></div>`;
-   const fields=g.fields.filter(chemOn); if(!fields.length) return "";
-   return `<div class="group"><h3>${g.title}</h3><div class="row">${fields.map(f=>{
-    const u=unitFor(draft.type,f), v=draft.f[f.k]??"";
-    const unit=Array.isArray(f.u)
-      ? `<select class="unit" data-u="${f.k}" id="u_${f.k}" aria-label="${esc(f.l)} unit">${f.u.map(x=>`<option${x===u?" selected":""}>${x}</option>`).join("")}</select>`
-      : `<span class="unit">${f.u}</span>`;
-    const lab=`<label class="f"><span class="lab">${f.l}${f.prog?" · final":""}</span><span class="unitwrap"><input class="num" type="text" inputmode="${f.sci?"text":"decimal"}" id="f_${f.k}" data-k="${f.k}" value="${esc(v)}" placeholder="${f.ph||""}">${unit}</span></label>`;
-    if(!f.prog) return lab;
-    const pr=(draft.prog||{})[f.k];
-    return `<div class="fcell">${lab}<button type="button" class="stepbtn${pr&&pr.length?" on":""}" data-prog="${f.k}" id="pb_${f.k}">${pr&&pr.length?stepSummary(pr):PK[f.prog].btn}</button></div>`;
-  }).join("")}</div>${g.hint?`<div class="hint">${g.hint}</div>`:""}${fields.some(f=>f.sci)?`<div class="hint">Type pressures like 5e-6 or 5x10^-6.</div>`:""}</div>`}).join("");
-  renderExtra();
+  renderKind(); renderTypeFields(); renderExtra(); renderLists_dl();
   const eb=$("#editBanner");
   if(ui.editing){eb.hidden=false;$("#editText").textContent="Editing entry from "+niceDate(draft.date,true);$("#saveBtn").textContent="Update entry"}
   else{eb.hidden=true;$("#saveBtn").textContent="Save entry"}
-  $("#formErr").hidden=true;
+  $("#formErr").hidden=true; dateHint();
 }
-const XT={
-  temp:{label:"Source temperature",short:"T",unit:"°C",prog:"temp",chem:1},
-  rate:{label:"Deposition rate",short:"Rate",unit:"Å/s",prog:"rate",chem:1},
-  mass:{label:"Powder mass",short:"Mass",units:["mg","g"],chem:1},
-  qcm:{label:"QCM life",short:"QCM life",unit:"%",chem:1},
-  value:{label:"Other value"}
-};
-const xTypes=()=>draft.type==="te"?["temp","rate","mass","qcm","value"]:["value"];
-const xT=x=>XT[x&&x.type]||XT.value;
-function xLabel(x,plain){const T=xT(x);return T.chem?`${T.short} ${plain?(x.chem||""):fmtChem(x.chem)}`:(plain?(x.k||"Parameter"):esc(x.k||"Parameter"))}
-function xUnit(x){const T=xT(x);return T.units?(x.u||T.units[0]):(T.unit||"")}
+function dateHint(){$("#dateHint").textContent=draft.date===ymd(new Date())?"Date and time are filled in automatically. Pick another day in Calendar to log for that date.":"Logging for "+niceDate(draft.date,true)+"."}
+function renderKind(){
+  $("#kinds").innerHTML=Object.entries(KINDS).map(([k,t])=>`<button type="button" class="kind" data-type="${k}" data-kindsel="${k}" aria-pressed="${draft.type===k}"><b>${t.name}</b><small>${t.sub}</small></button>`).join("");
+  const rb=$("#routeBox");
+  if(draft.type!=="dep"){rb.innerHTML="";rb.hidden=true;return}
+  rb.hidden=false;
+  const flow=draft.stages.map(s=>s.kind).join(",");
+  rb.innerHTML=`<div class="lab2">Deposition route</div><div class="routes">${Object.entries(ROUTES).map(([k,r])=>`<button type="button" class="route" data-route="${k}" aria-pressed="${draft.route===k}"><span class="ricon">${ICON[k]}</span><span><b>${r.name.replace(/-/g,"\u2011")}</b><small>${r.sub}</small></span></button>`).join("")}</div>`+
+    (draft.route==="hyb"?`<div class="lab2">Order of stages</div><div class="chips">${HYB_PRESETS.map(p=>`<button type="button" class="chip-btn" data-flow="${p.join(",")}" aria-pressed="${flow===p.join(",")}">${p.map(k=>STAGE_SHORT[k]).join(" → ")}</button>`).join("")}</div><div class="hint">Another order? Add, move or remove stages below.</div>`:"");
+}
+function renderTypeFields(){
+  const tf=$("#typeFields"), nav=$("#stageNav");
+  if(draft.type!=="dep"){nav.innerHTML="";nav.hidden=true;tf.innerHTML=flatHTML(draft.type);return}
+  const n=draft.stages.length;
+  nav.hidden=n<2;
+  nav.innerHTML=n<2?"":draft.stages.map((s,i)=>`${i?'<span class="arr" aria-hidden="true">→</span>':""}<button type="button" class="navpill" data-kind="${s.kind}" data-goto="${i}"><span class="stage-n">${i+1}</span>${STAGE_SHORT[s.kind]}${s.kind==="te"?` <small>${s.mode==="seq"?"seq":"co"}</small>`:""}</button>`).join("");
+  tf.innerHTML=draft.stages.map(stageHTML).join("")+(draft.route==="hyb"?`<div class="addstage"><button type="button" class="btn" data-addstage="spin">＋ Spin coating stage</button><button type="button" class="btn" data-addstage="te">＋ Evaporation stage</button></div>`:"");
+}
+function stageHTML(s,i){
+  const n=draft.stages.length, hyb=draft.route==="hyb", col=ui.col.has(i), P=`stages.${i}`;
+  const armed=ui.arm===`sdel:${i}`;
+  const tools=hyb&&n>1?`<button type="button" class="btn sm icon" data-smove="${i}:-1"${i===0?" disabled":""} aria-label="Move stage ${i+1} earlier">↑</button><button type="button" class="btn sm icon" data-smove="${i}:1"${i===n-1?" disabled":""} aria-label="Move stage ${i+1} later">↓</button><button type="button" class="btn sm icon danger" data-sdel="${i}" aria-label="Remove stage ${i+1}">✕</button>`:"";
+  const confirm=armed?`<div class="confirm" role="alert"><span>Remove stage ${i+1} and everything in it?</span><button type="button" class="btn sm danger solid" data-sdel="${i}">Remove</button><button type="button" class="btn sm" data-disarm>Keep</button></div>`:"";
+  const sub=col?stageBrief(s):(s.kind==="te"?TE_MODE[s.mode]+(n>1?` · stage ${i+1} of ${n}`:""):(n>1?`Stage ${i+1} of ${n}`:"Solution, spin steps, anneal"));
+  const head=`<div class="stage-h"><button type="button" class="stage-tog" data-col="${i}" aria-expanded="${!col}"><span class="stage-n">${i+1}</span><span class="stage-t"><b>${STAGE_NAME[s.kind]}</b><small>${esc(sub)}</small></span><span class="chev" aria-hidden="true">${col?"▸":"▾"}</span></button><div class="stage-tools">${tools}</div></div>`;
+  if(col) return `<section class="card stage" data-kind="${s.kind}" id="stage_${i}">${head}${confirm}</section>`;
+  const mode=hyb&&s.kind==="te"?`<div class="seg" role="group" aria-label="Evaporation mode">${["co","seq"].map(m=>`<button type="button" data-smode="${i}:${m}" aria-pressed="${s.mode===m}">${TE_MODE[m]}</button>`).join("")}</div>`:"";
+  return `<section class="card stage" data-kind="${s.kind}" id="stage_${i}">${head}${confirm}${mode}${s.kind==="te"?teBody(s,i,P):spinBody(s,i,P)}</section>`;
+}
+function teBody(s,i,P){
+  const seq=s.mode==="seq";
+  const ff=g=>TE_F.filter(fd=>fd.g===g).map(fd=>fld({p:`${P}.f.${fd.k}`,v:s.f[fd.k],l:fd.k==="thickness"&&seq?"Total film thickness":fd.l,u:fd.u,up:`${P}.f.${fd.k}_u`,uv:s.f[fd.k+"_u"],uk:fd.k+"_u",sci:fd.sci,ph:fd.ph})).join("");
+  const pool=[...CHEMS.map(c=>c.id),...customChems()]; s.src.forEach(c=>{if(c.chem&&!pool.includes(c.chem)) pool.push(c.chem)});
+  const uniq=pool.filter((v,j)=>pool.indexOf(v)===j);
+  const chips=uniq.map(id=>seq
+    ?`<button type="button" class="chemchip add" data-addchem="${i}" data-chem="${esc(id)}" aria-label="Add ${esc(chemPlain(id))} layer">＋ ${fmtChem(chemPlain(id))}</button>`
+    :`<button type="button" class="chemchip" data-addchem="${i}" data-chem="${esc(id)}" aria-pressed="${s.src.some(c=>c.chem===id)}">${fmtChem(chemPlain(id))}</button>`).join("");
+  const srcs=s.src.map((c,j)=>srcHTML(s,c,i,j)).join("")||`<div class="hint">${seq?"Tap a chemical above to add it as the next layer.":"Tap the chemicals you're evaporating together."}</div>`;
+  return `<div class="grp"><h4>Chamber</h4><div class="row">${ff("chamber")}</div><div class="hint">Type pressures like 5e-6 or 5x10^-6.</div></div>
+    <div class="grp"><h4>${seq?"Layers, in order of evaporation":"Sources evaporated together"}</h4>
+      <div class="chips" role="group" aria-label="Chemicals">${chips}</div>
+      <div class="subnew"><input type="text" id="cc_${i}" placeholder="Other chemical, e.g. SnF2" aria-label="Other chemical" list="chemList" autocomplete="off" autocapitalize="off" enterkeyhint="done" data-ccin="${i}"><button type="button" class="btn sm" data-addcustom="${i}">＋ Add</button></div>
+      <div class="srcs">${srcs}</div>
+      <div class="hint">“Set … steps” records a ramp program like the Control Temperature Panel; the final value fills in automatically.</div></div>
+    <div class="grp"><h4>Substrate &amp; film</h4><div class="row">${ff("sub")}</div></div>
+    ${annHTML(s,P)}`;
+}
+function srcHTML(s,c,i,j){
+  const seq=s.mode==="seq", P=`stages.${i}.src.${j}`, n=s.src.length, armed=ui.arm===`srcdel:${i}:${j}`;
+  const fields=SRC_F.filter(fd=>(!fd.seq||seq)&&!(fd.noOrg&&isOrg(c.chem))).map(fd=>{
+    const f=fld({p:`${P}.${fd.k}`,v:c[fd.k],l:fd.l+(fd.prog?" · final":""),u:fd.u,up:`${P}.${fd.k}U`,uv:c[fd.k+"U"],uk:fd.k+"U"});
+    if(!fd.prog) return f;
+    const pr=c[fd.k+"P"];
+    return `<div class="fcell">${f}<button type="button" class="stepbtn${pr&&pr.length?" on":""}" data-prog="${P}" data-pf="${fd.k}" id="pb_${pid(P)}_${fd.k}">${pr&&pr.length?stepSummary(pr):PK[fd.prog].btn}</button></div>`}).join("");
+  return `<div class="src"><div class="src-h">${seq?`<span class="layer-n">Layer ${j+1}</span>`:""}<b>${fmtChem(chemPlain(c.chem))}</b><span class="spacer"></span>${seq&&n>1?`<button type="button" class="btn sm icon" data-srcmove="${i}:${j}:-1"${j===0?" disabled":""} aria-label="Move layer ${j+1} earlier">↑</button><button type="button" class="btn sm icon" data-srcmove="${i}:${j}:1"${j===n-1?" disabled":""} aria-label="Move layer ${j+1} later">↓</button>`:""}<button type="button" class="btn sm icon" data-srcdel="${i}:${j}" aria-label="Remove ${esc(chemPlain(c.chem))}">✕</button></div>${armed?`<div class="confirm" role="alert"><span>Remove ${fmtChem(chemPlain(c.chem))} and its values?</span><button type="button" class="btn sm danger solid" data-srcdel="${i}:${j}">Remove</button><button type="button" class="btn sm" data-disarm>Keep</button></div>`:""}<div class="row">${fields}</div></div>`;
+}
+function spinBody(s,i,P){
+  const sols=s.sol.map((x,j)=>`<div class="src"><div class="src-h"><b>Solution ${j+1}</b><span class="spacer"></span>${s.sol.length>1?`<button type="button" class="btn sm icon" data-del="${P}.sol.${j}" aria-label="Remove solution ${j+1}">✕</button>`:""}</div><div class="row">${SOL_F.map(fd=>fld({p:`${P}.sol.${j}.${fd.k}`,v:x[fd.k],l:fd.l,u:fd.u,up:`${P}.sol.${j}.${fd.k}U`,uv:x[fd.k+"U"],uk:fd.k+"U",txt:fd.txt,ph:fd.ph,list:fd.list})).join("")}</div></div>`).join("");
+  const steps=s.steps.map((x,j)=>`<div class="src step"><div class="src-h"><span class="layer-n">Step ${j+1}</span><span class="spacer"></span>${s.steps.length>1?`<button type="button" class="btn sm icon" data-del="${P}.steps.${j}" aria-label="Remove step ${j+1}">✕</button>`:""}</div>
+    <div class="row three">${STEP_F.map(fd=>fld({p:`${P}.steps.${j}.${fd.k}`,v:x[fd.k],l:`${fd.l} (${fd.u})`})).join("")}</div>
+    <label class="check"><input type="checkbox" data-p="${P}.steps.${j}.as"${x.as?" checked":""}><span>Anti-solvent dropped in this step</span></label>
+    ${x.as?`<div class="row as">${AS_F.map(fd=>fld({p:`${P}.steps.${j}.${fd.k}`,v:x[fd.k],l:fd.u?`${fd.l} (${fd.u})`:fd.l,txt:fd.txt,ph:fd.ph,list:fd.list})).join("")}</div>`:""}</div>`).join("");
+  return `<div class="grp"><h4>Precursor solution</h4><div class="srcs">${sols}</div><div><button type="button" class="btn sm" data-addrow="${P}.sol">＋ Add solution</button></div></div>
+    <div class="grp"><h4>Spin program</h4><div class="srcs">${steps}</div><div><button type="button" class="btn sm" data-addrow="${P}.steps">＋ Add spin step</button></div><div class="hint">“Dropped at” is the second, counted from the start of that step, when the anti-solvent goes on.</div></div>
+    ${annHTML(s,P)}`;
+}
+function annHTML(s,P){const a=s.ann;
+  return `<div class="grp"><label class="check"><input type="checkbox" data-p="${P}.ann.on"${a.on?" checked":""}><span>${s.kind==="spin"?"Annealed after spin coating":"Annealed after this stage"}</span></label>${a.on?`<div class="row">${fld({p:`${P}.ann.t`,v:a.t,l:ANN_F[0].l,u:"°C"})}${fld({p:`${P}.ann.time`,v:a.time,l:ANN_F[1].l,u:ANN_F[1].u,up:`${P}.ann.timeU`,uv:a.timeU,uk:"timeU"})}</div>`:""}</div>`}
+function flatHTML(t){
+  return `<section class="card stage" data-kind="${t}"><div class="stage-h"><span class="stage-t"><b>${KINDS[t].name}</b><small>${KINDS[t].sub}</small></span></div>${TYPES[t].groups.map(g=>`<div class="grp"><h4>${g.title}</h4><div class="row">${g.fields.map(fd=>fld({p:"f."+fd.k,v:draft.f[fd.k],l:fd.l,u:fd.u,up:"f."+fd.k+"_u",uv:draft.f[fd.k+"_u"],uk:t+"."+fd.k})).join("")}</div></div>`).join("")}</section>`;
+}
 function renderExtra(){
-  const types=xTypes();
-  $("#extraRows").innerHTML=draft.extra.map((x,i)=>{
-    if(!types.includes(x.type)) x.type="value";
-    const T=XT[x.type];
-    const sel=types.length>1?`<select id="xt_${i}" data-xi="${i}" data-xp="type" aria-label="Parameter ${i+1} type">${types.map(t=>`<option value="${t}"${t===x.type?" selected":""}>${XT[t].label}</option>`).join("")}</select>`:`<span class="xlabel">Other value</span>`;
-    const who=T.chem?`<label class="f"><span class="lab">Chemical</span><input type="text" id="xc_${i}" data-xi="${i}" data-xp="chem" value="${esc(x.chem||"")}" placeholder="e.g. SnF2" list="chemList" autocomplete="off" autocapitalize="off"></label>`
-      :`<label class="f"><span class="lab">Name</span><input type="text" id="xk_${i}" data-xi="${i}" data-xp="k" value="${esc(x.k||"")}" placeholder="e.g. Tool factor"></label>`;
-    let unit=""; if(T.units){const u=x.u||T.units[0];unit=`<select class="unit" id="xu_${i}" data-xi="${i}" data-xp="u" aria-label="Unit">${T.units.map(o=>`<option${o===u?" selected":""}>${o}</option>`).join("")}</select>`} else if(T.unit) unit=`<span class="unit">${T.unit}</span>`;
-    const val=`<label class="f"><span class="lab">${T.prog?"Final value":"Value"}</span>${unit?`<span class="unitwrap"><input class="num" type="text" inputmode="decimal" id="xv_${i}" data-xi="${i}" data-xp="v" value="${esc(x.v||"")}">${unit}</span>`:`<input type="text" id="xv_${i}" data-xi="${i}" data-xp="v" value="${esc(x.v||"")}" placeholder="Value with unit">`}</label>`;
-    const pr=T.prog&&x.prog&&x.prog.length?x.prog:null;
-    const stepb=T.prog?`<button type="button" class="stepbtn${pr?" on":""}" data-xprog="${i}" id="xpb_${i}">${pr?stepSummary(pr):PK[T.prog].btn}</button>`:"";
-    return `<div class="xcard"><div class="xtop">${sel}<button type="button" class="btn icon-x" data-xdel="${i}" aria-label="Remove parameter ${i+1}">✕</button></div><div class="xbody">${who}${val}</div>${stepb}</div>`;
-  }).join("")+(draft.extra.length?"":`<div class="hint">${draft.type==="te"?"Add a chemical that isn't in the list above (temperature with steps, rate with steps, powder mass or QCM life), or any other value.":"Add any other measured value, e.g. slit width or filter."}</div>`);
-  const names=new Set(CHEMS.map(c=>c.id)); entries.forEach(e=>(e.extra||[]).forEach(x=>x.chem&&names.add(x.chem)));
-  $("#chemList").innerHTML=[...names].map(n=>`<option value="${esc(n)}">`).join("");
+  $("#extraRows").innerHTML=draft.extra.map((x,i)=>`<div class="xrow">${fld({p:`extra.${i}.k`,v:x.k,l:"Name",txt:1,ph:"e.g. Tool factor"})}${fld({p:`extra.${i}.v`,v:x.v,l:"Value (with unit)",txt:1,ph:"e.g. 1.2"})}<button type="button" class="btn icon-x" data-del="extra.${i}" aria-label="Remove parameter ${i+1}">✕</button></div>`).join("")
+    ||`<div class="hint">Anything else worth recording, e.g. tool factor, glovebox O₂/H₂O, humidity.</div>`;
 }
-const form=$("#entryForm");
+function renderLists_dl(){
+  const chems=new Set([...CHEMS.map(c=>c.id),...customChems()]), solv=new Set(SOLVENTS), as=new Set(ANTISOLV);
+  entries.forEach(e=>{if(kindOf(e)!=="dep") return; depOf(e).stages.forEach(s=>{
+    if(s.kind==="te") s.src.forEach(c=>c.chem&&chems.add(c.chem)); else {s.sol.forEach(x=>T_(x.solv)&&solv.add(T_(x.solv))); s.steps.forEach(x=>T_(x.asName)&&as.add(T_(x.asName)))}})});
+  const o=set=>[...set].slice(0,80).map(n=>`<option value="${esc(n)}">`).join("");
+  $("#chemList").innerHTML=o(chems); $("#solvList").innerHTML=o(solv); $("#asList").innerHTML=o(as);
+}
+
+/* ---------- form events ---------- */
 $("#subGrid").addEventListener("change",e=>{const v=e.target.dataset.sub; if(v==null) return;
   const set=new Set(draft.subs||[]); e.target.checked?set.add(v):set.delete(v);
-  draft.subs=subList().filter(x=>set.has(x)); lsSet(SUBLAST,draft.subs); $("#subCount").textContent=draft.subs.length?`· ${draft.subs.length} selected`:""});
-function addSub(){const v=$("#subNewIn").value.trim(); if(!v){$("#subNewIn").focus();return}
+  draft.subs=subList().filter(x=>set.has(x)); lsSet(SUBLAST,draft.subs); $("#subCount").textContent=draft.subs.length?`· ${draft.subs.length} selected`:""; saveDraft()});
+function addSub(){const v=$("#subNewIn").value.trim().slice(0,60); if(!v){$("#subNewIn").focus();return}
   const ex=subList().find(x=>x.toLowerCase()===v.toLowerCase()), name=ex||v;
   if(!ex){const c=lsGet(SUBKEY,[])||[];c.push(name);lsSet(SUBKEY,c)}
   if(!(draft.subs||[]).includes(name)) draft.subs=[...(draft.subs||[]),name];
-  lsSet(SUBLAST,draft.subs); $("#subNewIn").value=""; renderSub(); toast(ex?`${name} ticked`:`${name} added and ticked`)}
+  lsSet(SUBLAST,draft.subs); $("#subNewIn").value=""; renderSub(); saveDraft(); toast(ex?`${name} ticked`:`${name} added and ticked`)}
 $("#subNewAdd").addEventListener("click",addSub);
 $("#subNewIn").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();addSub()}});
 
+const touch=()=>{draft.touched=true;saveDraft()};
 form.addEventListener("input",e=>{
   const t=e.target;
-  if(t.id==="fDate") draft.date=t.value;
+  if(t.id==="fDate"){draft.date=t.value;dateHint()}
   else if(t.id==="fTime") draft.time=t.value;
   else if(t.id==="fSample") draft.sample=t.value;
   else if(t.id==="fNotes") draft.notes=t.value;
-  else if(t.dataset.k){draft.f[t.dataset.k]=t.value; t.removeAttribute("aria-invalid")}
-  else if(t.dataset.xi!=null){draft.extra[+t.dataset.xi][t.dataset.xp]=t.value; t.removeAttribute("aria-invalid")}
+  else if(t.dataset.p&&t.type!=="checkbox"&&t.tagName==="INPUT"){setPath(draft,t.dataset.p,t.value); t.removeAttribute("aria-invalid"); $("#formErr").hidden=true}
+  else return;
+  touch();
 });
 form.addEventListener("change",e=>{
   const t=e.target;
-  if(t.name==="etype"){draft.type=t.value;lsSet(TKEY,t.value);renderForm()}
-  else if(t.dataset.u){draft.f[t.dataset.u+"_u"]=t.value;unitPref[draft.type+"."+t.dataset.u]=t.value;lsSet(UKEY,unitPref)}
-  else if(t.dataset.xp==="type"){const i=+t.dataset.xi,x=draft.extra[i];x.type=t.value;if(x.prog&&x.progKind!==XT[x.type].prog){delete x.prog;delete x.progKind}renderExtra();const s=$("#xt_"+i);s&&s.focus()}
+  if(t.tagName==="SELECT"&&t.dataset.p){setPath(draft,t.dataset.p,t.value); if(t.dataset.uk){unitPref["u."+t.dataset.uk]=t.value;lsSet(UKEY,unitPref)} touch()}
+  else if(t.type==="checkbox"&&t.dataset.p){setPath(draft,t.dataset.p,t.checked); touch(); rerender(t.dataset.p)}
 });
+/* re-draw the stage area but keep the page where it is */
+function rerender(focusP){const y=window.scrollY; renderTypeFields(); renderKind(); window.scrollTo(0,y);
+  if(focusP){const el=document.querySelector(`[data-p="${CSS.escape(focusP)}"]`); if(el&&el.type==="checkbox") try{el.focus({preventScroll:true})}catch(e){}}}
+let armT=null;
+function arm(key,msg){ if(ui.arm===key){ui.arm=null;clearTimeout(armT);return true} ui.arm=key; clearTimeout(armT); armT=setTimeout(()=>{if(ui.arm===key){ui.arm=null;rerender()}},10000); if(msg) toast(msg); return false }
+function setRoute(r){ if(!ROUTES[r]) return; draft.route=r; draft.stages=stagesFor(r,draft.stages); lsSet(RKEY,r); ui.col.clear(); touch(); rerender() }
+function addChem(i,id){
+  const s=draft.stages[i]; if(!s||s.kind!=="te"||!id) return;
+  if(s.mode==="seq"){ if(s.src.length>=30) return; s.src.push(blankSrc(id)); lsSet(SEQKEY,s.src.map(c=>c.chem)); toast(`${chemPlain(id)} added as layer ${s.src.length}`) }
+  else {
+    const j=s.src.findIndex(c=>c.chem===id);
+    if(j<0) s.src.push(blankSrc(id));
+    else { if(srcHasData(s.src[j])&&!arm(`chem:${i}:${id}`,`Tap ${chemPlain(id)} again to remove it and its values`)) return; s.src.splice(j,1) }
+    lsSet(CHKEY,s.src.map(c=>c.chem));
+  }
+  touch(); rerender();
+}
 form.addEventListener("click",e=>{
-  const d=e.target.closest("[data-xdel]"); if(d){draft.extra.splice(+d.dataset.xdel,1);renderExtra()}
-  const pb=e.target.closest("[data-prog]"); if(pb) openProg({k:pb.dataset.prog});
-  const xb=e.target.closest("[data-xprog]"); if(xb) openProg({xi:+xb.dataset.xprog});
-  const ch=e.target.closest("[data-chem]"); if(ch){const id=ch.dataset.chem,on=draft.chems.includes(id);
-    draft.chems=on?draft.chems.filter(c=>c!==id):CHEMS.map(c=>c.id).filter(c=>c===id||draft.chems.includes(c));
-    lsSet(CHKEY,draft.chems);renderForm();const b=$("#ch_"+id);b&&b.focus()}
+  const q=sel=>e.target.closest(sel);
+  let b;
+  if(b=q("[data-disarm]")){ui.arm=null;clearTimeout(armT);rerender();return}
+  if(b=q("[data-kindsel]")){draft.type=b.dataset.kindsel; lsSet(TKEY,draft.type); touch(); renderForm(); return}
+  if(b=q("[data-route]")){setRoute(b.dataset.route);return}
+  if(b=q("[data-flow]")){draft.stages=stagesFor("hyb",draft.stages,b.dataset.flow.split(",")); ui.col.clear(); touch(); rerender(); return}
+  if(b=q("[data-smode]")){const [i,m]=b.dataset.smode.split(":"); const s=draft.stages[+i]; if(s){setMode(s,m==="seq"?"seq":"co"); touch(); rerender()} return}
+  if(b=q("[data-smove]")){const [i,d]=b.dataset.smove.split(":").map(Number), j=i+d, st=draft.stages; if(j<0||j>=st.length) return; [st[i],st[j]]=[st[j],st[i]]; ui.col.clear(); touch(); rerender(); return}
+  if(b=q("[data-sdel]")){const i=+b.dataset.sdel; if(draft.stages.length<2) return; if(!arm(`sdel:${i}`)){rerender();return} draft.stages.splice(i,1); ui.col.clear(); touch(); rerender(); toast(`Stage ${i+1} removed`); return}
+  if(b=q("[data-addstage]")){ if(draft.stages.length>=8){toast("Up to 8 stages per entry");return} draft.stages.push(newStage(b.dataset.addstage,"co")); touch(); rerender(); const n=draft.stages.length-1; $("#stage_"+n).scrollIntoView({behavior:"smooth",block:"start"}); return}
+  if(b=q("[data-col]")){const i=+b.dataset.col; ui.col.has(i)?ui.col.delete(i):ui.col.add(i); rerender(); return}
+  if(b=q("[data-goto]")){const i=+b.dataset.goto; ui.col.delete(i); rerender(); $("#stage_"+i).scrollIntoView({behavior:"smooth",block:"start"}); return}
+  if(b=q("[data-addchem]")){addChem(+b.dataset.addchem,b.dataset.chem); return}
+  if(b=q("[data-addcustom]")){const i=+b.dataset.addcustom, inp=$("#cc_"+i), v=inp.value.trim().replace(/\s+/g," ").slice(0,40); if(!v){inp.focus();return}
+    const known=CHEMS.find(c=>c.id.toLowerCase()===v.toLowerCase()), id=known?known.id:v;
+    if(!known){const cc=customChems(); if(!cc.some(x=>x.toLowerCase()===v.toLowerCase())){cc.push(v);lsSet(CCKEY,cc.slice(-30))}}
+    const s=draft.stages[i]; if(s&&s.mode!=="seq"&&s.src.some(c=>c.chem===id)){toast(`${chemPlain(id)} is already in this run`);return}
+    addChem(i,id); return}
+  if(b=q("[data-srcmove]")){const [i,j,d]=b.dataset.srcmove.split(":").map(Number), s=draft.stages[i]; if(!s) return; const k=j+d; if(k<0||k>=s.src.length) return; [s.src[j],s.src[k]]=[s.src[k],s.src[j]]; lsSet(SEQKEY,s.src.map(c=>c.chem)); touch(); rerender(); return}
+  if(b=q("[data-srcdel]")){const [i,j]=b.dataset.srcdel.split(":").map(Number), s=draft.stages[i]; if(!s||!s.src[j]) return;
+    if(srcHasData(s.src[j])&&!arm(`srcdel:${i}:${j}`)){rerender();return} s.src.splice(j,1); if(s.mode!=="seq") lsSet(CHKEY,s.src.map(c=>c.chem)); touch(); rerender(); return}
+  if(b=q("[data-prog]")){openProg(b.dataset.prog,b.dataset.pf); return}
+  if(b=q("[data-del]")){const p=b.dataset.del.split("."), idx=+p.pop(), a=getPath(draft,p.join(".")); if(Array.isArray(a)){a.splice(idx,1); touch(); p[0]==="extra"?renderExtra():rerender()} return}
+  if(b=q("[data-addrow]")){const a=getPath(draft,b.dataset.addrow); if(!Array.isArray(a)) return; if(a.length>=10){toast("Up to 10 rows");return} a.push(/\.sol$/.test(b.dataset.addrow)?blankSol():blankStep()); touch(); rerender(); return}
 });
-$("#addParam").addEventListener("click",()=>{draft.extra.push({type:draft.type==="te"?"temp":"value"});renderExtra();const i=draft.extra.length-1;const el=$("#xt_"+i)||$("#xk_"+i);el&&el.focus()});
-$("#clearBtn").addEventListener("click",()=>{ui.editing=null;draft=freshDraft(draft.type);renderForm()});
-$("#cancelEdit").addEventListener("click",()=>{ui.editing=null;draft=freshDraft(draft.type);renderForm();setTab("log")});
+form.addEventListener("keydown",e=>{const t=e.target; if(e.key==="Enter"&&t.dataset&&t.dataset.ccin!=null){e.preventDefault(); const b=form.querySelector(`[data-addcustom="${t.dataset.ccin}"]`); b&&b.click()}});
+$("#addParam").addEventListener("click",()=>{draft.extra.push({k:"",v:""});touch();renderExtra()});
+$("#clearBtn").addEventListener("click",()=>{
+  if(draft.touched&&!ui.editing&&!arm("clear")){ $("#clearBtn").textContent="Tap again to clear"; setTimeout(()=>{$("#clearBtn").textContent="Clear form"},4000); return}
+  $("#clearBtn").textContent="Clear form"; ui.editing=null; ui.col.clear(); dropDraft(); draft=freshDraft(draft.type); renderForm(); window.scrollTo(0,0)});
+$("#cancelEdit").addEventListener("click",()=>{ui.editing=null;ui.col.clear();dropDraft();draft=freshDraft(draft.type);renderForm();setTab("log")});
 
+/* ---------- checking and saving ---------- */
+function numIssues(d){
+  const out=[], chk=(p,l,v)=>{v=T_(v); if(v&&isNaN(parseNum(v))) out.push([p,l])};
+  if(d.type==="dep") d.stages.forEach((s,i)=>{const n=d.stages.length>1?`Stage ${i+1}, `:""; const P=`stages.${i}`;
+    if(s.kind==="te"){TE_F.forEach(fd=>chk(`${P}.f.${fd.k}`,n+fd.l,s.f[fd.k]));
+      s.src.forEach((c,j)=>SRC_F.forEach(fd=>{if(fd.seq&&s.mode!=="seq") return; if(fd.noOrg&&isOrg(c.chem)) return; chk(`${P}.src.${j}.${fd.k}`,`${n}${chemPlain(c.chem)} ${fd.l.toLowerCase()}`,c[fd.k])}))}
+    else {s.sol.forEach((x,j)=>{chk(`${P}.sol.${j}.conc`,`${n}solution ${j+1} concentration`,x.conc);chk(`${P}.sol.${j}.vol`,`${n}solution ${j+1} volume`,x.vol)});
+      s.steps.forEach((x,j)=>{STEP_F.forEach(fd=>chk(`${P}.steps.${j}.${fd.k}`,`${n}spin step ${j+1} ${fd.l.toLowerCase()}`,x[fd.k])); if(x.as){chk(`${P}.steps.${j}.asVol`,`${n}step ${j+1} anti-solvent volume`,x.asVol);chk(`${P}.steps.${j}.asAt`,`${n}step ${j+1} anti-solvent time`,x.asAt)}})}
+    if(s.ann.on){chk(`${P}.ann.t`,n+"annealing temperature",s.ann.t);chk(`${P}.ann.time`,n+"annealing time",s.ann.time)}});
+  else fieldsOf(d.type).forEach(fd=>chk("f."+fd.k,fd.l,d.f[fd.k]));
+  return out;
+}
+function buildDep(d){
+  let filled=0; const v=x=>{x=T_(x); if(x) filled++; return x};
+  const annOut=a=>{if(!a.on) return {on:false}; const t=v(a.t), time=v(a.time); return t||time?{on:true,t,time,timeU:unitOf(a.timeU,ANN_F[1].u)||uPref("timeU",ANN_F[1].u)}:{on:false}};
+  const stages=d.stages.map(s=>{
+    if(s.kind==="te"){const f={}; TE_F.forEach(fd=>{const x=v(s.f[fd.k]); if(x){f[fd.k]=x; if(Array.isArray(fd.u)) f[fd.k+"_u"]=fd.u.includes(s.f[fd.k+"_u"])?s.f[fd.k+"_u"]:uPref(fd.k+"_u",fd.u)}});
+      const src=s.src.filter(c=>T_(c.chem)).map(c=>{const o={chem:T_(c.chem)};
+        SRC_F.forEach(fd=>{if(fd.seq&&s.mode!=="seq") return; if(fd.noOrg&&isOrg(c.chem)) return;
+          const pr=fd.prog&&c[fd.k+"P"]&&c[fd.k+"P"].length?c[fd.k+"P"].map(r=>({...r})):null;
+          let x=v(c[fd.k]); if(pr){o[fd.k+"P"]=pr; if(!x){x=pr[pr.length-1].t;filled++}}
+          if(x){o[fd.k]=x; if(Array.isArray(fd.u)) o[fd.k+"U"]=fd.u.includes(c[fd.k+"U"])?c[fd.k+"U"]:uPref(fd.k+"U",fd.u)}});
+        return o});
+      return {kind:"te",mode:s.mode,f,src,ann:annOut(s.ann)}}
+    const sol=s.sol.map(x=>({name:v(x.name),conc:v(x.conc),concU:SOL_F[1].u.includes(x.concU)?x.concU:uPref("concU",SOL_F[1].u),solv:v(x.solv),vol:v(x.vol)})).filter(x=>x.name||x.conc||x.solv||x.vol);
+    const steps=s.steps.map(x=>{const o={rpm:v(x.rpm),ramp:v(x.ramp),time:v(x.time)}; if(x.as){o.as=true;o.asName=v(x.asName);o.asVol=v(x.asVol);o.asAt=v(x.asAt)} return o}).filter(x=>x.rpm||x.ramp||x.time||x.as);
+    return {kind:"spin",sol,steps,ann:annOut(s.ann)}});
+  return {out:{route:d.route,stages},filled};
+}
 form.addEventListener("submit",async e=>{
   e.preventDefault();
   const err=$("#formErr");
-  if(!draft.date){err.textContent="Pick a date for this entry.";err.hidden=false;$("#fDate").focus();return}
-  const f={}; let bad=null, filled=0;
-  for(const fd of fieldsOf(draft.type)){
-    if(!chemOn(fd)) continue;
-    const v=(draft.f[fd.k]??"").trim(); if(!v) continue;
-    if(isNaN(parseNum(v))){bad=bad||fd; $("#f_"+fd.k).setAttribute("aria-invalid","true"); continue}
-    f[fd.k]=v; filled++;
-    if(Array.isArray(fd.u)) f[fd.k+"_u"]=unitFor(draft.type,fd);
-  }
-  if(bad){err.textContent=`${bad.l}: enter a number (for example 280, 0.5 or 5e-6).`;err.hidden=false;$("#f_"+bad.k).focus();return}
-  const prog={};
-  for(const fd of fieldsOf(draft.type)){ const pr=(draft.prog||{})[fd.k]; if(fd.prog&&chemOn(fd)&&pr&&pr.length){ prog[fd.k]=pr.map(x=>({...x}));
-    if(!f[fd.k]){f[fd.k]=pr[pr.length-1].t;filled++} } }
-  const extra=[]; let xbad=null;
-  draft.extra.forEach((x,i)=>{const T=xT(x), v=String(x.v||"").trim(), n=`Other parameters, row ${i+1}`;
-    if(T.chem){const c=String(x.chem||"").trim(), pr=T.prog&&x.prog&&x.prog.length?x.prog:null;
-      if(!c&&!v&&!pr) return;
-      if(!c){xbad=xbad||[`${n}: enter the chemical name.`,"xc_"+i];return}
-      const val=v||(pr?pr[pr.length-1].t:"");
-      if(!val){xbad=xbad||[`${n}: enter the ${T.label.toLowerCase()} for ${c}.`,"xv_"+i];return}
-      if(isNaN(parseNum(val))){xbad=xbad||[`${n}: ${T.label.toLowerCase()} must be a number.`,"xv_"+i];return}
-      const o={type:x.type,chem:c,v:val}; if(T.units) o.u=x.u||T.units[0]; if(pr){o.prog=pr.map(r=>({...r}));o.progKind=T.prog} extra.push(o);
-    } else {const k=String(x.k||"").trim(); if(!k&&!v) return; extra.push({type:"value",k,v});}
-  });
-  if(xbad){err.textContent=xbad[0];err.hidden=false;const el=$("#"+xbad[1]);if(el){el.setAttribute("aria-invalid","true");el.focus()}return}
-  if(!filled&&!extra.length&&!draft.notes.trim()){err.textContent="Fill in at least one parameter or a comment before saving.";err.hidden=false;return}
+  const fail=(m,p)=>{err.textContent=m;err.hidden=false;
+    if(p){const mm=/^stages\.(\d+)/.exec(p); if(mm&&ui.col.has(+mm[1])){ui.col.delete(+mm[1]);rerender()}
+      const el=document.getElementById(pid(p)); if(el){el.setAttribute("aria-invalid","true");el.scrollIntoView({block:"center"});el.focus({preventScroll:true});return}}
+    err.scrollIntoView({block:"center"})};
+  if(!draft.date) return fail("Pick a date for this entry.","fDate");
+  const bad=numIssues(draft); if(bad.length) return fail(`${bad[0][1][0].toUpperCase()+bad[0][1].slice(1)}: enter a number (for example 280, 0.5 or 5e-6).`,bad[0][0]);
+  let body, filled=0;
+  if(draft.type==="dep"){const r=buildDep(draft); body=r.out; filled=r.filled}
+  else {const f={}; fieldsOf(draft.type).forEach(fd=>{const x=T_(draft.f[fd.k]); if(!x) return; f[fd.k]=x; filled++; if(Array.isArray(fd.u)) f[fd.k+"_u"]=fd.u.includes(draft.f[fd.k+"_u"])?draft.f[fd.k+"_u"]:uPref(draft.type+"."+fd.k,fd.u)}); body={f}}
+  const extra=draft.extra.map(x=>({k:T_(x.k),v:T_(x.v)})).filter(x=>x.k||x.v);
+  if(!filled&&!extra.length&&!T_(draft.notes)) return fail("Fill in at least one value or a comment before saving.");
   const now=Date.now(), prev=ui.editing?entries.get(ui.editing):null;
-  const entry={id:ui.editing||uid(),date:draft.date,time:draft.time||"",type:draft.type,sample:draft.sample.trim(),...(draft.subs&&draft.subs.length?{subs:[...draft.subs]}:{}),...(draft.type==="te"?{chems:[...draft.chems]}:{}),f,...(Object.keys(prog).length?{prog}:{}),extra,notes:draft.notes.trim(),created:prev?prev.created:now,upd:now};
+  const entry={id:ui.editing||uid(),date:draft.date,time:draft.time||"",type:draft.type,sample:T_(draft.sample),...(draft.subs&&draft.subs.length?{subs:[...draft.subs]}:{}),...body,extra,notes:draft.notes.trim(),created:prev&&prev.created||now,upd:now};
+  if(entry.type==="dep"){lsSet(RKEY,entry.route); if(entry.route==="hyb") lsSet(HKEY,entry.stages.map(s=>s.kind))}
   const wasEdit=!!ui.editing;
-  ui.editing=null;
+  ui.editing=null; ui.col.clear(); dropDraft();
   const keepDate=draft.date;
   draft=freshDraft(entry.type, keepDate!==ymd(new Date())?keepDate:null);
   renderForm();
-  toast(wasEdit?"Entry updated":`${TYPES[entry.type].short} entry saved for ${niceDate(entry.date)}`);
+  toast(wasEdit?"Entry updated":`${entry.type==="dep"?ROUTES[entry.route].name:KINDS[entry.type].name} saved for ${niceDate(entry.date)}`);
   if(wasEdit) setTab("log"); else window.scrollTo(0,0);
   await put(entry);
 });
-$("#fDate").addEventListener("change",()=>{ $("#dateHint").textContent = draft.date===ymd(new Date())?"Date and time are filled from your device calendar.":"Logging for "+niceDate(draft.date,true)+"." });
+
+/* ---------- describing an entry (cards and CSV share this) ---------- */
+function stageTitle(s){return STAGE_NAME[s.kind]+(s.kind==="te"?` · ${TE_MODE[s.mode]}`:"")}
+function stageItems(s){
+  const it=[], add=(l,v,u,o)=>{v=T_(v); if(v) it.push({l,v,u:u||"",...(o||{})})};
+  if(s.kind==="te"){
+    TE_F.forEach(fd=>add(fd.k==="thickness"&&s.mode==="seq"?"Total film thickness":(fd.d||fd.l),s.f[fd.k],unitOf(s.f[fd.k+"_u"],fd.u),{sci:fd.sci}));
+    s.src.forEach((c,j)=>{const nm=(s.mode==="seq"?`${j+1}. `:"")+chemPlain(c.chem); let any=false;
+      SRC_F.forEach(fd=>{if(fd.seq&&s.mode!=="seq") return; const pr=fd.prog&&c[fd.k+"P"]&&c[fd.k+"P"].length?c[fd.k+"P"]:null; const x=T_(c[fd.k])||(pr?pr[pr.length-1].t:"");
+        if(x){any=true; it.push({l:`${nm} ${fd.d}`,v:x,u:unitOf(c[fd.k+"U"],fd.u),prog:pr,kind:fd.prog})}});
+      if(!any) it.push({l:nm,v:"no values entered",u:"",muted:1})});
+  } else {
+    s.sol.forEach((x,j)=>{const nm=s.sol.length>1?`Solution ${j+1}`:"Solution"; add(nm,x.name); add(`${nm} conc.`,x.conc,unitOf(x.concU,SOL_F[1].u)); add(`${nm} solvent`,x.solv); add(`${nm} volume`,x.vol,"µL")});
+    s.steps.forEach((x,j)=>{const parts=[T_(x.rpm)&&`${T_(x.rpm)} rpm`,T_(x.ramp)&&`ramp ${T_(x.ramp)} rpm/s`,T_(x.time)&&`${T_(x.time)} s`].filter(Boolean);
+      if(parts.length) it.push({l:`Spin step ${j+1}`,v:parts.join(" · "),u:""});
+      if(x.as) it.push({l:`Step ${j+1} anti-solvent`,v:[T_(x.asName)||"anti-solvent",T_(x.asVol)&&`${T_(x.asVol)} µL`,T_(x.asAt)&&`at ${T_(x.asAt)} s`].filter(Boolean).join(" "),u:""})});
+  }
+  if(s.ann.on){add("Anneal T",s.ann.t,"°C"); add("Anneal time",s.ann.time,unitOf(s.ann.timeU,ANN_F[1].u))}
+  return it;
+}
+function flatItems(e){const f=obj(e.f);return fieldsOf(e.type).filter(fd=>T_(f[fd.k])).map(fd=>({l:fd.d||fd.l,v:T_(f[fd.k]),u:unitOf(str(f[fd.k+"_u"]),fd.u)}))}
+const itemHTML=x=>`<div${x.prog?' class="wide"':""}><dt>${fmtChem(x.l)}</dt><dd${x.muted?' class="muted"':""}>${x.sci?fmtVal(x.v,1):esc(x.v)}${x.u?" "+esc(x.u):""}</dd>${x.prog?`<dd class="progline">${progText(x.prog,x.kind)}</dd>`:""}</div>`;
+const extraHTML=list=>list.length?`<dl class="params">${list.map(x=>`<div><dt>${esc(x.k||"Other")}</dt><dd>${esc(x.v)}</dd></div>`).join("")}</dl>`:"";
 
 /* ---------- entry cards ---------- */
 function cardHTML(e){
-  const T=TYPES[e.type]; if(!T) return "";
-  const ps=fieldsOf(e.type).filter(fd=>e.f&&e.f[fd.k]!=null&&e.f[fd.k]!=="").map(fd=>{
-    const u=Array.isArray(fd.u)?(e.f[fd.k+"_u"]||fd.u[0]):fd.u;
-    const pr=fd.prog&&e.prog&&e.prog[fd.k];
-    return `<div${pr?' class="wide"':""}><dt>${fd.d||fd.l}</dt><dd>${fmtVal(e.f[fd.k],fd.sci)} ${esc(u)}</dd>${pr?`<dd class="progline">${progText(pr,fd.prog)}</dd>`:""}</div>`;
-  });
-  (e.extra||[]).forEach(x=>{const T=xT(x), pr=T.prog&&x.prog&&x.prog.length?x.prog:null, u=xUnit(x);
-    ps.push(`<div${pr?' class="wide"':""}><dt>${xLabel(x)}</dt><dd>${esc(x.v)}${u?" "+esc(u):""}</dd>${pr?`<dd class="progline">${progText(pr,T.prog)}</dd>`:""}</div>`)});
+  const k=kindOf(e); if(!KINDS[k]) return "";
+  let head, sum="", body;
+  if(k==="dep"){const d=depOf(e);
+    head=`<span class="chip">${esc(ROUTES[d.route].name)}</span>`;
+    const flow=d.stages.length>1?`<div class="flow">${d.stages.map((s,i)=>`<span class="fstep" data-kind="${s.kind}">${i+1} · ${STAGE_SHORT[s.kind]}${s.kind==="te"?" "+(s.mode==="seq"?"seq":"co"):""}</span>`).join('<span class="arr" aria-hidden="true">→</span>')}</div>`:"";
+    const brief=d.stages.map(stageBrief).filter(Boolean);
+    sum=flow+(brief.length?`<div class="brief">${brief.map(x=>fmtChem(x)).join('<br>')}</div>`:"");
+    body=`<details class="more"><summary>All parameters</summary>${d.stages.map((s,i)=>{const it=stageItems(s);return `<div class="dstage" data-kind="${s.kind}"><h5>${d.stages.length>1?(i+1)+". ":""}${esc(stageTitle(s))}</h5>${it.length?`<dl class="params">${it.map(itemHTML).join("")}</dl>`:'<div class="hint">No values recorded.</div>'}</div>`}).join("")}${d.extra.length?`<div class="dstage" data-kind="x"><h5>Other parameters</h5>${extraHTML(d.extra)}</div>`:""}</details>`;
+  } else {
+    head=`<span class="chip">${KINDS[k].name}</span>`;
+    const it=flatItems(e); body=(it.length?`<dl class="params">${it.map(itemHTML).join("")}</dl>`:"")+extraHTML(normExtra(e.extra));
+  }
   const confirming=ui.confirmDel===e.id;
-  return `<article class="entry" data-type="${esc(e.type)}" data-id="${esc(e.id)}">
-    <div class="entry-h"><span class="chip">${T.name}</span>${e.time?`<time>${esc(e.time)}</time>`:""}${e.sample?`<span class="sample">${esc(e.sample)}</span>`:""}${subsOf(e).map(x=>`<span class="chip sub">${esc(x)}</span>`).join("")}</div>
-    ${ps.length?`<dl class="params">${ps.join("")}</dl>`:""}
-    ${e.notes?`<div class="notes"><span class="hint">Comments</span><br>${esc(e.notes)}</div>`:""}
+  return `<article class="entry" data-type="${k}" data-id="${esc(e.id)}">
+    <div class="entry-h">${head}${e.time?`<time>${esc(e.time)}</time>`:""}${e.sample?`<span class="sample">${esc(e.sample)}</span>`:""}${subsOf(e).map(x=>`<span class="chip sub">${esc(x)}</span>`).join("")}</div>
+    ${sum}${body}
+    ${e.notes?`<div class="notes">${esc(e.notes)}</div>`:""}
     <div class="actions">${confirming
       ?`<span class="hint">Delete this entry?</span><button class="btn sm danger solid" data-act="del-yes">Delete</button><button class="btn sm" data-act="del-no">Keep</button>`
       :`<button class="btn sm" data-act="edit">Edit</button><button class="btn sm" data-act="repeat" title="Start a new entry with the same settings">Repeat</button><button class="btn sm ghost danger" data-act="del">Delete</button>`}</div>
   </article>`;
 }
-function entryChems(e){if(Array.isArray(e.chems)&&e.chems.length) return [...e.chems];
-  const used=CHEMS.map(c=>c.id).filter(id=>fieldsOf("te").some(fd=>fd.chem===id&&e.f&&e.f[fd.k]!=null&&e.f[fd.k]!==""));
-  return used.length?used:lastChems()}
-function sorted(){return [...entries.values()].filter(e=>TYPES[e.type]).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)||b.created-a.created)}
+function sorted(){return [...entries.values()].sort((a,b)=>(str(b.date)+str(b.time)).localeCompare(str(a.date)+str(a.time))||(b.created||0)-(a.created||0))}
 function onCardAction(ev){
   const b=ev.target.closest("[data-act]"); if(!b) return;
   const id=b.closest(".entry").dataset.id, e=entries.get(id); if(!e) return;
@@ -786,25 +1105,32 @@ function onCardAction(ev){
   else if(a==="del-no"){ui.confirmDel=null;renderLists()}
   else if(a==="del-yes"){ui.confirmDel=null;remove(id);toast("Entry deleted")}
   else if(a==="edit"||a==="repeat"){
-    const now=new Date();
-    draft={date:a==="edit"?e.date:ymd(now),time:a==="edit"?e.time:hm(now),sample:a==="edit"?e.sample:"",subs:[...subsOf(e)],type:e.type,
-      chems:entryChems(e),f:{...e.f},prog:JSON.parse(JSON.stringify(e.prog||{})),extra:JSON.parse(JSON.stringify(e.extra||[])),notes:a==="edit"?e.notes:""};
-    ui.editing=a==="edit"?id:null; renderForm(); setTab("new");
-    if(a==="repeat") toast("Settings copied. Adjust and save as a new entry.");
+    const now=new Date(), k=kindOf(e), ed=a==="edit";
+    const base={date:ed?str(e.date):ymd(now),time:ed?str(e.time):hm(now),sample:ed?str(e.sample):"",subs:[...subsOf(e)],type:k,notes:ed?String(e.notes||""):"",touched:true,f:{},extra:[]};
+    if(k==="dep"){const d=depOf(e); draft={...base,route:d.route,stages:d.stages.length?JSON.parse(JSON.stringify(d.stages)):stagesFor(d.route,[]),extra:d.extra}}
+    else {const r=ROUTES[lsGet(RKEY,"co")]?lsGet(RKEY,"co"):"co"; draft={...base,route:r,stages:stagesFor(r,[]),f:Object.fromEntries(Object.entries(obj(e.f)).map(([k2,v])=>[k2,str(v)])),extra:normExtra(e.extra)}}
+    ui.editing=ed?id:null; ui.col.clear(); saveDraft(); renderForm(); setTab("new");
+    if(!ed) toast("Settings copied. Adjust and save as a new entry.");
   }
 }
 $("#logList").addEventListener("click",onCardAction);
 $("#dayList").addEventListener("click",onCardAction);
 
 /* ---------- entries view ---------- */
+function searchText(e){
+  const p=[e.sample,subsOf(e).join(" "),e.notes];
+  if(kindOf(e)==="dep"){const d=depOf(e); p.push(ROUTES[d.route].name); d.stages.forEach(s=>{p.push(STAGE_NAME[s.kind]); if(s.kind==="te") s.src.forEach(c=>p.push(c.chem,chemPlain(c.chem))); else {s.sol.forEach(x=>p.push(x.name,x.solv)); s.steps.forEach(x=>p.push(x.asName))}}); d.extra.forEach(x=>p.push(x.k,x.v))}
+  else {p.push(KINDS[kindOf(e)].name); normExtra(e.extra).forEach(x=>p.push(x.k,x.v))}
+  return p.map(str).join(" ").toLowerCase();
+}
 function renderLog(){
   const q=ui.q.trim().toLowerCase();
-  const list=sorted().filter(e=>(ui.filter==="all"||e.type===ui.filter)&&(!q||(e.sample+" "+subsOf(e).join(" ")+" "+e.notes+" "+(e.extra||[]).map(x=>(x.k||"")+" "+(x.chem||"")+" "+(x.v||"")).join(" ")).toLowerCase().includes(q)));
+  const list=sorted().filter(e=>(ui.filter==="all"||kindOf(e)===ui.filter)&&(!q||searchText(e).includes(q)));
   const el=$("#logList");
   if(!entries.size){el.innerHTML=`<div class="empty"><b>No experiments logged yet</b>Your saved entries appear here, newest first, grouped by day.</div>`;return}
   if(!list.length){el.innerHTML=`<div class="empty"><b>No matching entries</b>Try another type or search term.</div>`;return}
   const by=new Map(); list.forEach(e=>{if(!by.has(e.date))by.set(e.date,[]);by.get(e.date).push(e)});
-  el.innerHTML=[...by].map(([d,es])=>`<section class="day"><h4 class="day-h"><b>${niceDate(d,true)}</b>${es.length} ${es.length>1?"entries":"entry"}</h4><div class="list">${es.map(cardHTML).join("")}</div></section>`).join("");
+  el.innerHTML=[...by].map(([d,es])=>`<section class="day"><h4 class="day-h"><b>${esc(niceDate(d,true))}</b>${es.length} ${es.length>1?"entries":"entry"}</h4><div class="list">${es.map(cardHTML).join("")}</div></section>`).join("");
 }
 $("#filterSeg").addEventListener("click",e=>{const b=e.target.closest("[data-f]");if(!b)return;ui.filter=b.dataset.f;document.querySelectorAll("#filterSeg button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));renderLog()});
 $("#search").addEventListener("input",e=>{ui.q=e.target.value;renderLog()});
@@ -813,14 +1139,14 @@ $("#search").addEventListener("input",e=>{ui.q=e.target.value;renderLog()});
 function renderCal(){
   if(!ui.calMonth){const d=parseD(ui.calDay);ui.calMonth=new Date(d.getFullYear(),d.getMonth(),1)}
   const m=ui.calMonth; $("#calTitle").textContent=MONTHS[m.getMonth()]+" "+m.getFullYear();
-  const byDay={}; entries.forEach(e=>{(byDay[e.date]=byDay[e.date]||new Set()).add(e.type)});
+  const byDay={}; entries.forEach(e=>{(byDay[e.date]=byDay[e.date]||new Set()).add(kindOf(e))});
   const start=new Date(m); start.setDate(1-((m.getDay()+6)%7));
   const today=ymd(new Date()); let h=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>`<div class="dow">${d}</div>`).join("");
   for(let i=0;i<42;i++){
     const d=new Date(start); d.setDate(start.getDate()+i); const s=ymd(d);
     if(i===35&&d.getMonth()!==m.getMonth()) break;
-    const types=byDay[s]?["te","pl","xrd"].filter(t=>byDay[s].has(t)):[];
-    h+=`<button class="cell${d.getMonth()!==m.getMonth()?" out":""}${s===today?" today":""}" data-day="${s}" aria-pressed="${s===ui.calDay}" aria-label="${niceDate(s,true)}${types.length?", "+types.length+" experiment types":""}">${d.getDate()}<span class="dots">${types.map(t=>`<i data-type="${t}"></i>`).join("")}</span></button>`;
+    const types=byDay[s]?["dep","pl","xrd"].filter(t=>byDay[s].has(t)):[];
+    h+=`<button class="cell${d.getMonth()!==m.getMonth()?" out":""}${s===today?" today":""}" data-day="${s}" aria-pressed="${s===ui.calDay}" aria-label="${niceDate(s,true)}${types.length?", "+types.map(t=>KINDS[t].name).join(", "):""}">${d.getDate()}<span class="dots">${types.map(t=>`<i data-type="${t}"></i>`).join("")}</span></button>`;
   }
   $("#calGrid").innerHTML=h;
   $("#dayTitle").textContent=niceDate(ui.calDay,true);
@@ -830,65 +1156,61 @@ function renderCal(){
 $("#calGrid").addEventListener("click",e=>{const b=e.target.closest("[data-day]");if(!b)return;ui.calDay=b.dataset.day;const d=parseD(ui.calDay);if(d.getMonth()!==ui.calMonth.getMonth())ui.calMonth=new Date(d.getFullYear(),d.getMonth(),1);renderCal()});
 $("#prevM").addEventListener("click",()=>{ui.calMonth=new Date(ui.calMonth.getFullYear(),ui.calMonth.getMonth()-1,1);renderCal()});
 $("#nextM").addEventListener("click",()=>{ui.calMonth=new Date(ui.calMonth.getFullYear(),ui.calMonth.getMonth()+1,1);renderCal()});
-$("#newOnDay").addEventListener("click",()=>{ui.editing=null;draft=freshDraft(draft.type,ui.calDay);renderForm();$("#fDate").dispatchEvent(new Event("change"));setTab("new")});
+$("#newOnDay").addEventListener("click",()=>{ui.editing=null;ui.col.clear();dropDraft();draft=freshDraft(draft.type,ui.calDay);renderForm();setTab("new")});
 
 function renderToday(){const t=ymd(new Date());const es=sorted().filter(e=>e.date===t);$("#todayList").innerHTML=es.length?es.map(cardHTML).join(""):`<div class="empty">Entries you save today show up here.</div>`}
 $("#todayList").addEventListener("click",onCardAction);
 function renderLists(){ renderToday(); if(ui.tab==="log") renderLog(); if(ui.tab==="cal") renderCal(); if(ui.tab==="rec"&&rec.mode!=="edit") renderRec(); }
 
 /* ---------- CSV export ---------- */
+function progPlain(pr,kind){const K=PK[kind];return pr.map((x,i)=>`Step ${i+1}: `+K.cols.map(c=>`${c.n} ${x[c.f]||"-"} ${c.u}`).join(", ")).join(" | ")}
+function stageText(s){const it=stageItems(s);return stageTitle(s)+(it.length?": "+it.map(x=>`${x.l} ${x.v}${x.u?" "+x.u:""}`+(x.prog?` [${progPlain(x.prog,x.kind)}]`:"")).join("; "):"")}
 function buildCSV(){
-  const cols=[]; const seen=new Set();
-  Object.entries(TYPES).forEach(([t,T])=>fieldsOf(t).forEach(fd=>{const key=fd.k; if(seen.has(t+key))return; seen.add(t+key); cols.push({t,fd})}));
   const q=v=>{v=v==null?"":String(v); if(/^[=+@\t\r]/.test(v)||/^-[^0-9.]/.test(v)) v="'"+v; return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v};
-  const head=["Date","Time","Experiment","Sample","Substrates"];
-  cols.forEach(({t,fd})=>{head.push(`${TYPES[t].short}: ${fd.d||fd.l}`); head.push(`${TYPES[t].short}: ${fd.d||fd.l} unit`); if(fd.prog) head.push(`${TYPES[t].short}: ${fd.d||fd.l} program`)});
+  const list=sorted().reverse(), deps=list.filter(e=>kindOf(e)==="dep").map(e=>[e.id,depOf(e)]), dmap=new Map(deps);
+  const nS=Math.max(1,...deps.map(([,d])=>d.stages.length));
+  const flat=[]; ["pl","xrd"].forEach(t=>fieldsOf(t).forEach(fd=>flat.push({t,fd})));
+  const head=["Date","Time","Experiment","Route","Sample","Substrates"];
+  for(let i=1;i<=nS;i++) head.push(`Stage ${i}`);
+  flat.forEach(({t,fd})=>head.push(`${KINDS[t].name}: ${fd.d||fd.l}`,`${KINDS[t].name}: ${fd.d||fd.l} unit`));
   head.push("Other parameters","Comments");
-  const rows=sorted().reverse().map(e=>{
-    const r=[e.date,e.time,TYPES[e.type].name,e.sample,subsOf(e).join("; ")];
-    cols.forEach(({t,fd})=>{ if(e.type===t&&e.f&&e.f[fd.k]!=null){r.push(e.f[fd.k]);r.push(Array.isArray(fd.u)?(e.f[fd.k+"_u"]||fd.u[0]):fd.u)} else {r.push("");r.push("")}
-      if(fd.prog){const pr=e.type===t&&e.prog&&e.prog[fd.k];r.push(pr?pr.map((x,i)=>`Step ${i+1}: `+PK[fd.prog].cols.map(c=>`${c.n} ${x[c.f]||"-"} ${c.u}`).join(", ")).join(" | "):"")} });
-    r.push((e.extra||[]).map(x=>{const T=xT(x),u=xUnit(x),pr=T.prog&&x.prog&&x.prog.length?x.prog:null;
-      return `${xLabel(x,1)}=${x.v}${u?" "+u:""}`+(pr?` [`+pr.map((s,i)=>`Step ${i+1}: `+PK[T.prog].cols.map(c=>`${c.n} ${s[c.f]||"-"} ${c.u}`).join(", ")).join(" | ")+`]`:"")}).join("; ")); r.push(e.notes);
-    return r.map(q).join(",");
-  });
+  const rows=list.map(e=>{const k=kindOf(e), d=dmap.get(e.id);
+    const r=[e.date,e.time,KINDS[k].name,d?ROUTES[d.route].name+(d.stages.length>1?" ("+d.stages.map(s=>STAGE_SHORT[s.kind]).join(" → ")+")":""):"",e.sample,subsOf(e).join("; ")];
+    for(let i=0;i<nS;i++) r.push(d&&d.stages[i]?stageText(d.stages[i]):"");
+    const f=obj(e.f); flat.forEach(({t,fd})=>{ if(k===t&&T_(f[fd.k])){r.push(f[fd.k]);r.push(unitOf(str(f[fd.k+"_u"]),fd.u))} else r.push("","") });
+    r.push((d?d.extra:normExtra(e.extra)).map(x=>`${x.k}=${x.v}`).join("; ")); r.push(e.notes);
+    return r.map(q).join(",")});
   return "﻿"+[head.map(q).join(","),...rows].join("\n");
 }
 $("#exportBtn").addEventListener("click",()=>{
   if(!entries.size){toast("Nothing to export yet.");return}
   const csv=buildCSV(), name=`lab-log-${ymd(new Date())}.csv`;
   try{const url=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);toast("CSV downloaded")}
-  catch(e){$("#csvText").value=csv.replace(/^\ufeff/,"");$("#csvBox").hidden=false}
+  catch(e){$("#csvText").value=csv.replace(/^﻿/,"");$("#csvBox").hidden=false}
 });
 $("#copyCsv").addEventListener("click",()=>{const t=$("#csvText");navigator.clipboard.writeText(t.value).then(()=>toast("CSV copied"),()=>{t.focus();t.select();toast("Press ⌘C / Ctrl+C to copy")})});
 $("#closeCsv").addEventListener("click",()=>$("#csvBox").hidden=true);
 
-/* ---------- step program pop-up (temperature and rate) ---------- */
-const PK={
-  temp:{title:"temperature program",btn:"Set temperature steps",vu:"°C",base:25,baseLabel:"RT",rise:.42,
-    cols:[{f:"t",n:"Temp",h:"Temp (°C)",u:"°C",req:1},{f:"r",n:"Ramp",h:"Ramp (°C/min)",u:"°C/min"},{f:"s",n:"Soak",h:"Soak (s)",u:"s",def:"0"}]},
-  rate:{title:"deposition rate program",btn:"Set rate steps",vu:"Å/s",base:0,baseLabel:"0",rise:.14,
-    cols:[{f:"t",n:"Rate",h:"Rate (Å/s)",u:"Å/s",req:1},{f:"s",n:"Hold",h:"Hold (s)",u:"s"},{f:"k",n:"Thickness",h:"Thick. (kÅ)",u:"kÅ"}]}
-};
+/* ---------- step program pop-up (temperature and rate of one source) ---------- */
 function progText(pr,kind){const K=PK[kind]||PK.temp;return pr.map((x,i)=>`${i+1}) `+K.cols.map((c,j)=>j===0?`${esc(x[c.f])} ${c.u}`:`${c.n.toLowerCase()} ${x[c.f]?esc(x[c.f])+" "+c.u:"–"}`).join(" · ")).join("<br>")}
-let prog=null; // {k, kind, rows, lastFocus}
+let prog=null;
 const pm=$("#progModal");
-function fieldDef(k){return fieldsOf(draft.type).find(f=>f.k===k)}
 function blankRow(K){const r={};K.cols.forEach(c=>r[c.f]=c.def||"");return r}
-function openProg(tg){
-  let kind,label,cur,init;
-  if(tg.xi!=null){const x=draft.extra[tg.xi]; if(!x) return; kind=xT(x).prog; label=String(x.chem||"").trim()||"Chemical"; cur=x.prog&&x.progKind===kind?x.prog:null; init=String(x.v||"").trim()}
-  else {const fd=fieldDef(tg.k); if(!fd) return; kind=fd.prog; label=fd.l; cur=(draft.prog||{})[tg.k]; init=(draft.f[tg.k]||"").trim()}
-  const K=PK[kind]||PK.temp;
-  let rows=cur&&cur.length?cur.map(x=>({...x})):[{...blankRow(K),t:init}];
-  prog={k:tg.k,xi:tg.xi,kind,label,rows,lastFocus:document.activeElement};
-  $("#progTitle").textContent=`${label.replace(/(\d+)/g,d=>d.split("").map(c=>"₀₁₂₃₄₅₆₇₈₉"[+c]).join(""))} ${K.title}`;
-  $("#progHead").innerHTML=`<span>Step</span>`+K.cols.map(c=>`<span>${c.h}</span>`).join("");
+function openProg(p,f){
+  const c=getPath(draft,p); if(!c||(f!=="t"&&f!=="r")) return;
+  const kind=f==="t"?"temp":"rate", K=PK[kind], cur=c[f+"P"];
+  const rows=cur&&cur.length?cur.map(x=>({...x})):[{...blankRow(K),t:T_(c[f])}];
+  const label=chemPlain(c.chem)||"Source";
+  prog={p,f,kind,label,rows,lastFocus:document.activeElement};
+  $("#progTitle").textContent=`${label.replace(/(\d+)/g,d=>d.split("").map(x=>"₀₁₂₃₄₅₆₇₈₉"[+x]).join(""))} ${K.title}`;
+  $("#progHead").innerHTML=`<span>Step</span>`+K.cols.map(x=>`<span>${x.h}</span>`).join("");
   $("#progClear").hidden=!(cur&&cur.length);
   $("#progErr").hidden=true;
   if(document.activeElement&&document.activeElement.blur) document.activeElement.blur();
   renderProgRows(); pm.hidden=false; pm.scrollTop=0; document.body.style.overflow="hidden";
 }
+function progDone(msg){const id=`pb_${pid(prog.p)}_${prog.f}`; closeProg(); rerender(); touch(); if(msg) toast(msg); const b=document.getElementById(id); if(b) try{b.focus({preventScroll:true})}catch(e){}}
+
 function closeProg(){if(document.activeElement&&pm.contains(document.activeElement))document.activeElement.blur();pm.hidden=true;document.body.style.overflow="";const f=prog&&prog.lastFocus;prog=null;if(f&&f.focus&&f.tagName==="BUTTON")try{f.focus({preventScroll:true})}catch(e){}}
 function renderProgRows(){
   const K=PK[prog.kind];
@@ -930,32 +1252,25 @@ $("#progCancel").addEventListener("click",closeProg);
 $("#progX").addEventListener("click",closeProg);
 pm.addEventListener("click",e=>{if(e.target===pm)closeProg()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!pm.hidden)closeProg()});
-$("#progClear").addEventListener("click",()=>{const k=prog.k,xi=prog.xi;
-  if(xi!=null){const x=draft.extra[xi];delete x.prog;delete x.progKind;closeProg();renderExtra();toast("Steps removed");const b=$("#xpb_"+xi);b&&b.focus();return}
-  delete draft.prog[k];closeProg();renderForm();toast("Steps removed");const b=$("#pb_"+k);b&&b.focus()});
+$("#progClear").addEventListener("click",()=>{const c=getPath(draft,prog.p); if(c) c[prog.f+"P"]=[]; progDone("Steps removed")});
 $("#progEnter").addEventListener("click",()=>{
   const K=PK[prog.kind], err=$("#progErr"); let bad=null;
   prog.rows.forEach((x,i)=>{K.cols.forEach(c=>{x[c.f]=String(x[c.f]??"").trim(); if(bad) return;
     if(c.req&&!x[c.f]) bad=[`Step ${i+1}: enter the ${c.n.toLowerCase()} in ${c.u}.`,`p_${c.f}_${i}`];
     else if(x[c.f]&&isNaN(parseNum(x[c.f]))) bad=[`Step ${i+1}: ${c.n.toLowerCase()} must be a number in ${c.u}.`,`p_${c.f}_${i}`];})});
   if(bad){err.textContent=bad[0];err.hidden=false;const el=$("#"+bad[1]);el.setAttribute("aria-invalid","true");el.focus();return}
-  const k=prog.k, xi=prog.xi, kind=prog.kind, label=prog.label, rows=prog.rows.map(x=>{const r={};K.cols.forEach(c=>r[c.f]=x[c.f]||c.def||"");return r});
-  const last=rows[rows.length-1].t;
-  if(xi!=null){const x=draft.extra[xi]; x.prog=rows; x.progKind=kind; x.v=last; closeProg(); renderExtra();
-    toast(`${label}: ${rows.length}-step program, final ${last} ${K.vu}`); const b=$("#xpb_"+xi); b&&b.focus(); return}
-  if(!draft.prog) draft.prog={};
-  draft.prog[k]=rows; draft.f[k]=last;
-  closeProg(); renderForm();
-  toast(`${label}: ${rows.length}-step program, final ${last} ${K.vu}`);
-  const b=$("#pb_"+k); b&&b.focus();
+  const rows=prog.rows.map(x=>{const r={};K.cols.forEach(c=>r[c.f]=x[c.f]||c.def||"");return r}), last=rows[rows.length-1].t, c=getPath(draft,prog.p);
+  if(c){c[prog.f+"P"]=rows; c[prog.f]=last}
+  progDone(`${prog.label}: ${rows.length}-step program, final ${last} ${K.vu}`);
 });
 
 /* ---------- recipes ---------- */
-const REC_CAT={te:"Thermal evaporation",pl:"PL",xrd:"XRD",other:"Other"};
+const REC_CAT={co:"Co-evaporation",seq:"Sequential evaporation",spin:"Spin coating",hyb:"Hybrid",te:"Thermal evaporation",pl:"PL",xrd:"XRD",other:"Other"};
+const catType=c=>c==="pl"||c==="xrd"?c:(c&&c!=="other"?"dep":"");
 const rec={mode:"list",id:null,pushed:false,confirmDel:false,q:""};
 const recipes=()=>Object.values(store.entries).filter(e=>e&&!e.deleted&&e.type==="recipe");
 function recShow(){ $("#recListView").hidden=rec.mode!=="list"; $("#recDetail").hidden=rec.mode!=="view"; $("#recForm").hidden=rec.mode!=="edit"; $("#recAdd").hidden=rec.mode!=="list"; }
-function recMeta(r){return [r.cat&&Object.hasOwn(REC_CAT,r.cat)?`<span class="chip" data-type="${r.cat==="other"?"":r.cat}" style="${r.cat==="other"?"--tc:var(--muted)":""}">${REC_CAT[r.cat]}</span>`:"",r.date?`<span>${niceDate(r.date,true)}</span>`:"",r.source?`<span>From ${esc(r.source)}</span>`:""].filter(Boolean).join("")}
+function recMeta(r){return [r.cat&&Object.hasOwn(REC_CAT,r.cat)?`<span class="chip" data-type="${catType(r.cat)}" style="${r.cat==="other"?"--tc:var(--muted)":""}">${REC_CAT[r.cat]}</span>`:"",r.date?`<span>${niceDate(r.date,true)}</span>`:"",r.source?`<span>From ${esc(r.source)}</span>`:""].filter(Boolean).join("")}
 function renderRec(){
   if(rec.mode==="view"){const r=store.entries[rec.id]; if(!r||r.deleted||r.type!=="recipe"){rec.mode="list"} }
   recShow();
@@ -1011,14 +1326,14 @@ $("#recForm").addEventListener("submit",e=>{e.preventDefault();
   const r={id:prev?prev.id:"r"+uid(),type:"recipe",title,cat:$("#rCat").value,date:$("#rDate").value,source:$("#rSource").value.trim(),body:$("#rBody").value.replace(/\s+$/,""),created:prev&&prev.created||now,upd:now};
   rec.id=r.id; rec.mode="view"; put(r); renderRec(); window.scrollTo(0,0); toast(prev?"Recipe updated":"Recipe saved");
 });
-
 /* ---------- toast ---------- */
 let tt; function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2600)}
 
 /* ---------- start ---------- */
 $("#subtitle").textContent=niceDate(ymd(new Date()),true);
 renderForm(); setTab("new");
-/* One-tap connect: opening the app with #LAB1-… saves the code on this device and removes it from the address bar */
+if(draft.touched&&!ui.editing) setTimeout(()=>toast("Your unsaved entry was restored"),500);
+/* One-tap connect: opening the app with #LAB1-… only fills in the code; the user taps Connect */
 (function(){const h=decodeURIComponent(location.hash||"");if(!/LAB1-/.test(h))return;const o=parseCode(h);
   try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}
   if(!o){setTimeout(()=>toast("That sync link isn't valid, so it was ignored."),600);return}
@@ -1033,15 +1348,15 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   navigator.serviceWorker.register("sw.js").then(r=>{try{r.update()}catch(e){}}).catch(()=>{});
   navigator.serviceWorker.addEventListener("controllerchange",()=>{ if(hadSW&&!reloaded){reloaded=true;location.reload()} });
 }
-// refresh the auto date/time when coming back to the page on a new day
+/* coming back to the app on a new day refreshes the automatic date/time of an untouched form */
 document.addEventListener("visibilitychange",()=>{
   if(document.visibilityState!=="visible"||ui.editing) return;
-  const untouched=!draft.sample&&!draft.notes&&!Object.keys(draft.f).some(k=>!k.endsWith("_u")&&draft.f[k]);
-  if(untouched){const now=new Date();draft.date=ymd(now);draft.time=hm(now);$("#fDate").value=draft.date;$("#fTime").value=draft.time}
+  if(!draft.touched){const now=new Date();draft.date=ymd(now);draft.time=hm(now);$("#fDate").value=draft.date;$("#fTime").value=draft.time;dateHint()}
   $("#subtitle").textContent=niceDate(ymd(new Date()),true);
   if(cloudOn()) cloudSync(false);
 });
 })();
+
 </script>
 </body>
 </html>
