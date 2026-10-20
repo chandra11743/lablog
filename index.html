@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-vs3oS6/2Y/d0PboU1CjQS+/FjrENqooAj5qEuHtdPx8='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-gAlsqcsL00eKz4lb7l/BmpsRK0D4TcNVMgoUv7BIEfo='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0E6E6B">
@@ -274,6 +274,7 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 .src-h{display:flex;align-items:center;gap:8px;min-height:30px}
 .src-h b{font-size:15px}
 .src-h .spacer{flex:1}
+.solpick{width:auto;max-width:60%;padding:4px 8px;font-size:13px;background:var(--panel)}
 .layer-n{font:600 12px var(--mono);color:var(--sc);text-transform:uppercase;letter-spacing:.04em}
 .row.three{grid-template-columns:repeat(3,minmax(0,1fr))}
 .row.as{grid-template-columns:repeat(2,minmax(0,1fr))}.row.as>:first-child{grid-column:1/-1}
@@ -590,13 +591,13 @@ const T_=v=>str(v).trim();
 function normRows(rows,kind){const K=PK[kind];return arr(rows).slice(0,10).map(r=>{r=obj(r);const o={};K.cols.forEach(c=>o[c.f]=str(r[c.f]));return o}).filter(r=>r.t!=="")}
 const blankSrc=chem=>({chem:chem||"",t:"",tP:[],m:"",mU:"",r:"",rP:[],q:"",k:"",kU:""});
 const blankSol=()=>({name:"",conc:"",concU:"",solv:"",vol:""});
-const blankStep=()=>({rpm:"",ramp:"",time:"",as:false,asName:"",asVol:"",asAt:""});
+const blankStep=sol=>({sol:sol||"1",rpm:"",ramp:"",time:"",as:false,asName:"",asVol:"",asAt:"",an:false,anT:"",anTime:"",anTimeU:""});
 function normSrc(s){s=obj(s);return {chem:T_(s.chem),t:str(s.t),tP:normRows(s.tP,"temp"),m:str(s.m),mU:str(s.mU),r:str(s.r),rP:normRows(s.rP,"rate"),q:str(s.q),k:str(s.k),kU:str(s.kU)}}
 function normAnn(a,def){a=obj(a);return {on:a.on==null?!!def:!!a.on,t:str(a.t),time:str(a.time),timeU:str(a.timeU)}}
 function normStage(s){s=obj(s);
   if(s.kind==="spin") return {kind:"spin",
     sol:arr(s.sol).slice(0,10).map(x=>{x=obj(x);return {name:str(x.name),conc:str(x.conc),concU:str(x.concU),solv:str(x.solv),vol:str(x.vol)}}),
-    steps:arr(s.steps).slice(0,10).map(x=>{x=obj(x);return {rpm:str(x.rpm),ramp:str(x.ramp),time:str(x.time),as:!!x.as,asName:str(x.asName),asVol:str(x.asVol),asAt:str(x.asAt)}}),
+    steps:arr(s.steps).slice(0,10).map(x=>{x=obj(x);return {sol:/^\d{1,2}$/.test(x.sol)?String(x.sol):"1",rpm:str(x.rpm),ramp:str(x.ramp),time:str(x.time),as:!!x.as,asName:str(x.asName),asVol:str(x.asVol),asAt:str(x.asAt),an:!!x.an,anT:str(x.anT),anTime:str(x.anTime),anTimeU:str(x.anTimeU)}}),
     ann:normAnn(s.ann,false)};
   const f={},sf=obj(s.f); TE_F.forEach(fd=>{f[fd.k]=str(sf[fd.k]); if(Array.isArray(fd.u)) f[fd.k+"_u"]=str(sf[fd.k+"_u"])});
   return {kind:"te",mode:s.mode==="seq"?"seq":"co",f,src:arr(s.src).slice(0,30).map(normSrc),ann:normAnn(s.ann,false)};
@@ -817,7 +818,7 @@ function stageBrief(s){
   } else {
     s.sol.forEach(x=>{const a=[T_(x.conc)&&`${T_(x.conc)} ${unitOf(x.concU,SOL_F[1].u)}`,T_(x.name)].filter(Boolean).join(" "); if(a) p.push(a)});
     const rpm=s.steps.map(x=>T_(x.rpm)).filter(Boolean); if(rpm.length) p.push(rpm.join("/")+" rpm");
-    s.steps.forEach(x=>{if(x.as) p.push((T_(x.asName)||"anti-solvent")+(T_(x.asAt)?` @ ${T_(x.asAt)} s`:""))});
+    s.steps.forEach(x=>{if(x.as) p.push((T_(x.asName)||"anti-solvent")+(T_(x.asAt)?` @ ${T_(x.asAt)} s`:"")); if(x.an&&(T_(x.anT)||T_(x.anTime))) p.push("anneal "+[T_(x.anT)&&`${T_(x.anT)} °C`,T_(x.anTime)&&`${T_(x.anTime)} ${unitOf(x.anTimeU,ANN_F[1].u)}`].filter(Boolean).join(", "))});
   }
   if(s.ann.on&&(T_(s.ann.t)||T_(s.ann.time))) p.push("anneal "+[T_(s.ann.t)&&`${T_(s.ann.t)} °C`,T_(s.ann.time)&&`${T_(s.ann.time)} ${unitOf(s.ann.timeU,ANN_F[1].u)}`].filter(Boolean).join(", "));
   return p.join(" · ");
@@ -890,16 +891,18 @@ function srcHTML(s,c,i,j){
 }
 function spinBody(s,i,P){
   const sols=s.sol.map((x,j)=>`<div class="src"><div class="src-h"><b>Solution ${j+1}</b><span class="spacer"></span>${s.sol.length>1?`<button type="button" class="btn sm icon" data-del="${P}.sol.${j}" aria-label="Remove solution ${j+1}">✕</button>`:""}</div><div class="row">${SOL_F.map(fd=>fld({p:`${P}.sol.${j}.${fd.k}`,v:x[fd.k],l:fd.l,u:fd.u,up:`${P}.sol.${j}.${fd.k}U`,uv:x[fd.k+"U"],uk:fd.k+"U",txt:fd.txt,ph:fd.ph,list:fd.list})).join("")}</div></div>`).join("");
-  const steps=s.steps.map((x,j)=>`<div class="src step"><div class="src-h"><span class="layer-n">Step ${j+1}</span><span class="spacer"></span>${s.steps.length>1?`<button type="button" class="btn sm icon" data-del="${P}.steps.${j}" aria-label="Remove step ${j+1}">✕</button>`:""}</div>
+  const steps=s.steps.map((x,j)=>`<div class="src step"><div class="src-h"><span class="layer-n">Step ${j+1}</span>${s.sol.length>1?`<select class="solpick" data-p="${P}.steps.${j}.sol" aria-label="Solution used in step ${j+1}">${s.sol.map((y,k)=>`<option value="${k+1}"${String(k+1)===x.sol?" selected":""}>Solution ${k+1}${T_(y.name)?" · "+esc(T_(y.name).slice(0,18)):""}</option>`).join("")}</select>`:""}<span class="spacer"></span>${s.steps.length>1?`<button type="button" class="btn sm icon" data-del="${P}.steps.${j}" aria-label="Remove step ${j+1}">✕</button>`:""}</div>
     <div class="row three">${STEP_F.map(fd=>fld({p:`${P}.steps.${j}.${fd.k}`,v:x[fd.k],l:`${fd.l} (${fd.u})`})).join("")}</div>
     <label class="check"><input type="checkbox" data-p="${P}.steps.${j}.as"${x.as?" checked":""}><span>Anti-solvent dropped in this step</span></label>
-    ${x.as?`<div class="row as">${AS_F.map(fd=>fld({p:`${P}.steps.${j}.${fd.k}`,v:x[fd.k],l:fd.u?`${fd.l} (${fd.u})`:fd.l,txt:fd.txt,ph:fd.ph,list:fd.list})).join("")}</div>`:""}</div>`).join("");
+    ${x.as?`<div class="row as">${AS_F.map(fd=>fld({p:`${P}.steps.${j}.${fd.k}`,v:x[fd.k],l:fd.u?`${fd.l} (${fd.u})`:fd.l,txt:fd.txt,ph:fd.ph,list:fd.list})).join("")}</div>`:""}
+    <label class="check"><input type="checkbox" data-p="${P}.steps.${j}.an"${x.an?" checked":""}><span>Annealed after this step</span></label>
+    ${x.an?`<div class="row">${fld({p:`${P}.steps.${j}.anT`,v:x.anT,l:"Anneal temp (°C)"})}${fld({p:`${P}.steps.${j}.anTime`,v:x.anTime,l:"Anneal time",u:ANN_F[1].u,up:`${P}.steps.${j}.anTimeU`,uv:x.anTimeU,uk:"timeU"})}</div>`:""}</div>`).join("");
   return `<div class="grp"><h4>Precursor solution</h4><div class="srcs">${sols}</div><div><button type="button" class="btn sm" data-addrow="${P}.sol">＋ Add solution</button></div></div>
-    <div class="grp"><h4>Spin program</h4><div class="srcs">${steps}</div><div><button type="button" class="btn sm" data-addrow="${P}.steps">＋ Add spin step</button></div><div class="hint">“Dropped at” is the second, counted from the start of that step, when the anti-solvent goes on.</div></div>
+    <div class="grp"><h4>Spin program</h4><div class="srcs">${steps}</div><div><button type="button" class="btn sm" data-addrow="${P}.steps">＋ Add spin step</button></div><div class="hint">“Dropped at” is the second, counted from the start of that step, when the anti-solvent goes on. For layer-by-layer coating, pick the solution for each step and tick “Annealed after this step”.</div></div>
     ${annHTML(s,P)}`;
 }
 function annHTML(s,P){const a=s.ann;
-  return `<div class="grp"><label class="check"><input type="checkbox" data-p="${P}.ann.on"${a.on?" checked":""}><span>${s.kind==="spin"?"Annealed after spin coating":"Annealed after this stage"}</span></label>${a.on?`<div class="row">${fld({p:`${P}.ann.t`,v:a.t,l:ANN_F[0].l,u:"°C"})}${fld({p:`${P}.ann.time`,v:a.time,l:ANN_F[1].l,u:ANN_F[1].u,up:`${P}.ann.timeU`,uv:a.timeU,uk:"timeU"})}</div>`:""}</div>`}
+  return `<div class="grp"><label class="check"><input type="checkbox" data-p="${P}.ann.on"${a.on?" checked":""}><span>${s.kind==="spin"?"Final annealing after all steps":"Annealed after this stage"}</span></label>${a.on?`<div class="row">${fld({p:`${P}.ann.t`,v:a.t,l:ANN_F[0].l,u:"°C"})}${fld({p:`${P}.ann.time`,v:a.time,l:ANN_F[1].l,u:ANN_F[1].u,up:`${P}.ann.timeU`,uv:a.timeU,uk:"timeU"})}</div>`:""}</div>`}
 function flatHTML(t){
   return `<section class="card stage" data-kind="${t}"><div class="stage-h"><span class="stage-t"><b>${KINDS[t].name}</b><small>${KINDS[t].sub}</small></span></div>${TYPES[t].groups.map(g=>`<div class="grp"><h4>${g.title}</h4><div class="row">${g.fields.map(fd=>fld({p:"f."+fd.k,v:draft.f[fd.k],l:fd.l,u:fd.u,up:"f."+fd.k+"_u",uv:draft.f[fd.k+"_u"],uk:t+"."+fd.k})).join("")}</div></div>`).join("")}</section>`;
 }
@@ -983,8 +986,10 @@ form.addEventListener("click",e=>{
   if(b=q("[data-srcdel]")){const [i,j]=b.dataset.srcdel.split(":").map(Number), s=draft.stages[i]; if(!s||!s.src[j]) return;
     if(srcHasData(s.src[j])&&!arm(`srcdel:${i}:${j}`)){rerender();return} s.src.splice(j,1); if(s.mode!=="seq") lsSet(CHKEY,s.src.map(c=>c.chem)); touch(); rerender(); return}
   if(b=q("[data-prog]")){openProg(b.dataset.prog,b.dataset.pf); return}
-  if(b=q("[data-del]")){const p=b.dataset.del.split("."), idx=+p.pop(), a=getPath(draft,p.join(".")); if(Array.isArray(a)){a.splice(idx,1); touch(); p[0]==="extra"?renderExtra():rerender()} return}
-  if(b=q("[data-addrow]")){const a=getPath(draft,b.dataset.addrow); if(!Array.isArray(a)) return; if(a.length>=10){toast("Up to 10 rows");return} a.push(/\.sol$/.test(b.dataset.addrow)?blankSol():blankStep()); touch(); rerender(); return}
+  if(b=q("[data-del]")){const p=b.dataset.del.split("."), idx=+p.pop(), a=getPath(draft,p.join(".")); if(Array.isArray(a)){a.splice(idx,1);
+      if(p[p.length-1]==="sol"){const st=getPath(draft,p.slice(0,-1).join(".")); (st.steps||[]).forEach(x=>{const k=+x.sol||1; x.sol=k===idx+1?"1":k>idx+1?String(k-1):String(k)})}
+      touch(); p[0]==="extra"?renderExtra():rerender()} return}
+  if(b=q("[data-addrow]")){const a=getPath(draft,b.dataset.addrow); if(!Array.isArray(a)) return; if(a.length>=10){toast("Up to 10 rows");return} a.push(/\.sol$/.test(b.dataset.addrow)?blankSol():blankStep(a.length?a[a.length-1].sol:"1")); touch(); rerender(); return}
 });
 form.addEventListener("keydown",e=>{const t=e.target; if(e.key==="Enter"&&t.dataset&&t.dataset.ccin!=null){e.preventDefault(); const b=form.querySelector(`[data-addcustom="${t.dataset.ccin}"]`); b&&b.click()}});
 $("#addParam").addEventListener("click",()=>{draft.extra.push({k:"",v:""});touch();renderExtra()});
@@ -1000,7 +1005,7 @@ function numIssues(d){
     if(s.kind==="te"){TE_F.forEach(fd=>chk(`${P}.f.${fd.k}`,n+fd.l,s.f[fd.k]));
       s.src.forEach((c,j)=>SRC_F.forEach(fd=>{if(fd.seq&&s.mode!=="seq") return; if(fd.noOrg&&isOrg(c.chem)) return; chk(`${P}.src.${j}.${fd.k}`,`${n}${chemPlain(c.chem)} ${fd.l.toLowerCase()}`,c[fd.k])}))}
     else {s.sol.forEach((x,j)=>{chk(`${P}.sol.${j}.conc`,`${n}solution ${j+1} concentration`,x.conc);chk(`${P}.sol.${j}.vol`,`${n}solution ${j+1} volume`,x.vol)});
-      s.steps.forEach((x,j)=>{STEP_F.forEach(fd=>chk(`${P}.steps.${j}.${fd.k}`,`${n}spin step ${j+1} ${fd.l.toLowerCase()}`,x[fd.k])); if(x.as){chk(`${P}.steps.${j}.asVol`,`${n}step ${j+1} anti-solvent volume`,x.asVol);chk(`${P}.steps.${j}.asAt`,`${n}step ${j+1} anti-solvent time`,x.asAt)}})}
+      s.steps.forEach((x,j)=>{STEP_F.forEach(fd=>chk(`${P}.steps.${j}.${fd.k}`,`${n}spin step ${j+1} ${fd.l.toLowerCase()}`,x[fd.k])); if(x.as){chk(`${P}.steps.${j}.asVol`,`${n}step ${j+1} anti-solvent volume`,x.asVol);chk(`${P}.steps.${j}.asAt`,`${n}step ${j+1} anti-solvent time`,x.asAt)} if(x.an){chk(`${P}.steps.${j}.anT`,`${n}step ${j+1} annealing temperature`,x.anT);chk(`${P}.steps.${j}.anTime`,`${n}step ${j+1} annealing time`,x.anTime)}})}
     if(s.ann.on){chk(`${P}.ann.t`,n+"annealing temperature",s.ann.t);chk(`${P}.ann.time`,n+"annealing time",s.ann.time)}});
   else fieldsOf(d.type).forEach(fd=>chk("f."+fd.k,fd.l,d.f[fd.k]));
   return out;
@@ -1017,8 +1022,12 @@ function buildDep(d){
           if(x){o[fd.k]=x; if(Array.isArray(fd.u)) o[fd.k+"U"]=fd.u.includes(c[fd.k+"U"])?c[fd.k+"U"]:uPref(fd.k+"U",fd.u)}});
         return o});
       return {kind:"te",mode:s.mode,f,src,ann:annOut(s.ann)}}
+    const keep=s.sol.map(x=>!!(T_(x.name)||T_(x.conc)||T_(x.solv)||T_(x.vol))), newIdx=k=>{let n=0;for(let i=0;i<k&&i<keep.length;i++) if(keep[i]) n++; return keep[k-1]?n:1};
     const sol=s.sol.map(x=>({name:v(x.name),conc:v(x.conc),concU:SOL_F[1].u.includes(x.concU)?x.concU:uPref("concU",SOL_F[1].u),solv:v(x.solv),vol:v(x.vol)})).filter(x=>x.name||x.conc||x.solv||x.vol);
-    const steps=s.steps.map(x=>{const o={rpm:v(x.rpm),ramp:v(x.ramp),time:v(x.time)}; if(x.as){o.as=true;o.asName=v(x.asName);o.asVol=v(x.asVol);o.asAt=v(x.asAt)} return o}).filter(x=>x.rpm||x.ramp||x.time||x.as);
+    const steps=s.steps.map(x=>{const o={rpm:v(x.rpm),ramp:v(x.ramp),time:v(x.time)}; if(sol.length>1) o.sol=String(newIdx(+x.sol||1));
+      if(x.as){o.as=true;o.asName=v(x.asName);o.asVol=v(x.asVol);o.asAt=v(x.asAt)}
+      if(x.an){const t=v(x.anT), tm=v(x.anTime); if(t||tm){o.an=true;o.anT=t;o.anTime=tm;o.anTimeU=ANN_F[1].u.includes(x.anTimeU)?x.anTimeU:uPref("timeU",ANN_F[1].u)}}
+      return o}).filter(x=>x.rpm||x.ramp||x.time||x.as||x.an);
     return {kind:"spin",sol,steps,ann:annOut(s.ann)}});
   return {out:{route:d.route,stages},filled};
 }
@@ -1061,11 +1070,12 @@ function stageItems(s){
       if(!any) it.push({l:nm,v:"no values entered",u:"",muted:1})});
   } else {
     s.sol.forEach((x,j)=>{const nm=s.sol.length>1?`Solution ${j+1}`:"Solution"; add(nm,x.name); add(`${nm} conc.`,x.conc,unitOf(x.concU,SOL_F[1].u)); add(`${nm} solvent`,x.solv); add(`${nm} volume`,x.vol,"µL")});
-    s.steps.forEach((x,j)=>{const parts=[T_(x.rpm)&&`${T_(x.rpm)} rpm`,T_(x.ramp)&&`ramp ${T_(x.ramp)} rpm/s`,T_(x.time)&&`${T_(x.time)} s`].filter(Boolean);
+    s.steps.forEach((x,j)=>{const parts=[s.sol.length>1&&`solution ${+x.sol||1}`,T_(x.rpm)&&`${T_(x.rpm)} rpm`,T_(x.ramp)&&`ramp ${T_(x.ramp)} rpm/s`,T_(x.time)&&`${T_(x.time)} s`].filter(Boolean);
       if(parts.length) it.push({l:`Spin step ${j+1}`,v:parts.join(" · "),u:""});
-      if(x.as) it.push({l:`Step ${j+1} anti-solvent`,v:[T_(x.asName)||"anti-solvent",T_(x.asVol)&&`${T_(x.asVol)} µL`,T_(x.asAt)&&`at ${T_(x.asAt)} s`].filter(Boolean).join(" "),u:""})});
+      if(x.as) it.push({l:`Step ${j+1} anti-solvent`,v:[T_(x.asName)||"anti-solvent",T_(x.asVol)&&`${T_(x.asVol)} µL`,T_(x.asAt)&&`at ${T_(x.asAt)} s`].filter(Boolean).join(" "),u:""});
+      if(x.an&&(T_(x.anT)||T_(x.anTime))) it.push({l:`Step ${j+1} anneal`,v:[T_(x.anT)&&`${T_(x.anT)} °C`,T_(x.anTime)&&`${T_(x.anTime)} ${unitOf(x.anTimeU,ANN_F[1].u)}`].filter(Boolean).join(", "),u:""})});
   }
-  if(s.ann.on){add("Anneal T",s.ann.t,"°C"); add("Anneal time",s.ann.time,unitOf(s.ann.timeU,ANN_F[1].u))}
+  if(s.ann.on){const fin=s.kind==="spin"?"Final anneal":"Anneal"; add(fin+" T",s.ann.t,"°C"); add(fin+" time",s.ann.time,unitOf(s.ann.timeU,ANN_F[1].u))}
   return it;
 }
 function flatItems(e){const f=obj(e.f);return fieldsOf(e.type).filter(fd=>T_(f[fd.k])).map(fd=>({l:fd.d||fd.l,v:T_(f[fd.k]),u:unitOf(str(f[fd.k+"_u"]),fd.u)}))}
