@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-gAlsqcsL00eKz4lb7l/BmpsRK0D4TcNVMgoUv7BIEfo='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-ihFVPLeP5SXpK8snYdKd07QsqEpPdjgMX74B3l16wFw='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0E6E6B">
@@ -220,6 +220,12 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 #progSvg .pd{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3;opacity:.6}
 #progSvg .pl{fill:var(--ink);font:600 11px var(--mono)}
 #progSvg .pr{fill:var(--muted);font:10px var(--mono)}
+#progSvg .pas{stroke:var(--xrd);stroke-width:1.5;stroke-dasharray:3 2}
+#progModal[data-kind="spin"] #progSvg .pline{stroke:var(--spin)} #progModal[data-kind="spin"] .pstep{color:var(--spin)}
+.check.pas{font-size:13px;margin:-2px 0 6px 46px;min-height:24px}.check.pas input{width:17px;height:17px;accent-color:var(--spin)}
+.prow.asrow{margin-top:-2px;margin-bottom:10px;grid-template-columns:40px minmax(0,1.7fr) minmax(0,.9fr) minmax(0,.9fr)}
+.src.sol{gap:12px}.solname{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.src .fcell .stepbtn{max-width:100%}
 .prow{display:grid;grid-template-columns:40px repeat(3,minmax(0,1fr));gap:6px;align-items:center;margin-bottom:6px}
 .prow .unit{padding:9px 5px;font-size:11.5px}
 .phead{font-size:11px;letter-spacing:.02em;color:var(--muted);margin-bottom:0}
@@ -470,6 +476,7 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
     <svg id="progSvg" viewBox="0 0 320 130" role="img" aria-label="Program profile"></svg>
     <div class="prow phead" id="progHead"></div>
     <div id="progRows"></div>
+    <div class="hint" id="progHint" hidden>Tick anti-solvent on any step. “At (s)” is the second, counted from the start of that step, when it is dropped.</div>
     <div class="err" id="progErr" hidden></div>
     <div class="actions pact"><button type="button" class="btn primary" id="progEnter">Enter</button><button type="button" class="btn" id="progCancel">Cancel</button><span class="spacer"></span><button type="button" class="btn sm ghost danger" id="progClear">Remove steps</button></div>
   </div>
@@ -552,7 +559,10 @@ const PK={
   temp:{title:"temperature program",btn:"Set temperature steps",vu:"°C",base:25,baseLabel:"RT",rise:.42,
     cols:[{f:"t",n:"Temp",h:"Temp (°C)",u:"°C",req:1},{f:"r",n:"Ramp",h:"Ramp (°C/min)",u:"°C/min"},{f:"s",n:"Soak",h:"Soak (s)",u:"s",def:"0"}]},
   rate:{title:"deposition rate program",btn:"Set rate steps",vu:"Å/s",base:0,baseLabel:"0",rise:.14,
-    cols:[{f:"t",n:"Rate",h:"Rate (Å/s)",u:"Å/s",req:1},{f:"s",n:"Hold",h:"Hold (s)",u:"s"},{f:"k",n:"Thickness",h:"Thick. (kÅ)",u:"kÅ"}]}
+    cols:[{f:"t",n:"Rate",h:"Rate (Å/s)",u:"Å/s",req:1},{f:"s",n:"Hold",h:"Hold (s)",u:"s"},{f:"k",n:"Thickness",h:"Thick. (kÅ)",u:"kÅ"}]},
+  spin:{title:"spin program",btn:"Set spin program",vu:"rpm",
+    cols:[{f:"rpm",n:"Speed",h:"Speed (rpm)",u:"rpm",req:1},{f:"ramp",n:"Ramp",h:"Ramp (rpm/s)",u:"rpm/s"},{f:"time",n:"Time",h:"Time (s)",u:"s"}],
+    as:[{f:"asName",n:"Anti-solvent",ph:"Anti-solvent",txt:1},{f:"asVol",n:"Volume",ph:"Vol (µL)",u:"µL"},{f:"asAt",n:"Dropped at",ph:"At (s)",u:"s"}]}
 };
 
 /* ---------- helpers ---------- */
@@ -590,15 +600,22 @@ const obj=v=>v&&typeof v==="object"&&!Array.isArray(v)?v:{};
 const T_=v=>str(v).trim();
 function normRows(rows,kind){const K=PK[kind];return arr(rows).slice(0,10).map(r=>{r=obj(r);const o={};K.cols.forEach(c=>o[c.f]=str(r[c.f]));return o}).filter(r=>r.t!=="")}
 const blankSrc=chem=>({chem:chem||"",t:"",tP:[],m:"",mU:"",r:"",rP:[],q:"",k:"",kU:""});
-const blankSol=()=>({name:"",conc:"",concU:"",solv:"",vol:""});
-const blankStep=sol=>({sol:sol||"1",rpm:"",ramp:"",time:"",as:false,asName:"",asVol:"",asAt:"",an:false,anT:"",anTime:"",anTimeU:""});
+const blankSol=()=>({name:"",conc:"",concU:"",solv:"",vol:"",prog:[],ann:{on:true,t:"",time:"",timeU:""}});
+const normSpin=rows=>arr(rows).slice(0,10).map(r=>{r=obj(r);return {rpm:str(r.rpm),ramp:str(r.ramp),time:str(r.time),as:!!r.as,asName:str(r.asName),asVol:str(r.asVol),asAt:str(r.asAt)}}).filter(r=>r.rpm||r.ramp||r.time||r.as);
 function normSrc(s){s=obj(s);return {chem:T_(s.chem),t:str(s.t),tP:normRows(s.tP,"temp"),m:str(s.m),mU:str(s.mU),r:str(s.r),rP:normRows(s.rP,"rate"),q:str(s.q),k:str(s.k),kU:str(s.kU)}}
 function normAnn(a,def){a=obj(a);return {on:a.on==null?!!def:!!a.on,t:str(a.t),time:str(a.time),timeU:str(a.timeU)}}
 function normStage(s){s=obj(s);
-  if(s.kind==="spin") return {kind:"spin",
-    sol:arr(s.sol).slice(0,10).map(x=>{x=obj(x);return {name:str(x.name),conc:str(x.conc),concU:str(x.concU),solv:str(x.solv),vol:str(x.vol)}}),
-    steps:arr(s.steps).slice(0,10).map(x=>{x=obj(x);return {sol:/^\d{1,2}$/.test(x.sol)?String(x.sol):"1",rpm:str(x.rpm),ramp:str(x.ramp),time:str(x.time),as:!!x.as,asName:str(x.asName),asVol:str(x.asVol),asAt:str(x.asAt),an:!!x.an,anT:str(x.anT),anTime:str(x.anTime),anTimeU:str(x.anTimeU)}}),
-    ann:normAnn(s.ann,false)};
+  if(s.kind==="spin"){
+    const sol=arr(s.sol).slice(0,10).map(x=>{x=obj(x);return {name:str(x.name),conc:str(x.conc),concU:str(x.concU),solv:str(x.solv),vol:str(x.vol),prog:normSpin(x.prog),ann:normAnn(x.ann,false)}});
+    /* entries saved before v14 had one spin program per stage (steps[]), with optional solution links and step / final annealing */
+    const steps=arr(s.steps);
+    if(steps.length){ if(!sol.length){const b=blankSol();b.ann={on:false,t:"",time:"",timeU:""};sol.push(b)}
+      steps.forEach(st=>{st=obj(st); const k=Math.min(Math.max(+st.sol||1,1),sol.length)-1, so=sol[k];
+        so.prog.push(...normSpin([st])); if(so.prog.length>10) so.prog.length=10;
+        if(st.an&&!so.ann.on) so.ann={on:true,t:str(st.anT),time:str(st.anTime),timeU:str(st.anTimeU)}})}
+    const sa=normAnn(s.ann,false); if(sa.on&&(sa.t||sa.time)&&sol.length){const last=sol[sol.length-1]; if(!last.ann.on||(!last.ann.t&&!last.ann.time)) last.ann=sa}
+    return {kind:"spin",sol,ann:{on:false,t:"",time:"",timeU:""}};
+  }
   const f={},sf=obj(s.f); TE_F.forEach(fd=>{f[fd.k]=str(sf[fd.k]); if(Array.isArray(fd.u)) f[fd.k+"_u"]=str(sf[fd.k+"_u"])});
   return {kind:"te",mode:s.mode==="seq"?"seq":"co",f,src:arr(s.src).slice(0,30).map(normSrc),ann:normAnn(s.ann,false)};
 }
@@ -660,7 +677,7 @@ function renderSub(){const cur=draft.subs||[];
   $("#subCount").textContent=cur.length?`· ${cur.length} selected`:""}
 
 function newStage(kind,mode){
-  if(kind==="spin") return {kind:"spin",sol:[blankSol()],steps:[blankStep()],ann:{on:true,t:"",time:"",timeU:""}};
+  if(kind==="spin") return {kind:"spin",sol:[blankSol()],ann:{on:false,t:"",time:"",timeU:""}};
   const m=mode==="seq"?"seq":"co";
   return {kind:"te",mode:m,f:{},src:(m==="seq"?lastSeq():lastChems()).map(blankSrc),ann:{on:false,t:"",time:"",timeU:""}};
 }
@@ -809,6 +826,7 @@ const ICON={
   spin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="17" rx="8.5" ry="3"/><path d="M12 3v7M9.5 7.5L12 10l2.5-2.5"/></svg>',
   hyb:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="18" rx="8.5" ry="2.6"/><path d="M7 4l2 9M17 4l-2 9"/><path d="M12 4v6"/></svg>'
 };
+function spinSummary(pr){const as=pr.filter(r=>r.as).length;return `${pr.length} step${pr.length>1?"s":""}: ${pr.map(r=>T_(r.rpm)||"?").join(" → ")} rpm`+(as?` · anti-solvent in ${as===1?"1 step":as+" steps"}`:"")}
 function stageBrief(s){
   const p=[];
   if(s.kind==="te"){
@@ -816,9 +834,10 @@ function stageBrief(s){
     const th=T_(s.f.thickness); if(th) p.push(`${th} ${unitOf(s.f.thickness_u,TE_F[4].u)}`);
     if(!s.src.length) p.push("no sources yet");
   } else {
-    s.sol.forEach(x=>{const a=[T_(x.conc)&&`${T_(x.conc)} ${unitOf(x.concU,SOL_F[1].u)}`,T_(x.name)].filter(Boolean).join(" "); if(a) p.push(a)});
-    const rpm=s.steps.map(x=>T_(x.rpm)).filter(Boolean); if(rpm.length) p.push(rpm.join("/")+" rpm");
-    s.steps.forEach(x=>{if(x.as) p.push((T_(x.asName)||"anti-solvent")+(T_(x.asAt)?` @ ${T_(x.asAt)} s`:"")); if(x.an&&(T_(x.anT)||T_(x.anTime))) p.push("anneal "+[T_(x.anT)&&`${T_(x.anT)} °C`,T_(x.anTime)&&`${T_(x.anTime)} ${unitOf(x.anTimeU,ANN_F[1].u)}`].filter(Boolean).join(", "))});
+    return s.sol.map(x=>{const a=[T_(x.conc)&&`${T_(x.conc)} ${unitOf(x.concU,SOL_F[1].u)}`,T_(x.name)].filter(Boolean).join(" ");
+      const rpm=x.prog.map(r=>T_(r.rpm)).filter(Boolean).join("/"), as=x.prog.filter(r=>r.as).map(r=>(T_(r.asName)||"anti-solvent")+(T_(r.asAt)?` @ ${T_(r.asAt)} s`:""));
+      const an=x.ann.on&&(T_(x.ann.t)||T_(x.ann.time))?"anneal "+[T_(x.ann.t)&&`${T_(x.ann.t)} °C`,T_(x.ann.time)&&`${T_(x.ann.time)} ${unitOf(x.ann.timeU,ANN_F[1].u)}`].filter(Boolean).join(", "):"";
+      return [a,rpm&&rpm+" rpm",...as,an].filter(Boolean).join(" · ")}).filter(Boolean).join(" → ")||"no solution yet";
   }
   if(s.ann.on&&(T_(s.ann.t)||T_(s.ann.time))) p.push("anneal "+[T_(s.ann.t)&&`${T_(s.ann.t)} °C`,T_(s.ann.time)&&`${T_(s.ann.time)} ${unitOf(s.ann.timeU,ANN_F[1].u)}`].filter(Boolean).join(", "));
   return p.join(" · ");
@@ -856,7 +875,7 @@ function stageHTML(s,i){
   const armed=ui.arm===`sdel:${i}`;
   const tools=hyb&&n>1?`<button type="button" class="btn sm icon" data-smove="${i}:-1"${i===0?" disabled":""} aria-label="Move stage ${i+1} earlier">↑</button><button type="button" class="btn sm icon" data-smove="${i}:1"${i===n-1?" disabled":""} aria-label="Move stage ${i+1} later">↓</button><button type="button" class="btn sm icon danger" data-sdel="${i}" aria-label="Remove stage ${i+1}">✕</button>`:"";
   const confirm=armed?`<div class="confirm" role="alert"><span>Remove stage ${i+1} and everything in it?</span><button type="button" class="btn sm danger solid" data-sdel="${i}">Remove</button><button type="button" class="btn sm" data-disarm>Keep</button></div>`:"";
-  const sub=col?stageBrief(s):(s.kind==="te"?TE_MODE[s.mode]+(n>1?` · stage ${i+1} of ${n}`:""):(n>1?`Stage ${i+1} of ${n}`:"Solution, spin steps, anneal"));
+  const sub=col?stageBrief(s):(s.kind==="te"?TE_MODE[s.mode]+(n>1?` · stage ${i+1} of ${n}`:""):(n>1?`Stage ${i+1} of ${n}`:"Solution → spin program → anneal"));
   const head=`<div class="stage-h"><button type="button" class="stage-tog" data-col="${i}" aria-expanded="${!col}"><span class="stage-n">${i+1}</span><span class="stage-t"><b>${STAGE_NAME[s.kind]}</b><small>${esc(sub)}</small></span><span class="chev" aria-hidden="true">${col?"▸":"▾"}</span></button><div class="stage-tools">${tools}</div></div>`;
   if(col) return `<section class="card stage" data-kind="${s.kind}" id="stage_${i}">${head}${confirm}</section>`;
   const mode=hyb&&s.kind==="te"?`<div class="seg" role="group" aria-label="Evaporation mode">${["co","seq"].map(m=>`<button type="button" data-smode="${i}:${m}" aria-pressed="${s.mode===m}">${TE_MODE[m]}</button>`).join("")}</div>`:"";
@@ -890,16 +909,18 @@ function srcHTML(s,c,i,j){
   return `<div class="src"><div class="src-h">${seq?`<span class="layer-n">Layer ${j+1}</span>`:""}<b>${fmtChem(chemPlain(c.chem))}</b><span class="spacer"></span>${seq&&n>1?`<button type="button" class="btn sm icon" data-srcmove="${i}:${j}:-1"${j===0?" disabled":""} aria-label="Move layer ${j+1} earlier">↑</button><button type="button" class="btn sm icon" data-srcmove="${i}:${j}:1"${j===n-1?" disabled":""} aria-label="Move layer ${j+1} later">↓</button>`:""}<button type="button" class="btn sm icon" data-srcdel="${i}:${j}" aria-label="Remove ${esc(chemPlain(c.chem))}">✕</button></div>${armed?`<div class="confirm" role="alert"><span>Remove ${fmtChem(chemPlain(c.chem))} and its values?</span><button type="button" class="btn sm danger solid" data-srcdel="${i}:${j}">Remove</button><button type="button" class="btn sm" data-disarm>Keep</button></div>`:""}<div class="row">${fields}</div></div>`;
 }
 function spinBody(s,i,P){
-  const sols=s.sol.map((x,j)=>`<div class="src"><div class="src-h"><b>Solution ${j+1}</b><span class="spacer"></span>${s.sol.length>1?`<button type="button" class="btn sm icon" data-del="${P}.sol.${j}" aria-label="Remove solution ${j+1}">✕</button>`:""}</div><div class="row">${SOL_F.map(fd=>fld({p:`${P}.sol.${j}.${fd.k}`,v:x[fd.k],l:fd.l,u:fd.u,up:`${P}.sol.${j}.${fd.k}U`,uv:x[fd.k+"U"],uk:fd.k+"U",txt:fd.txt,ph:fd.ph,list:fd.list})).join("")}</div></div>`).join("");
-  const steps=s.steps.map((x,j)=>`<div class="src step"><div class="src-h"><span class="layer-n">Step ${j+1}</span>${s.sol.length>1?`<select class="solpick" data-p="${P}.steps.${j}.sol" aria-label="Solution used in step ${j+1}">${s.sol.map((y,k)=>`<option value="${k+1}"${String(k+1)===x.sol?" selected":""}>Solution ${k+1}${T_(y.name)?" · "+esc(T_(y.name).slice(0,18)):""}</option>`).join("")}</select>`:""}<span class="spacer"></span>${s.steps.length>1?`<button type="button" class="btn sm icon" data-del="${P}.steps.${j}" aria-label="Remove step ${j+1}">✕</button>`:""}</div>
-    <div class="row three">${STEP_F.map(fd=>fld({p:`${P}.steps.${j}.${fd.k}`,v:x[fd.k],l:`${fd.l} (${fd.u})`})).join("")}</div>
-    <label class="check"><input type="checkbox" data-p="${P}.steps.${j}.as"${x.as?" checked":""}><span>Anti-solvent dropped in this step</span></label>
-    ${x.as?`<div class="row as">${AS_F.map(fd=>fld({p:`${P}.steps.${j}.${fd.k}`,v:x[fd.k],l:fd.u?`${fd.l} (${fd.u})`:fd.l,txt:fd.txt,ph:fd.ph,list:fd.list})).join("")}</div>`:""}
-    <label class="check"><input type="checkbox" data-p="${P}.steps.${j}.an"${x.an?" checked":""}><span>Annealed after this step</span></label>
-    ${x.an?`<div class="row">${fld({p:`${P}.steps.${j}.anT`,v:x.anT,l:"Anneal temp (°C)"})}${fld({p:`${P}.steps.${j}.anTime`,v:x.anTime,l:"Anneal time",u:ANN_F[1].u,up:`${P}.steps.${j}.anTimeU`,uv:x.anTimeU,uk:"timeU"})}</div>`:""}</div>`).join("");
-  return `<div class="grp"><h4>Precursor solution</h4><div class="srcs">${sols}</div><div><button type="button" class="btn sm" data-addrow="${P}.sol">＋ Add solution</button></div></div>
-    <div class="grp"><h4>Spin program</h4><div class="srcs">${steps}</div><div><button type="button" class="btn sm" data-addrow="${P}.steps">＋ Add spin step</button></div><div class="hint">“Dropped at” is the second, counted from the start of that step, when the anti-solvent goes on. For layer-by-layer coating, pick the solution for each step and tick “Annealed after this step”.</div></div>
-    ${annHTML(s,P)}`;
+  const n=s.sol.length;
+  const sols=s.sol.map((x,j)=>{const SP=`${P}.sol.${j}`, pr=x.prog, a=x.ann, armed=ui.arm===`soldel:${i}:${j}`;
+    return `<div class="src sol"><div class="src-h"><span class="layer-n">Solution ${j+1}</span>${T_(x.name)?`<b class="solname">${fmtChem(T_(x.name))}</b>`:""}<span class="spacer"></span>${n>1?`<button type="button" class="btn sm icon" data-solmove="${i}:${j}:-1"${j===0?" disabled":""} aria-label="Move solution ${j+1} earlier">↑</button><button type="button" class="btn sm icon" data-solmove="${i}:${j}:1"${j===n-1?" disabled":""} aria-label="Move solution ${j+1} later">↓</button><button type="button" class="btn sm icon" data-soldel="${i}:${j}" aria-label="Remove solution ${j+1}">✕</button>`:""}</div>
+      ${armed?`<div class="confirm" role="alert"><span>Remove solution ${j+1} with its spin program and annealing?</span><button type="button" class="btn sm danger solid" data-soldel="${i}:${j}">Remove</button><button type="button" class="btn sm" data-disarm>Keep</button></div>`:""}
+      <div class="row">${SOL_F.map(fd=>fld({p:`${SP}.${fd.k}`,v:x[fd.k],l:fd.l,u:fd.u,up:`${SP}.${fd.k}U`,uv:x[fd.k+"U"],uk:fd.k+"U",txt:fd.txt,ph:fd.ph,list:fd.list})).join("")}</div>
+      <div class="fcell"><span class="lab2">Spin program</span><button type="button" class="stepbtn${pr.length?" on":""}" data-sprog="${SP}" id="pb_${pid(SP)}_prog">${pr.length?esc(spinSummary(pr)):"Set spin program (steps, anti-solvent)"}</button>${pr.length?`<div class="progline">${progText(pr,"spin")}</div>`:""}</div>
+      <label class="check"><input type="checkbox" data-p="${SP}.ann.on"${a.on?" checked":""}><span>Annealed after this solution</span></label>
+      ${a.on?`<div class="row">${fld({p:`${SP}.ann.t`,v:a.t,l:"Anneal temp (°C)"})}${fld({p:`${SP}.ann.time`,v:a.time,l:"Anneal time",u:ANN_F[1].u,up:`${SP}.ann.timeU`,uv:a.timeU,uk:"timeU"})}</div>`:""}
+    </div>`}).join("");
+  return `<div class="grp"><h4>${n>1?"Solutions, in order of coating":"Solution"}</h4><div class="srcs">${sols}</div>
+    <div><button type="button" class="btn sm" data-addrow="${P}.sol">＋ Add next solution</button></div>
+    <div class="hint">Each solution has its own spin program and annealing. For layer-by-layer coating, add the solutions in the order you coat them.</div></div>`;
 }
 function annHTML(s,P){const a=s.ann;
   return `<div class="grp"><label class="check"><input type="checkbox" data-p="${P}.ann.on"${a.on?" checked":""}><span>${s.kind==="spin"?"Final annealing after all steps":"Annealed after this stage"}</span></label>${a.on?`<div class="row">${fld({p:`${P}.ann.t`,v:a.t,l:ANN_F[0].l,u:"°C"})}${fld({p:`${P}.ann.time`,v:a.time,l:ANN_F[1].l,u:ANN_F[1].u,up:`${P}.ann.timeU`,uv:a.timeU,uk:"timeU"})}</div>`:""}</div>`}
@@ -913,7 +934,7 @@ function renderExtra(){
 function renderLists_dl(){
   const chems=new Set([...CHEMS.map(c=>c.id),...customChems()]), solv=new Set(SOLVENTS), as=new Set(ANTISOLV);
   entries.forEach(e=>{if(kindOf(e)!=="dep") return; depOf(e).stages.forEach(s=>{
-    if(s.kind==="te") s.src.forEach(c=>c.chem&&chems.add(c.chem)); else {s.sol.forEach(x=>T_(x.solv)&&solv.add(T_(x.solv))); s.steps.forEach(x=>T_(x.asName)&&as.add(T_(x.asName)))}})});
+    if(s.kind==="te") s.src.forEach(c=>c.chem&&chems.add(c.chem)); else s.sol.forEach(x=>{T_(x.solv)&&solv.add(T_(x.solv)); x.prog.forEach(r=>T_(r.asName)&&as.add(T_(r.asName)))})})});
   const o=set=>[...set].slice(0,80).map(n=>`<option value="${esc(n)}">`).join("");
   $("#chemList").innerHTML=o(chems); $("#solvList").innerHTML=o(solv); $("#asList").innerHTML=o(as);
 }
@@ -986,10 +1007,15 @@ form.addEventListener("click",e=>{
   if(b=q("[data-srcdel]")){const [i,j]=b.dataset.srcdel.split(":").map(Number), s=draft.stages[i]; if(!s||!s.src[j]) return;
     if(srcHasData(s.src[j])&&!arm(`srcdel:${i}:${j}`)){rerender();return} s.src.splice(j,1); if(s.mode!=="seq") lsSet(CHKEY,s.src.map(c=>c.chem)); touch(); rerender(); return}
   if(b=q("[data-prog]")){openProg(b.dataset.prog,b.dataset.pf); return}
+  if(b=q("[data-sprog]")){openProg(b.dataset.sprog,"prog"); return}
+  if(b=q("[data-solmove]")){const [i,j,d]=b.dataset.solmove.split(":").map(Number), st=draft.stages[i]; if(!st||st.kind!=="spin") return; const k=j+d; if(k<0||k>=st.sol.length) return; [st.sol[j],st.sol[k]]=[st.sol[k],st.sol[j]]; touch(); rerender(); return}
+  if(b=q("[data-soldel]")){const [i,j]=b.dataset.soldel.split(":").map(Number), st=draft.stages[i]; if(!st||st.kind!=="spin"||!st.sol[j]||st.sol.length<2) return;
+    const x=st.sol[j], has=["name","conc","solv","vol"].some(k=>T_(x[k]))||x.prog.length||T_(x.ann.t)||T_(x.ann.time);
+    if(has&&!arm(`soldel:${i}:${j}`)){rerender();return} st.sol.splice(j,1); touch(); rerender(); return}
   if(b=q("[data-del]")){const p=b.dataset.del.split("."), idx=+p.pop(), a=getPath(draft,p.join(".")); if(Array.isArray(a)){a.splice(idx,1);
       if(p[p.length-1]==="sol"){const st=getPath(draft,p.slice(0,-1).join(".")); (st.steps||[]).forEach(x=>{const k=+x.sol||1; x.sol=k===idx+1?"1":k>idx+1?String(k-1):String(k)})}
       touch(); p[0]==="extra"?renderExtra():rerender()} return}
-  if(b=q("[data-addrow]")){const a=getPath(draft,b.dataset.addrow); if(!Array.isArray(a)) return; if(a.length>=10){toast("Up to 10 rows");return} a.push(/\.sol$/.test(b.dataset.addrow)?blankSol():blankStep(a.length?a[a.length-1].sol:"1")); touch(); rerender(); return}
+  if(b=q("[data-addrow]")){const a=getPath(draft,b.dataset.addrow); if(!Array.isArray(a)) return; if(a.length>=10){toast("Up to 10 rows");return} a.push(blankSol()); touch(); rerender(); return}
 });
 form.addEventListener("keydown",e=>{const t=e.target; if(e.key==="Enter"&&t.dataset&&t.dataset.ccin!=null){e.preventDefault(); const b=form.querySelector(`[data-addcustom="${t.dataset.ccin}"]`); b&&b.click()}});
 $("#addParam").addEventListener("click",()=>{draft.extra.push({k:"",v:""});touch();renderExtra()});
@@ -1004,9 +1030,9 @@ function numIssues(d){
   if(d.type==="dep") d.stages.forEach((s,i)=>{const n=d.stages.length>1?`Stage ${i+1}, `:""; const P=`stages.${i}`;
     if(s.kind==="te"){TE_F.forEach(fd=>chk(`${P}.f.${fd.k}`,n+fd.l,s.f[fd.k]));
       s.src.forEach((c,j)=>SRC_F.forEach(fd=>{if(fd.seq&&s.mode!=="seq") return; if(fd.noOrg&&isOrg(c.chem)) return; chk(`${P}.src.${j}.${fd.k}`,`${n}${chemPlain(c.chem)} ${fd.l.toLowerCase()}`,c[fd.k])}))}
-    else {s.sol.forEach((x,j)=>{chk(`${P}.sol.${j}.conc`,`${n}solution ${j+1} concentration`,x.conc);chk(`${P}.sol.${j}.vol`,`${n}solution ${j+1} volume`,x.vol)});
-      s.steps.forEach((x,j)=>{STEP_F.forEach(fd=>chk(`${P}.steps.${j}.${fd.k}`,`${n}spin step ${j+1} ${fd.l.toLowerCase()}`,x[fd.k])); if(x.as){chk(`${P}.steps.${j}.asVol`,`${n}step ${j+1} anti-solvent volume`,x.asVol);chk(`${P}.steps.${j}.asAt`,`${n}step ${j+1} anti-solvent time`,x.asAt)} if(x.an){chk(`${P}.steps.${j}.anT`,`${n}step ${j+1} annealing temperature`,x.anT);chk(`${P}.steps.${j}.anTime`,`${n}step ${j+1} annealing time`,x.anTime)}})}
-    if(s.ann.on){chk(`${P}.ann.t`,n+"annealing temperature",s.ann.t);chk(`${P}.ann.time`,n+"annealing time",s.ann.time)}});
+    else s.sol.forEach((x,j)=>{const m=`${n}solution ${j+1} `; chk(`${P}.sol.${j}.conc`,m+"concentration",x.conc); chk(`${P}.sol.${j}.vol`,m+"volume",x.vol);
+      if(x.ann.on){chk(`${P}.sol.${j}.ann.t`,m+"annealing temperature",x.ann.t); chk(`${P}.sol.${j}.ann.time`,m+"annealing time",x.ann.time)}});
+    if(s.kind==="te"&&s.ann.on){chk(`${P}.ann.t`,n+"annealing temperature",s.ann.t);chk(`${P}.ann.time`,n+"annealing time",s.ann.time)}});
   else fieldsOf(d.type).forEach(fd=>chk("f."+fd.k,fd.l,d.f[fd.k]));
   return out;
 }
@@ -1022,13 +1048,10 @@ function buildDep(d){
           if(x){o[fd.k]=x; if(Array.isArray(fd.u)) o[fd.k+"U"]=fd.u.includes(c[fd.k+"U"])?c[fd.k+"U"]:uPref(fd.k+"U",fd.u)}});
         return o});
       return {kind:"te",mode:s.mode,f,src,ann:annOut(s.ann)}}
-    const keep=s.sol.map(x=>!!(T_(x.name)||T_(x.conc)||T_(x.solv)||T_(x.vol))), newIdx=k=>{let n=0;for(let i=0;i<k&&i<keep.length;i++) if(keep[i]) n++; return keep[k-1]?n:1};
-    const sol=s.sol.map(x=>({name:v(x.name),conc:v(x.conc),concU:SOL_F[1].u.includes(x.concU)?x.concU:uPref("concU",SOL_F[1].u),solv:v(x.solv),vol:v(x.vol)})).filter(x=>x.name||x.conc||x.solv||x.vol);
-    const steps=s.steps.map(x=>{const o={rpm:v(x.rpm),ramp:v(x.ramp),time:v(x.time)}; if(sol.length>1) o.sol=String(newIdx(+x.sol||1));
-      if(x.as){o.as=true;o.asName=v(x.asName);o.asVol=v(x.asVol);o.asAt=v(x.asAt)}
-      if(x.an){const t=v(x.anT), tm=v(x.anTime); if(t||tm){o.an=true;o.anT=t;o.anTime=tm;o.anTimeU=ANN_F[1].u.includes(x.anTimeU)?x.anTimeU:uPref("timeU",ANN_F[1].u)}}
-      return o}).filter(x=>x.rpm||x.ramp||x.time||x.as||x.an);
-    return {kind:"spin",sol,steps,ann:annOut(s.ann)}});
+    const sol=s.sol.map(x=>{const prog=x.prog.map(r=>{const o={rpm:v(r.rpm),ramp:v(r.ramp),time:v(r.time)}; if(r.as){o.as=true;o.asName=v(r.asName);o.asVol=v(r.asVol);o.asAt=v(r.asAt)} return o});
+      return {name:v(x.name),conc:v(x.conc),concU:SOL_F[1].u.includes(x.concU)?x.concU:uPref("concU",SOL_F[1].u),solv:v(x.solv),vol:v(x.vol),prog,ann:annOut(x.ann)}})
+      .filter(x=>x.name||x.conc||x.solv||x.vol||x.prog.length||x.ann.on);
+    return {kind:"spin",sol,ann:{on:false}}});
   return {out:{route:d.route,stages},filled};
 }
 form.addEventListener("submit",async e=>{
@@ -1069,11 +1092,9 @@ function stageItems(s){
         if(x){any=true; it.push({l:`${nm} ${fd.d}`,v:x,u:unitOf(c[fd.k+"U"],fd.u),prog:pr,kind:fd.prog})}});
       if(!any) it.push({l:nm,v:"no values entered",u:"",muted:1})});
   } else {
-    s.sol.forEach((x,j)=>{const nm=s.sol.length>1?`Solution ${j+1}`:"Solution"; add(nm,x.name); add(`${nm} conc.`,x.conc,unitOf(x.concU,SOL_F[1].u)); add(`${nm} solvent`,x.solv); add(`${nm} volume`,x.vol,"µL")});
-    s.steps.forEach((x,j)=>{const parts=[s.sol.length>1&&`solution ${+x.sol||1}`,T_(x.rpm)&&`${T_(x.rpm)} rpm`,T_(x.ramp)&&`ramp ${T_(x.ramp)} rpm/s`,T_(x.time)&&`${T_(x.time)} s`].filter(Boolean);
-      if(parts.length) it.push({l:`Spin step ${j+1}`,v:parts.join(" · "),u:""});
-      if(x.as) it.push({l:`Step ${j+1} anti-solvent`,v:[T_(x.asName)||"anti-solvent",T_(x.asVol)&&`${T_(x.asVol)} µL`,T_(x.asAt)&&`at ${T_(x.asAt)} s`].filter(Boolean).join(" "),u:""});
-      if(x.an&&(T_(x.anT)||T_(x.anTime))) it.push({l:`Step ${j+1} anneal`,v:[T_(x.anT)&&`${T_(x.anT)} °C`,T_(x.anTime)&&`${T_(x.anTime)} ${unitOf(x.anTimeU,ANN_F[1].u)}`].filter(Boolean).join(", "),u:""})});
+    s.sol.forEach((x,j)=>{const nm=s.sol.length>1?`Solution ${j+1}`:"Solution"; add(nm,x.name); add(`${nm} conc.`,x.conc,unitOf(x.concU,SOL_F[1].u)); add(`${nm} solvent`,x.solv); add(`${nm} volume`,x.vol,"µL");
+      if(x.prog.length) it.push({l:`${nm} spin program`,v:spinSummary(x.prog),u:"",prog:x.prog,kind:"spin"});
+      if(x.ann.on){add(`${nm} anneal T`,x.ann.t,"°C"); add(`${nm} anneal time`,x.ann.time,unitOf(x.ann.timeU,ANN_F[1].u))}});
   }
   if(s.ann.on){const fin=s.kind==="spin"?"Final anneal":"Anneal"; add(fin+" T",s.ann.t,"°C"); add(fin+" time",s.ann.time,unitOf(s.ann.timeU,ANN_F[1].u))}
   return it;
@@ -1129,7 +1150,7 @@ $("#dayList").addEventListener("click",onCardAction);
 /* ---------- entries view ---------- */
 function searchText(e){
   const p=[e.sample,subsOf(e).join(" "),e.notes];
-  if(kindOf(e)==="dep"){const d=depOf(e); p.push(ROUTES[d.route].name); d.stages.forEach(s=>{p.push(STAGE_NAME[s.kind]); if(s.kind==="te") s.src.forEach(c=>p.push(c.chem,chemPlain(c.chem))); else {s.sol.forEach(x=>p.push(x.name,x.solv)); s.steps.forEach(x=>p.push(x.asName))}}); d.extra.forEach(x=>p.push(x.k,x.v))}
+  if(kindOf(e)==="dep"){const d=depOf(e); p.push(ROUTES[d.route].name); d.stages.forEach(s=>{p.push(STAGE_NAME[s.kind]); if(s.kind==="te") s.src.forEach(c=>p.push(c.chem,chemPlain(c.chem))); else s.sol.forEach(x=>{p.push(x.name,x.solv); x.prog.forEach(r=>p.push(r.asName))})}); d.extra.forEach(x=>p.push(x.k,x.v))}
   else {p.push(KINDS[kindOf(e)].name); normExtra(e.extra).forEach(x=>p.push(x.k,x.v))}
   return p.map(str).join(" ").toLowerCase();
 }
@@ -1173,7 +1194,8 @@ $("#todayList").addEventListener("click",onCardAction);
 function renderLists(){ renderToday(); if(ui.tab==="log") renderLog(); if(ui.tab==="cal") renderCal(); if(ui.tab==="rec"&&rec.mode!=="edit") renderRec(); }
 
 /* ---------- CSV export ---------- */
-function progPlain(pr,kind){const K=PK[kind];return pr.map((x,i)=>`Step ${i+1}: `+K.cols.map(c=>`${c.n} ${x[c.f]||"-"} ${c.u}`).join(", ")).join(" | ")}
+function spinLine(x,e){e=e||(v=>v);return [T_(x.rpm)?e(T_(x.rpm))+" rpm":"– rpm",T_(x.ramp)&&`ramp ${e(T_(x.ramp))} rpm/s`,T_(x.time)&&`${e(T_(x.time))} s`,x.as&&`${e(T_(x.asName)||"anti-solvent")}${T_(x.asVol)?" "+e(T_(x.asVol))+" µL":""}${T_(x.asAt)?" at "+e(T_(x.asAt))+" s":""}`].filter(Boolean).join(" · ")}
+function progPlain(pr,kind){if(kind==="spin") return pr.map((x,i)=>`Step ${i+1}: `+spinLine(x)).join(" | "); const K=PK[kind];return pr.map((x,i)=>`Step ${i+1}: `+K.cols.map(c=>`${c.n} ${x[c.f]||"-"} ${c.u}`).join(", ")).join(" | ")}
 function stageText(s){const it=stageItems(s);return stageTitle(s)+(it.length?": "+it.map(x=>`${x.l} ${x.v}${x.u?" "+x.u:""}`+(x.prog?` [${progPlain(x.prog,x.kind)}]`:"")).join("; "):"")}
 function buildCSV(){
   const q=v=>{v=v==null?"":String(v); if(/^[=+@\t\r]/.test(v)||/^-[^0-9.]/.test(v)) v="'"+v; return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v};
@@ -1202,17 +1224,19 @@ $("#copyCsv").addEventListener("click",()=>{const t=$("#csvText");navigator.clip
 $("#closeCsv").addEventListener("click",()=>$("#csvBox").hidden=true);
 
 /* ---------- step program pop-up (temperature and rate of one source) ---------- */
-function progText(pr,kind){const K=PK[kind]||PK.temp;return pr.map((x,i)=>`${i+1}) `+K.cols.map((c,j)=>j===0?`${esc(x[c.f])} ${c.u}`:`${c.n.toLowerCase()} ${x[c.f]?esc(x[c.f])+" "+c.u:"–"}`).join(" · ")).join("<br>")}
+function progText(pr,kind){if(kind==="spin") return pr.map((x,i)=>`${i+1}) `+spinLine(x,esc)).join("<br>"); const K=PK[kind]||PK.temp;return pr.map((x,i)=>`${i+1}) `+K.cols.map((c,j)=>j===0?`${esc(x[c.f])} ${c.u}`:`${c.n.toLowerCase()} ${x[c.f]?esc(x[c.f])+" "+c.u:"–"}`).join(" · ")).join("<br>")}
 let prog=null;
 const pm=$("#progModal");
-function blankRow(K){const r={};K.cols.forEach(c=>r[c.f]=c.def||"");return r}
+function blankRow(K){const r={};K.cols.forEach(c=>r[c.f]=c.def||""); if(K.as){r.as=false;K.as.forEach(c=>r[c.f]="")} return r}
 function openProg(p,f){
-  const c=getPath(draft,p); if(!c||(f!=="t"&&f!=="r")) return;
-  const kind=f==="t"?"temp":"rate", K=PK[kind], cur=c[f+"P"];
-  const rows=cur&&cur.length?cur.map(x=>({...x})):[{...blankRow(K),t:T_(c[f])}];
-  const label=chemPlain(c.chem)||"Source";
+  const c=getPath(draft,p); if(!c||(f!=="t"&&f!=="r"&&f!=="prog")) return;
+  const kind=f==="t"?"temp":f==="r"?"rate":"spin", K=PK[kind], cur=f==="prog"?c.prog:c[f+"P"];
+  const rows=cur&&cur.length?cur.map(x=>({...x})):[kind==="spin"?blankRow(K):{...blankRow(K),t:T_(c[f])}];
+  const sj=/\.sol\.(\d+)$/.exec(p), label=kind==="spin"?`Solution ${sj?+sj[1]+1:1}`+(T_(c.name)?` · ${T_(c.name)}`:""):(chemPlain(c.chem)||"Source");
+  pm.dataset.kind=kind==="spin"?"spin":"te"; $("#progHint").hidden=kind!=="spin";
   prog={p,f,kind,label,rows,lastFocus:document.activeElement};
-  $("#progTitle").textContent=`${label.replace(/(\d+)/g,d=>d.split("").map(x=>"₀₁₂₃₄₅₆₇₈₉"[+x]).join(""))} ${K.title}`;
+  const sub=t=>t.replace(/([A-Za-z\)])(\d+)/g,(m,a,d)=>a+d.split("").map(x=>"₀₁₂₃₄₅₆₇₈₉"[+x]).join(""));
+  $("#progTitle").textContent=kind==="spin"?`Solution ${sj?+sj[1]+1:1}${T_(c.name)?" · "+sub(T_(c.name)):""} — spin program`:`${sub(label)} ${K.title}`;
   $("#progHead").innerHTML=`<span>Step</span>`+K.cols.map(x=>`<span>${x.h}</span>`).join("");
   $("#progClear").hidden=!(cur&&cur.length);
   $("#progErr").hidden=true;
@@ -1225,10 +1249,10 @@ function closeProg(){if(document.activeElement&&pm.contains(document.activeEleme
 function renderProgRows(){
   const K=PK[prog.kind];
   $("#progN").value=prog.rows.length;
-  $("#progRows").innerHTML=prog.rows.map((x,i)=>`<div class="prow">
+  $("#progRows").innerHTML=prog.rows.map((x,i)=>`<div class="prow${K.as?" spinrow":""}">
     <span class="pstep">${i+1}${["st","nd","rd"][i]||"th"}</span>
     ${K.cols.map(c=>`<input class="num" type="text" inputmode="decimal" id="p_${c.f}_${i}" data-pi="${i}" data-pf="${c.f}" value="${esc(x[c.f]??"")}" aria-label="Step ${i+1} ${c.h}">`).join("")}
-  </div>`).join("");
+  </div>${K.as?`<label class="check pas"><input type="checkbox" data-pi="${i}" data-pf="as"${x.as?" checked":""}><span>Anti-solvent in step ${i+1}</span></label>${x.as?`<div class="prow asrow"><span></span>${K.as.map(c=>`<input type="text"${c.txt?' list="asList" autocapitalize="off"':' class="num" inputmode="decimal"'} id="p_${c.f}_${i}" data-pi="${i}" data-pf="${c.f}" value="${esc(x[c.f]??"")}" placeholder="${c.ph}" aria-label="Step ${i+1} ${c.n}${c.u?" ("+c.u+")":""}">`).join("")}</div>`:""}`:""}`).join("");
   drawProg();
 }
 function setSteps(n){
@@ -1236,7 +1260,22 @@ function setSteps(n){
   while(prog.rows.length<n) prog.rows.push(blankRow(PK[prog.kind]));
   prog.rows.length=n; renderProgRows();
 }
+function drawSpin(){
+  const W=320,H=130,L=40,R=10,Tp=16,B=22, rows=prog.rows; let t=0, prev=0; const pts=[[0,0]], segs=[], marks=[];
+  rows.forEach(x=>{const rpm=parseNum(x.rpm), v=isNaN(rpm)?prev:rpm, dur=parseNum(x.time), D=isNaN(dur)||dur<=0?10:dur, ramp=parseNum(x.ramp);
+    const rt=Math.min(!isNaN(ramp)&&ramp>0?Math.abs(v-prev)/ramp:Math.min(D*.15,3),D);
+    pts.push([t+rt,v],[t+D,v]); segs.push({a:t+rt,b:t+D,v,lab:isNaN(rpm)?"?":String(x.rpm).trim()});
+    if(x.as){const at=parseNum(x.asAt); marks.push(t+(isNaN(at)?D/2:Math.min(Math.max(at,0),D)))}
+    t+=D; prev=v});
+  const tot=t||1, hi=Math.max(1000,...pts.map(q=>q[1]))*1.18, X=v=>L+(W-L-R)*v/tot, Y=v=>Tp+(H-Tp-B)*(1-v/hi);
+  let g=`<line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" class="pa"/><line x1="${L}" x2="${L}" y1="${Tp-6}" y2="${H-B}" class="pa"/><text x="${L-4}" y="${H-B+4}" text-anchor="end" class="pr">0</text><text x="${L-4}" y="${Tp}" text-anchor="end" class="pr">rpm</text><text x="${W-R}" y="${H-B+15}" text-anchor="end" class="pr">${+tot.toFixed(1)} s total</text>`;
+  marks.forEach(m=>{g+=`<line x1="${X(m)}" x2="${X(m)}" y1="${Tp-2}" y2="${H-B}" class="pas"/><text x="${X(m)+3}" y="${H-B-4}" class="pr">AS</text>`});
+  g+=`<polyline points="${pts.map(q=>X(q[0]).toFixed(1)+","+Y(q[1]).toFixed(1)).join(" ")}" class="pline"/>`;
+  segs.forEach(s=>{g+=`<text x="${((X(s.a)+X(s.b))/2).toFixed(1)}" y="${(Y(s.v)-5).toFixed(1)}" text-anchor="middle" class="pl">${esc(s.lab)}</text>`});
+  $("#progSvg").innerHTML=g;
+}
 function drawProg(){
+  if(prog.kind==="spin") return drawSpin();
   const K=PK[prog.kind], W=320,H=130,L=34,R=10,Tp=16,B=22, rows=prog.rows, n=rows.length, sfx=prog.kind==="temp"?"°":"";
   const vals=[K.base]; rows.forEach(x=>{const v=parseNum(x.t);vals.push(isNaN(v)?vals[vals.length-1]:v)});
   let lo=Math.min(...vals),hi=Math.max(...vals); if(hi-lo<1e-9){hi+=prog.kind==="temp"?10:.1;lo=Math.max(0,lo-(prog.kind==="temp"?10:.1))}
@@ -1254,7 +1293,8 @@ function drawProg(){
     <text x="${L-4}" y="${y(vals[0])+4}" text-anchor="end" class="pr">${K.baseLabel}</text>
     <polyline points="${pts.map(p=>p.join(",")).join(" ")}" class="pline"/>${labels}`;
 }
-$("#progRows").addEventListener("input",e=>{const t=e.target;if(t.dataset.pi==null)return;prog.rows[+t.dataset.pi][t.dataset.pf]=t.value;t.removeAttribute("aria-invalid");$("#progErr").hidden=true;drawProg()});
+$("#progRows").addEventListener("change",e=>{const t=e.target;if(t.type!=="checkbox"||t.dataset.pi==null)return;prog.rows[+t.dataset.pi].as=t.checked;renderProgRows()});
+$("#progRows").addEventListener("input",e=>{const t=e.target;if(t.dataset.pi==null||t.type==="checkbox")return;prog.rows[+t.dataset.pi][t.dataset.pf]=t.value;t.removeAttribute("aria-invalid");$("#progErr").hidden=true;drawProg()});
 ["progMinus","progPlus"].forEach(id=>$("#"+id).addEventListener("pointerdown",e=>{const a=document.activeElement;if(a&&a.tagName==="INPUT"&&pm.contains(a))a.blur()}));
 $("#progMinus").addEventListener("click",()=>setSteps(prog.rows.length-1));
 $("#progPlus").addEventListener("click",()=>setSteps(prog.rows.length+1));
@@ -1262,13 +1302,16 @@ $("#progCancel").addEventListener("click",closeProg);
 $("#progX").addEventListener("click",closeProg);
 pm.addEventListener("click",e=>{if(e.target===pm)closeProg()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!pm.hidden)closeProg()});
-$("#progClear").addEventListener("click",()=>{const c=getPath(draft,prog.p); if(c) c[prog.f+"P"]=[]; progDone("Steps removed")});
+$("#progClear").addEventListener("click",()=>{const c=getPath(draft,prog.p); if(c){ if(prog.f==="prog") c.prog=[]; else c[prog.f+"P"]=[] } progDone(prog.f==="prog"?"Spin program removed":"Steps removed")});
 $("#progEnter").addEventListener("click",()=>{
   const K=PK[prog.kind], err=$("#progErr"); let bad=null;
   prog.rows.forEach((x,i)=>{K.cols.forEach(c=>{x[c.f]=String(x[c.f]??"").trim(); if(bad) return;
     if(c.req&&!x[c.f]) bad=[`Step ${i+1}: enter the ${c.n.toLowerCase()} in ${c.u}.`,`p_${c.f}_${i}`];
     else if(x[c.f]&&isNaN(parseNum(x[c.f]))) bad=[`Step ${i+1}: ${c.n.toLowerCase()} must be a number in ${c.u}.`,`p_${c.f}_${i}`];})});
+  if(!bad&&K.as) prog.rows.forEach((x,i)=>{ if(bad||!x.as) return; K.as.forEach(c=>{x[c.f]=String(x[c.f]??"").trim(); if(!bad&&!c.txt&&x[c.f]&&isNaN(parseNum(x[c.f]))) bad=[`Step ${i+1}: anti-solvent ${c.n.toLowerCase()} must be a number in ${c.u}.`,`p_${c.f}_${i}`]})});
   if(bad){err.textContent=bad[0];err.hidden=false;const el=$("#"+bad[1]);el.setAttribute("aria-invalid","true");el.focus();return}
+  if(K.as){const rows=prog.rows.map(x=>{const r={};K.cols.forEach(c=>r[c.f]=x[c.f]||"");r.as=!!x.as;K.as.forEach(c=>r[c.f]=x.as?(x[c.f]||""):"");return r}), c=getPath(draft,prog.p);
+    if(c) c.prog=rows; progDone(`${prog.label}: ${rows.length}-step spin program saved`); return}
   const rows=prog.rows.map(x=>{const r={};K.cols.forEach(c=>r[c.f]=x[c.f]||c.def||"");return r}), last=rows[rows.length-1].t, c=getPath(draft,prog.p);
   if(c){c[prog.f+"P"]=rows; c[prog.f]=last}
   progDone(`${prog.label}: ${rows.length}-step program, final ${last} ${K.vu}`);
