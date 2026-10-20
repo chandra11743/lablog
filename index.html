@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-RkK6cPjiY4J5L4czI6UHBtQhK+i8j07W3Wv2WQdEND4='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-1Hk3DBdpf1zonfhi3j5+ggFeln2uFxU4DqQKDNL3eYQ='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0E6E6B">
@@ -20,7 +20,7 @@
   --bg:#EDF0F2; --panel:#FFFFFF; --panel2:#F6F8F9; --ink:#14202B; --muted:#5B6975; --line:#D5DCE1;
   --accent:#0E6E6B; --accent-ink:#FFFFFF;
   --te:#B45A22; --pl:#7045C8; --xrd:#1D68B0;
-  --danger:#B3261E; --ok:#2E7D4F; --warn:#9A6A00; --spin:#3C7D23; --em:#A1475E; --spm:#0F7C8C;
+  --danger:#B3261E; --ok:#2E7D4F; --warn:#9A6A00; --spin:#3C7D23; --em:#A1475E; --spm:#0F7C8C; --sur:#4E5D8C; --elec:#8A6D00; --dev:#C2185B;
   --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   --cond:"IBM Plex Sans Condensed","IBM Plex Sans",-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -32,7 +32,7 @@
     --bg:#0F151A; --panel:#172027; --panel2:#1C272F; --ink:#E4EAEE; --muted:#93A2AD; --line:#2A3640;
     --accent:#3FB8B1; --accent-ink:#06201F;
     --te:#E08A52; --pl:#A68BF0; --xrd:#62A6E8;
-    --danger:#F2877F; --ok:#6CC592; --warn:#E3B341; --spin:#8BC86B; --em:#E88AA0; --spm:#4FC3D1;
+    --danger:#F2877F; --ok:#6CC592; --warn:#E3B341; --spin:#8BC86B; --em:#E88AA0; --spm:#4FC3D1; --sur:#9AA8DA; --elec:#D9B94A; --dev:#F48FB1;
   }
 }
 :root[data-theme="dark"]{
@@ -40,7 +40,7 @@
   --bg:#0F151A; --panel:#172027; --panel2:#1C272F; --ink:#E4EAEE; --muted:#93A2AD; --line:#2A3640;
   --accent:#3FB8B1; --accent-ink:#06201F;
   --te:#E08A52; --pl:#A68BF0; --xrd:#62A6E8;
-  --danger:#F2877F; --ok:#6CC592; --warn:#E3B341; --spin:#8BC86B; --em:#E88AA0; --spm:#4FC3D1;
+  --danger:#F2877F; --ok:#6CC592; --warn:#E3B341; --spin:#8BC86B; --em:#E88AA0; --spm:#4FC3D1; --sur:#9AA8DA; --elec:#D9B94A; --dev:#F48FB1;
 }
 [hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
@@ -161,8 +161,8 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 .csvbox{margin-top:12px}
 .csvbox textarea{font-family:var(--mono);font-size:12px;min-height:160px}
 
-[data-type="te"],[data-type="dep"]{--tc:var(--te)} [data-type="pl"],[data-type="opt"]{--tc:var(--pl)} [data-type="xrd"],[data-type="xray"]{--tc:var(--xrd)} [data-type="em"]{--tc:var(--em)} [data-type="spm"]{--tc:var(--spm)} [data-type="oth"]{--tc:var(--muted)}
-[data-kind="xray"]{--sc:var(--xrd)} [data-kind="opt"]{--sc:var(--pl)} [data-kind="em"]{--sc:var(--em)} [data-kind="spm"]{--sc:var(--spm)} [data-kind="oth"]{--sc:var(--muted)}
+[data-type="te"],[data-type="dep"]{--tc:var(--te)} [data-type="pl"],[data-type="opt"]{--tc:var(--pl)} [data-type="xrd"],[data-type="xray"]{--tc:var(--xrd)} [data-type="em"]{--tc:var(--em)} [data-type="spm"]{--tc:var(--spm)} [data-type="sur"]{--tc:var(--sur)} [data-type="elec"]{--tc:var(--elec)} [data-type="dev"]{--tc:var(--dev)} [data-type="oth"]{--tc:var(--muted)}
+[data-kind="xray"]{--sc:var(--xrd)} [data-kind="opt"]{--sc:var(--pl)} [data-kind="em"]{--sc:var(--em)} [data-kind="spm"]{--sc:var(--spm)} [data-kind="sur"]{--sc:var(--sur)} [data-kind="elec"]{--sc:var(--elec)} [data-kind="dev"]{--sc:var(--dev)} [data-kind="oth"]{--sc:var(--muted)}
 .chip-btn.grp[aria-pressed="true"],.chip-btn.tech[aria-pressed="true"]{border-color:var(--tc);color:var(--tc);background:color-mix(in srgb,var(--tc) 10%,var(--panel))}
 .chip-btn.tech,.chip-btn.grp{font-family:var(--sans)} #techFilter{width:auto;max-width:180px}
 
@@ -239,7 +239,8 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 /* ---- v12: experiment chooser, stages ---- */
 .stack{display:grid;gap:12px}
 .card>h3,.card .grp-h h3{margin:0}
-.kinds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.kinds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media (max-width:420px){.kinds{gap:6px}.kinds .kind{padding:9px 9px}.kinds .kind b{font-size:14px}.kinds .kind small{font-size:11px}}
 .kind{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);cursor:pointer;min-width:0}
 .kind b{font-size:15px}.kind small{font-size:11.5px;color:var(--muted);line-height:1.3}
 .kind[aria-pressed="true"]{border-color:var(--tc);box-shadow:inset 0 0 0 1px var(--tc);background:color-mix(in srgb,var(--tc) 10%,var(--panel))}
@@ -397,6 +398,7 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
         <button data-f="all" aria-pressed="true">All</button>
         <button data-f="dep" aria-pressed="false">Deposition</button>
         <button data-f="char" aria-pressed="false">Characterisation</button>
+        <button data-f="dev" aria-pressed="false">Devices</button>
       </div>
       <select id="techFilter" aria-label="Technique" hidden></select>
       <input type="search" id="search" placeholder="Search sample, chemical, solvent…">
@@ -422,7 +424,7 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
         </div>
         <div class="grid7" id="calGrid"></div>
         <div class="legend">
-          <span data-type="dep"><i></i>Deposition</span><span data-type="xray"><i></i>X-ray</span><span data-type="opt"><i></i>Optical</span><span data-type="em"><i></i>Electron</span><span data-type="spm"><i></i>Probe</span>
+          <span data-type="dep"><i></i>Deposition</span><span data-type="xray"><i></i>X-ray</span><span data-type="opt"><i></i>Optical</span><span data-type="em"><i></i>Electron</span><span data-type="spm"><i></i>Probe</span><span data-type="sur"><i></i>Surface</span><span data-type="elec"><i></i>Electrical</span><span data-type="oth"><i></i>Other</span><span data-type="dev"><i></i>Device</span>
         </div>
       </div>
       <div>
@@ -444,7 +446,7 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
       <div class="card" style="display:grid;gap:12px">
         <label class="f"><span class="lab">Title of experiment</span><input type="text" id="rTitle" placeholder="e.g. FAPbI₃ co-evaporation, 2-step spin coating with CB"></label>
         <div class="row">
-          <label class="f"><span class="lab">Experiment type (optional)</span><select id="rCat"><option value="">—</option><option value="co">Co-evaporation</option><option value="seq">Sequential evaporation</option><option value="spin">Spin coating</option><option value="hyb">Hybrid</option><option value="char">Characterisation</option><option value="pl">PL</option><option value="xrd">XRD</option><option value="other">Other</option></select></label>
+          <label class="f"><span class="lab">Experiment type (optional)</span><select id="rCat"><option value="">—</option><option value="co">Co-evaporation</option><option value="seq">Sequential evaporation</option><option value="spin">Spin coating</option><option value="hyb">Hybrid</option><option value="char">Characterisation</option><option value="dev">Device testing</option><option value="pl">PL</option><option value="xrd">XRD</option><option value="other">Other</option></select></label>
           <label class="f"><span class="lab">Date (optional)</span><input type="date" id="rDate"></label>
         </div>
         <label class="f"><span class="lab">Learned from (optional)</span><input type="text" id="rSource" placeholder="Person, paper or lab manual"></label>
@@ -499,10 +501,14 @@ const TECH_GROUPS={
   xray:{name:"X-ray",sub:"Diffraction, reflectivity, fluorescence, photoemission"},
   opt:{name:"Optical",sub:"PL, TRPL, PL mapping, UV-Vis"},
   em:{name:"Electron",sub:"SEM, TEM, LEED"},
-  spm:{name:"Scanning probe",sub:"AFM, STM"},
-  oth:{name:"Other",sub:"Any other technique"}
+  spm:{name:"Scanning probe",sub:"AFM, KPFM, c-AFM, STM"},
+  sur:{name:"Surface & composition",sub:"UPS, Kelvin probe, ToF-SIMS"},
+  elec:{name:"Electrical",sub:"Hall effect, SCLC, film I–V"},
+  oth:{name:"Physical & other",sub:"Profilometer, contact angle, TGA/DSC, any other"},
+  dev:{name:"Device testing",sub:"TFTs, photodetectors"}
 };
-const TECH_ORDER={xray:["xrd","gixrd","giwaxs","pole","xrr","xrf","xps"],opt:["pl","trpl","plmap","uvvis"],em:["sem","tem","leed"],spm:["afm","stm"],oth:["other"]};
+const TECH_ORDER={xray:["xrd","gixrd","giwaxs","gisaxs","pole","xrr","xrf","xps"],opt:["pl","trpl","plmap","plqy","uvvis","raman","ftir","tas","ellips"],em:["sem","tem","eds","ebsd","cl","leed"],spm:["afm","kpfm","cafm","stm"],sur:["ups","kp","tofsims"],elec:["hall","sclc","iv"],oth:["profil","contact","tga","other"],dev:["tft","pd","devo"]};
+const CHAR_GROUPS=Object.keys(TECH_ORDER).filter(g=>g!=="dev");
 /* deposition routes; a route is a chain of stages (te = thermal evaporation, spin = spin coating) */
 const ROUTES={
   co:{name:"Co-evaporation",short:"Co-evap",sub:"Single step, all sources together",flow:["te"]},
@@ -555,6 +561,9 @@ const TECH={
   giwaxs:{n:"GIWAXS",g:"xray",sub:"Grazing-incidence wide-angle scattering",groups:[
     {title:"Beam & geometry",fields:[F("energy","X-ray energy","keV"),F("incAngle","Incidence angle","°",{d:"Incidence angle"}),F("sdd","Sample–detector distance","mm",{d:"Detector distance"})]},
     {title:"Acquisition",fields:[F("expTime","Exposure time",TS),F("frames","Number of frames"),TX("beamline","Beamline / instrument","e.g. lab source, beamline name")]}]},
+  gisaxs:{n:"GISAXS",g:"xray",sub:"Grazing-incidence small-angle scattering",groups:[
+    {title:"Beam & geometry",fields:[F("energy","X-ray energy","keV"),F("incAngle","Incidence angle","°",{d:"Incidence angle"}),F("sdd","Sample–detector distance","mm",{d:"Detector distance"})]},
+    {title:"Acquisition",fields:[F("expTime","Exposure time",TS),TX("beamline","Beamline / instrument","e.g. lab source, beamline name")]}]},
   pole:{n:"Pole figure",g:"xray",sub:"Texture: ψ / φ scan of one reflection",groups:[
     {title:"Reflection",fields:[TX("hkl","Reflection (hkl)","e.g. (100)"),F("tth","2θ position","°")]},
     {title:"Scan",fields:[F("psiStart","ψ start","°"),F("psiEnd","ψ end","°"),F("psiStep","ψ step","°"),F("phiStep","φ step","°"),F("tpp","Time per point",["s","ms"])]}]},
@@ -577,30 +586,99 @@ const TECH={
   plmap:{n:"PL mapping",g:"opt",sub:"Spatially resolved PL",groups:[
     {title:"Excitation",fields:[F("exWl","Excitation wavelength","nm",{d:"Excitation λ"}),F("power","Power",["µW","nW","mW"])]},
     {title:"Map",fields:[TX("area","Map area","e.g. 50 × 50 µm"),F("stepXY","Step size","µm"),F("intTime","Integration time per point",["ms","s"],{d:"Integration / point"})]}]},
+  plqy:{n:"PLQY",g:"opt",sub:"PL quantum yield (integrating sphere)",groups:[
+    {title:"Measurement",fields:[F("exWl","Excitation wavelength","nm",{d:"Excitation λ"}),F("power","Excitation intensity",["mW/cm²","suns","µW"]),TX("method","Method","e.g. de Mello, 3-step")]},
+    {title:"Result (optional)",fields:[F("plqy","PLQY","%"),F("peak","PL peak","nm")]}]},
+  raman:{n:"Raman",g:"opt",sub:"Raman spectroscopy",groups:[
+    {title:"Measurement",fields:[F("exWl","Laser wavelength","nm",{d:"Laser λ"}),F("power","Laser power",["mW","µW","%"]),TX("obj","Objective","e.g. 50×"),TX("grating","Grating","e.g. 1800 l/mm"),F("collTime","Acquisition time",TS,{d:"Acquisition time"}),F("acc","Accumulations"),F("kStart","Range start","cm⁻¹"),F("kEnd","Range end","cm⁻¹")]}]},
+  ftir:{n:"FTIR",g:"opt",sub:"Infrared spectroscopy",groups:[
+    {title:"Measurement",fields:[TX("mode","Mode","e.g. ATR / transmission"),F("kStart","Range start","cm⁻¹"),F("kEnd","Range end","cm⁻¹"),F("res","Resolution","cm⁻¹"),F("scans","Number of scans")]}]},
+  tas:{n:"TAS",g:"opt",sub:"Transient absorption",groups:[
+    {title:"Pump",fields:[F("exWl","Pump wavelength","nm",{d:"Pump λ"}),F("fluence","Pump fluence",["µJ/cm²","nJ/cm²"]),F("rep","Repetition rate",["kHz","Hz","MHz"])]},
+    {title:"Probe",fields:[TX("probe","Probe","e.g. white light 450–800 nm"),F("delay","Delay range",["ps","ns"]),TX("tz","Time zero / IRF (optional)","")]}]},
+  ellips:{n:"Ellipsometry",g:"opt",sub:"Spectroscopic ellipsometry: n, k, thickness",groups:[
+    {title:"Measurement",fields:[F("wlStart","λ start","nm"),F("wlEnd","λ end","nm"),TX("angles","Angles of incidence","e.g. 55°, 65°, 75°"),TX("model","Model","e.g. Tauc–Lorentz")]},
+    {title:"Fit results (optional)",fields:[F("thick","Thickness",["nm","Å"]),F("rough","Roughness",["nm","Å"]),TX("nk","n, k at λ","e.g. n 2.5 @ 600 nm")]}]},
   uvvis:{n:"UV-Vis",g:"opt",sub:"Absorbance, transmittance, reflectance",groups:[
-    {title:"Measurement",fields:[TX("mode","Mode","Absorbance / transmittance / reflectance"),F("wlStart","λ start","nm"),F("wlEnd","λ end","nm"),F("stepWl","Step / interval","nm"),F("scanSpeed","Scan speed","nm/min"),TX("acc","Accessory (optional)","e.g. integrating sphere")]}]},
+    {title:"Measurement",fields:[TX("mode","Mode","Absorbance / transmittance / reflectance"),F("wlStart","λ start","nm"),F("wlEnd","λ end","nm"),F("stepWl","Step / interval","nm"),F("scanSpeed","Scan speed","nm/min"),TX("acc","Accessory (optional)","e.g. integrating sphere")]},
+    {title:"Result (optional)",fields:[F("eg","Band gap (Tauc)","eV"),F("edge","Absorption edge","nm")]}]},
   sem:{n:"SEM",g:"em",sub:"Scanning electron microscopy",groups:[
     {title:"Imaging",fields:[F("kv","Accelerating voltage","kV"),F("wd","Working distance","mm"),F("mag","Magnification","×"),F("current","Probe current",["pA","nA"]),TX("detector","Detector","e.g. SE / BSE / InLens"),TX("view","View","e.g. top view / cross-section")]}]},
   tem:{n:"TEM",g:"em",sub:"Transmission electron microscopy",groups:[
     {title:"Imaging",fields:[F("kv","Accelerating voltage","kV"),F("mag","Magnification","×"),TX("mode","Mode","e.g. BF / HRTEM / SAED / STEM"),TX("prep","Sample preparation","e.g. FIB lamella")]}]},
+  eds:{n:"EDS / EDX",g:"em",sub:"Energy-dispersive X-ray composition",groups:[
+    {title:"Measurement",fields:[F("kv","Accelerating voltage","kV"),F("wd","Working distance","mm"),F("collTime","Live time",["s","min"],{d:"Live time"}),TX("mode","Mode","e.g. point / line / map"),TX("elements","Elements","e.g. Pb, I, Cs, Br")]},
+    {title:"Result (optional)",fields:[TX("ratio","Atomic ratio","e.g. Pb:I = 1:2.9")]}]},
+  ebsd:{n:"EBSD",g:"em",sub:"Electron backscatter diffraction",groups:[
+    {title:"Measurement",fields:[F("kv","Accelerating voltage","kV"),F("tilt","Sample tilt","°"),F("stepXY","Step size",["nm","µm"]),TX("area","Map area","e.g. 20 × 20 µm"),TX("phase","Phase file","e.g. cubic FAPbI3")]}]},
+  cl:{n:"Cathodoluminescence",g:"em",sub:"CL in SEM",groups:[
+    {title:"Measurement",fields:[F("kv","Accelerating voltage","kV"),F("current","Beam current",["pA","nA"]),TX("mode","Mode","e.g. panchromatic / hyperspectral"),F("dwell","Dwell time",["ms","µs"]),F("temp","Sample temperature",["K","°C"])]}]},
   leed:{n:"LEED",g:"em",sub:"Low-energy electron diffraction",groups:[
     {title:"Measurement",fields:[F("energy","Electron energy","eV"),F("current","Beam current",["µA","nA"]),F("temp","Sample temperature",["K","°C"]),TX("pattern","Pattern","e.g. (1×1), (√2×√2)R45°")]}]},
   afm:{n:"AFM",g:"spm",sub:"Atomic force microscopy",groups:[
-    {title:"Scan",fields:[TX("mode","Mode","e.g. tapping / contact / KPFM"),F("size","Scan size","µm"),F("rate","Scan rate","Hz"),TX("res","Resolution","e.g. 512 × 512"),TX("tip","Tip","e.g. Si, 300 kHz")]},
+    {title:"Scan",fields:[TX("mode","Mode","e.g. tapping / contact / PeakForce"),F("size","Scan size","µm"),F("rate","Scan rate","Hz"),TX("res","Resolution","e.g. 512 × 512"),TX("tip","Tip","e.g. Si, 300 kHz")]},
     {title:"Result (optional)",fields:[F("rms","RMS roughness","nm")]}]},
+  kpfm:{n:"KPFM",g:"spm",sub:"Kelvin probe force microscopy: surface potential",groups:[
+    {title:"Scan",fields:[TX("mode","Mode","e.g. AM / FM, single / dual pass"),F("size","Scan size","µm"),F("lift","Lift height","nm"),F("vac","AC bias",["V","mV"]),TX("tip","Tip","e.g. Pt/Ir coated"),TX("light","Illumination","e.g. dark / 1 sun")]},
+    {title:"Result (optional)",fields:[F("cpd","CPD / surface potential",["mV","V"]),F("wf","Work function","eV")]}]},
+  cafm:{n:"Conductive AFM",g:"spm",sub:"c-AFM current maps",groups:[
+    {title:"Scan",fields:[F("size","Scan size","µm"),F("bias","Sample bias",["V","mV"]),F("force","Setpoint force","nN"),TX("tip","Tip","e.g. Pt/Ir, PtSi"),TX("light","Illumination","e.g. dark / light")]}]},
   stm:{n:"STM",g:"spm",sub:"Scanning tunnelling microscopy",groups:[
     {title:"Scan",fields:[F("bias","Bias voltage",["V","mV"]),F("iset","Setpoint current",["pA","nA"]),F("size","Scan size","nm"),F("speed","Scan speed","nm/s"),F("temp","Temperature",["K","°C"]),TX("tip","Tip","e.g. W / PtIr")]}]},
+  ups:{n:"UPS",g:"sur",sub:"Work function, VBM",groups:[
+    {title:"Measurement",fields:[TX("src","Source","e.g. He I 21.22 eV"),F("bias","Sample bias","V"),F("passE","Pass energy","eV"),F("stepE","Step size","eV")]},
+    {title:"Result (optional)",fields:[F("wf","Work function","eV"),F("vbm","VBM below EF","eV"),F("ip","Ionisation energy","eV")]}]},
+  kp:{n:"Kelvin probe",g:"sur",sub:"Macroscopic work function / SPV",groups:[
+    {title:"Measurement",fields:[TX("ref","Reference","e.g. HOPG, Au"),F("tipD","Tip diameter","mm"),TX("atm","Atmosphere","e.g. N₂ / air"),TX("light","Illumination","e.g. dark / SPV 1 sun")]},
+    {title:"Result (optional)",fields:[F("cpd","CPD",["mV","V"]),F("wf","Work function","eV")]}]},
+  tofsims:{n:"ToF-SIMS",g:"sur",sub:"Depth profile / ion maps",groups:[
+    {title:"Measurement",fields:[TX("primary","Analysis beam","e.g. Bi₃⁺ 30 keV"),TX("sputter","Sputter beam","e.g. Cs⁺ 1 keV, Ar cluster"),TX("polarity","Polarity","positive / negative"),TX("area","Analysis area","e.g. 100 × 100 µm"),TX("ions","Ions tracked","e.g. Pb⁺, I⁻, Cs⁺, CN⁻")]}]},
+  hall:{n:"Hall effect",g:"elec",sub:"Carrier type, density, mobility",groups:[
+    {title:"Measurement",fields:[TX("geom","Geometry","e.g. van der Pauw"),F("field","Magnetic field","T"),F("current","Current",["nA","µA","mA"]),F("temp","Temperature",["K","°C"]),F("thick","Film thickness",["nm","µm"]),TX("light","Illumination","e.g. dark")]},
+    {title:"Result (optional)",fields:[TX("ctype","Carrier type","n / p"),F("n","Carrier density","cm⁻³",{sci:1}),F("mu","Mobility","cm²/V·s"),F("rho","Resistivity","Ω·cm",{sci:1})]}]},
+  sclc:{n:"SCLC",g:"elec",sub:"Space-charge-limited current: trap density, mobility",groups:[
+    {title:"Device",fields:[TX("stack","Stack","e.g. ITO/PEDOT/PVK/PTAA/Au (hole-only)"),TX("carrier","Carrier","electron-only / hole-only"),F("thick","Perovskite thickness",["nm","µm"]),F("area","Area",["cm²","mm²"])]},
+    {title:"Sweep",fields:[F("vStart","V start","V"),F("vEnd","V end","V"),F("vStep","Step","V"),TX("pulse","Pulsed? (optional)","e.g. pulsed 10 ms")]},
+    {title:"Result (optional)",fields:[F("vtfl","V_TFL","V"),F("nt","Trap density","cm⁻³",{sci:1}),F("mu","Mobility","cm²/V·s")]}]},
+  iv:{n:"Film I–V",g:"elec",sub:"Lateral conductivity, dark / light",groups:[
+    {title:"Measurement",fields:[TX("elec","Electrodes","e.g. Au, 50 µm gap"),F("vStart","V start","V"),F("vEnd","V end","V"),F("vStep","Step","V"),TX("light","Illumination","e.g. dark / 1 sun"),TX("atm","Atmosphere","e.g. N₂ / vacuum")]},
+    {title:"Result (optional)",fields:[F("sigma","Conductivity","S/cm",{sci:1})]}]},
+  profil:{n:"Profilometer",g:"oth",sub:"Thickness by stylus (Dektak)",groups:[
+    {title:"Scan",fields:[F("len","Scan length",["µm","mm"]),F("force","Stylus force","mg"),F("dur","Duration","s")]},
+    {title:"Result (optional)",fields:[F("thick","Thickness",["nm","µm"]),F("ra","Roughness Ra","nm")]}]},
+  contact:{n:"Contact angle",g:"oth",sub:"Wettability",groups:[
+    {title:"Measurement",fields:[TX("liquid","Liquid","e.g. water, DMF"),F("vol","Drop volume","µL"),F("angle","Contact angle","°"),TX("surface","Surface","e.g. after UV-ozone")]}]},
+  tga:{n:"TGA / DSC",g:"oth",sub:"Thermal stability, phase transitions",groups:[
+    {title:"Measurement",fields:[F("tStart","T start","°C"),F("tEnd","T end","°C"),F("rate","Heating rate","°C/min"),TX("gas","Gas","e.g. N₂ 50 mL/min"),F("mass","Sample mass","mg"),TX("pan","Pan","e.g. Al₂O₃")]}]},
   other:{n:"Other",g:"oth",sub:"Name the technique",groups:[
-    {title:"Technique",fields:[TX("tech","Technique name","e.g. Raman, EQE, J–V"),TX("instr","Instrument (optional)","")]}]}
+    {title:"Technique",fields:[TX("tech","Technique name","e.g. NMR, XAS, PDS"),TX("instr","Instrument (optional)","")]}]},
+  /* device testing */
+  tft:{n:"TFT",g:"dev",sub:"Thin-film transistor: transfer & output",groups:[
+    {title:"Device",fields:[TX("devId","Device / pixel ID","e.g. D3-L50"),TX("arch","Architecture","e.g. bottom-gate top-contact"),TX("diel","Dielectric","e.g. SiO₂ 300 nm / Al₂O₃"),F("ci","Dielectric capacitance","nF/cm²"),TX("sd","Source/drain electrodes","e.g. Au 50 nm"),F("L","Channel length L","µm"),F("W","Channel width W",["µm","mm"])]},
+    {title:"Conditions",fields:[TX("atm","Atmosphere","e.g. N₂ glovebox / vacuum / air"),F("temp","Temperature",["°C","K"]),TX("light","Illumination","e.g. dark"),TX("smu","Instrument","e.g. Keithley 4200")]},
+    {title:"Transfer sweep",fields:[F("vgStart","V_GS start","V"),F("vgEnd","V_GS end","V"),F("vgStep","V_GS step","V"),TX("vds","V_DS","e.g. −1 V, −40 V"),TX("dir","Sweep direction","e.g. forward + reverse"),TX("rateT","Sweep rate / delay","e.g. 0.5 V/s, pulsed")]},
+    {title:"Output sweep",fields:[F("vdStart","V_DS start","V"),F("vdEnd","V_DS end","V"),TX("vgSet","V_GS values","e.g. 0, −10, −20, −30 V")]},
+    {title:"Results (optional)",fields:[F("mu","Mobility (sat.)","cm²/V·s"),F("muLin","Mobility (lin.)","cm²/V·s"),F("vth","V_th","V"),F("onoff","On/off ratio",null,{sci:1,ph:"1e5"}),F("ss","Subthreshold swing","V/dec"),F("hyst","Hysteresis ΔV","V"),F("ion","I_on",["A","mA","µA"],{sci:1}),F("ioff","I_off",["A","nA","pA"],{sci:1})]}]},
+  pd:{n:"Photodetector",g:"dev",sub:"Responsivity, detectivity, speed",groups:[
+    {title:"Device",fields:[TX("devId","Device / pixel ID","e.g. PD-2"),TX("type","Type","photodiode / photoconductor / phototransistor"),TX("stack","Stack / electrodes","e.g. ITO/SnO₂/PVK/Spiro/Au"),F("area","Active area",["cm²","mm²"]),F("gap","Channel / gap (lateral)","µm")]},
+    {title:"Illumination",fields:[TX("src","Light source","e.g. 532 nm laser, LED, AM1.5"),F("wl","Wavelength","nm"),F("pd","Power density",["mW/cm²","µW/cm²","nW/cm²"]),TX("mod","Modulation","e.g. chopper 10 Hz, pulsed")]},
+    {title:"Conditions",fields:[F("bias","Bias",["V","mV"]),TX("atm","Atmosphere","e.g. N₂ / air"),TX("smu","Instrument","e.g. Keithley 2450, oscilloscope")]},
+    {title:"Results (optional)",fields:[F("idark","Dark current",["A","nA","pA"],{sci:1}),F("iph","Photocurrent",["A","µA","nA"],{sci:1}),F("resp","Responsivity R",["A/W","mA/W"]),F("dstar","Detectivity D*","Jones",{sci:1,ph:"1e12"}),F("eqe","EQE","%"),F("ldr","LDR","dB"),F("rise","Rise time",["µs","ms","ns"]),F("fall","Fall time",["µs","ms","ns"]),F("f3db","−3 dB bandwidth",["kHz","Hz","MHz"]),F("onoff","On/off ratio",null,{sci:1})]}]},
+  devo:{n:"Other device",g:"dev",sub:"Solar cell, LED, memristor…",groups:[
+    {title:"Device",fields:[TX("tech","Device type","e.g. solar cell J–V, LED, memristor"),TX("devId","Device / pixel ID",""),TX("stack","Stack",""),F("area","Active area",["cm²","mm²"])]},
+    {title:"Test",fields:[TX("test","Measurement","e.g. J–V, EQE, stability"),TX("cond","Conditions","e.g. AM1.5G 100 mW/cm², N₂")]},
+    {title:"Results (optional)",fields:[TX("res","Key results","e.g. PCE 18.2 %, Voc 1.10 V")]}]}
 };
 const KINDS={dep:{name:"Deposition",sub:"Evaporation, spin coating, hybrid"}};
 Object.entries(TECH).forEach(([k,t])=>{KINDS[k]={name:t.n,sub:t.sub,g:t.g}});
 const TYPES=TECH;
 const grpOf=k=>k==="dep"?"dep":(TECH[k]?TECH[k].g:"oth");
-const kindName=e=>{const k=kindOf(e); return k==="other"&&T_(obj(e.f).tech)?T_(obj(e.f).tech):KINDS[k].name};
+const secOf=k=>k==="dep"?"dep":grpOf(k)==="dev"?"dev":"char";
+const SEC_NAME={dep:"Deposition",char:"Characterisation",dev:"Device testing"};
+const kindName=e=>{const k=kindOf(e); return (k==="other"||k==="devo")&&T_(obj(e.f).tech)?T_(obj(e.f).tech):KINDS[k].name};
 const LTKEY="perovLabLog.lastTech";
-function lastTech(g){const m=obj(lsGet(LTKEY,{})); const t=g?m[g]:m._; return TECH[t]&&(!g||TECH[t].g===g)?t:(g?TECH_ORDER[g][0]:"xrd")}
-function rememberTech(t){if(!TECH[t]) return; const m=obj(lsGet(LTKEY,{})); m._=t; m[TECH[t].g]=t; lsSet(LTKEY,m)}
+function lastTech(g){const m=obj(lsGet(LTKEY,{})); const t=g?m[g]:m._; return TECH[t]&&(!g||TECH[t].g===g)&&(g||TECH[t].g!=="dev")?t:(g?TECH_ORDER[g][0]:"xrd")}
+function rememberTech(t){if(!TECH[t]) return; const m=obj(lsGet(LTKEY,{})); if(TECH[t].g!=="dev") m._=t; m[TECH[t].g]=t; lsSet(LTKEY,m)}
 const fieldsOf=t=>TYPES[t]?TYPES[t].groups.flatMap(g=>g.fields):[];
 /* step programs (temperature and rate pop-up) */
 const PK={
@@ -903,12 +981,15 @@ function renderForm(){
 }
 function dateHint(){$("#dateHint").textContent=draft.date===ymd(new Date())?"Date and time are filled in automatically. Pick another day in Calendar to log for that date.":"Logging for "+niceDate(draft.date,true)+"."}
 function renderKind(){
-  const isDep=draft.type==="dep";
-  $("#kinds").innerHTML=`<button type="button" class="kind" data-type="dep" data-kindsel="dep" aria-pressed="${isDep}"><b>Deposition</b><small>Making films: evaporation, spin coating, hybrid</small></button><button type="button" class="kind" data-type="${isDep?"xray":grpOf(draft.type)}" data-kindsel="char" aria-pressed="${!isDep}"><b>Characterisation</b><small>X-ray, optical, electron, scanning probe</small></button>`;
+  const sec=secOf(draft.type);
+  $("#kinds").innerHTML=`<button type="button" class="kind" data-type="dep" data-kindsel="dep" aria-pressed="${sec==="dep"}"><b>Deposition</b><small>Making films: evaporation, spin coating, hybrid</small></button><button type="button" class="kind" data-type="${sec==="char"?grpOf(draft.type):"xray"}" data-kindsel="char" aria-pressed="${sec==="char"}"><b>Characterisation</b><small>X-ray, optical, electron, probe, surface, electrical</small></button><button type="button" class="kind" data-type="dev" data-kindsel="dev" aria-pressed="${sec==="dev"}"><b>Device testing</b><small>TFTs, photodetectors, other devices</small></button>`;
   const rb=$("#routeBox");
   rb.hidden=false;
-  if(draft.type!=="dep"){const g=grpOf(draft.type);
-    rb.innerHTML=`<div class="lab2">Technique group</div><div class="chips">${Object.entries(TECH_GROUPS).map(([gk,G])=>`<button type="button" class="chip-btn grp" data-type="${gk}" data-grp="${gk}" aria-pressed="${gk===g}">${G.name}</button>`).join("")}</div>
+  if(sec==="dev"){
+    rb.innerHTML=`<div class="lab2">Device</div><div class="chips">${TECH_ORDER.dev.map(t=>`<button type="button" class="chip-btn tech" data-type="dev" data-tech="${t}" aria-pressed="${t===draft.type}">${TECH[t].n}</button>`).join("")}</div>`;
+    return}
+  if(sec==="char"){const g=grpOf(draft.type);
+    rb.innerHTML=`<div class="lab2">Technique group</div><div class="chips">${CHAR_GROUPS.map(gk=>[gk,TECH_GROUPS[gk]]).map(([gk,G])=>`<button type="button" class="chip-btn grp" data-type="${gk}" data-grp="${gk}" aria-pressed="${gk===g}">${G.name}</button>`).join("")}</div>
       <div class="lab2">Technique</div><div class="chips">${TECH_ORDER[g].map(t=>`<button type="button" class="chip-btn tech" data-type="${g}" data-tech="${t}" aria-pressed="${t===draft.type}">${TECH[t].n}</button>`).join("")}</div>`;
     return}
   const flow=draft.stages.map(s=>s.kind).join(",");
@@ -984,7 +1065,7 @@ function spinBody(s,i,P){
 function annHTML(s,P){const a=s.ann;
   return `<div class="grp"><label class="check"><input type="checkbox" data-p="${P}.ann.on"${a.on?" checked":""}><span>${s.kind==="spin"?"Final annealing after all steps":"Annealed after this stage"}</span></label>${a.on?`<div class="row">${fld({p:`${P}.ann.t`,v:a.t,l:ANN_F[0].l,u:"°C"})}${fld({p:`${P}.ann.time`,v:a.time,l:ANN_F[1].l,u:ANN_F[1].u,up:`${P}.ann.timeU`,uv:a.timeU,uk:"timeU"})}</div>`:""}</div>`}
 function flatHTML(t){
-  return `<section class="card stage" data-kind="${grpOf(t)}"><div class="stage-h"><span class="stage-t"><b>${KINDS[t].name}</b><small>${TECH_GROUPS[grpOf(t)].name} · ${KINDS[t].sub}</small></span></div>${TYPES[t].groups.map(g=>`<div class="grp"><h4>${g.title}</h4><div class="row">${g.fields.map(fd=>fld({p:"f."+fd.k,v:draft.f[fd.k],l:fd.l,u:fd.u,up:"f."+fd.k+"_u",uv:draft.f[fd.k+"_u"],uk:t+"."+fd.k,txt:fd.txt,ph:fd.ph})).join("")}</div></div>`).join("")}</section>`;
+  return `<section class="card stage" data-kind="${grpOf(t)}"><div class="stage-h"><span class="stage-t"><b>${KINDS[t].name}</b><small>${TECH_GROUPS[grpOf(t)].name} · ${KINDS[t].sub}</small></span></div>${TYPES[t].groups.map(g=>`<div class="grp"><h4>${g.title}</h4><div class="row">${g.fields.map(fd=>fld({p:"f."+fd.k,v:draft.f[fd.k],l:fd.l,u:fd.u,up:"f."+fd.k+"_u",uv:draft.f[fd.k+"_u"],uk:t+"."+fd.k,txt:fd.txt,ph:fd.ph,sci:fd.sci})).join("")}</div></div>`).join("")}</section>`;
 }
 function renderExtra(){
   $("#extraRows").innerHTML=draft.extra.map((x,i)=>`<div class="xrow">${fld({p:`extra.${i}.k`,v:x.k,l:"Name",txt:1,ph:"e.g. Tool factor",list:"xList"})}${fld({p:`extra.${i}.v`,v:x.v,l:"Value (with unit)",txt:1,ph:"e.g. 1.2"})}<button type="button" class="btn icon-x" data-del="extra.${i}" aria-label="Remove parameter ${i+1}">✕</button></div>`).join("")
@@ -1050,7 +1131,7 @@ form.addEventListener("click",e=>{
   const q=sel=>e.target.closest(sel);
   let b;
   if(b=q("[data-disarm]")){ui.arm=null;clearTimeout(armT);rerender();return}
-  if(b=q("[data-kindsel]")){const v=b.dataset.kindsel; if(v==="dep") draft.type="dep"; else if(draft.type==="dep") draft.type=lastTech(); lsSet(TKEY,draft.type); touch(); renderForm(); return}
+  if(b=q("[data-kindsel]")){const v=b.dataset.kindsel; if(v==="dep") draft.type="dep"; else if(v==="dev"){if(secOf(draft.type)!=="dev") draft.type=lastTech("dev")} else if(secOf(draft.type)!=="char") draft.type=lastTech(); lsSet(TKEY,draft.type); touch(); renderForm(); return}
   if(b=q("[data-grp]")){draft.type=lastTech(b.dataset.grp); rememberTech(draft.type); lsSet(TKEY,draft.type); touch(); renderForm(); return}
   if(b=q("[data-tech]")){const t=b.dataset.tech; if(!TECH[t]) return; draft.type=t; rememberTech(t); lsSet(TKEY,t); touch(); renderForm(); return}
   if(b=q("[data-route]")){setRoute(b.dataset.route);return}
@@ -1166,7 +1247,7 @@ function stageItems(s){
   (s.x||[]).forEach(x=>{if(T_(x.k)||T_(x.v)) it.push({l:T_(x.k)||"Other",v:T_(x.v)||"—",u:""})});
   return it;
 }
-function flatItems(e){const f=obj(e.f);return fieldsOf(e.type).filter(fd=>T_(f[fd.k])&&!(e.type==="other"&&fd.k==="tech")).map(fd=>({l:fd.d||fd.l,v:T_(f[fd.k]),u:unitOf(str(f[fd.k+"_u"]),fd.u)}))}
+function flatItems(e){const f=obj(e.f);return fieldsOf(e.type).filter(fd=>T_(f[fd.k])&&!((e.type==="other"||e.type==="devo")&&fd.k==="tech")).map(fd=>({l:fd.d||fd.l,v:T_(f[fd.k]),u:unitOf(str(f[fd.k+"_u"]),fd.u)}))}
 const itemHTML=x=>`<div${x.prog?' class="wide"':""}><dt>${fmtChem(x.l)}</dt><dd${x.muted?' class="muted"':""}>${x.sci?fmtVal(x.v,1):esc(x.v)}${x.u?" "+esc(x.u):""}</dd>${x.prog?`<dd class="progline">${progText(x.prog,x.kind)}</dd>`:""}</div>`;
 const extraHTML=list=>list.length?`<dl class="params">${list.map(x=>`<div><dt>${esc(x.k||"Other")}</dt><dd>${esc(x.v)}</dd></div>`).join("")}</dl>`:"";
 
@@ -1218,20 +1299,21 @@ $("#dayList").addEventListener("click",onCardAction);
 function searchText(e){
   const p=[e.sample,subsOf(e).join(" "),e.notes];
   if(kindOf(e)==="dep"){const d=depOf(e); p.push(ROUTES[d.route].name); d.stages.forEach(s=>{p.push(STAGE_NAME[s.kind]); if(s.kind==="te") s.src.forEach(c=>p.push(c.chem,chemPlain(c.chem))); else s.sol.forEach(x=>{p.push(x.name,x.solv); x.prog.forEach(r=>p.push(r.asName))}); s.x.forEach(x=>p.push(x.k,x.v))}); d.extra.forEach(x=>p.push(x.k,x.v))}
-  else {const k=kindOf(e); p.push(kindName(e),TECH_GROUPS[grpOf(k)].name,"characterisation"); fieldsOf(k).forEach(fd=>{if(fd.txt) p.push(obj(e.f)[fd.k])}); normExtra(e.extra).forEach(x=>p.push(x.k,x.v))}
+  else {const k=kindOf(e); p.push(kindName(e),TECH_GROUPS[grpOf(k)].name,SEC_NAME[secOf(k)]); fieldsOf(k).forEach(fd=>{if(fd.txt) p.push(obj(e.f)[fd.k])}); normExtra(e.extra).forEach(x=>p.push(x.k,x.v))}
   return p.map(str).join(" ").toLowerCase();
 }
 function renderLog(){
   const q=ui.q.trim().toLowerCase();
-  const list=sorted().filter(e=>{const k=kindOf(e); return (ui.filter==="all"||(ui.filter==="dep"?k==="dep":k!=="dep"&&(!ui.tech||k===ui.tech)))&&(!q||searchText(e).includes(q))});
+  const list=sorted().filter(e=>{const k=kindOf(e); return (ui.filter==="all"||(secOf(k)===ui.filter&&(ui.filter==="dep"||!ui.tech||k===ui.tech)))&&(!q||searchText(e).includes(q))});
   const el=$("#logList");
   if(!entries.size){el.innerHTML=`<div class="empty"><b>No experiments logged yet</b>Your saved entries appear here, newest first, grouped by day.</div>`;return}
   if(!list.length){el.innerHTML=`<div class="empty"><b>No matching entries</b>Try another type or search term.</div>`;return}
   const by=new Map(); list.forEach(e=>{if(!by.has(e.date))by.set(e.date,[]);by.get(e.date).push(e)});
   el.innerHTML=[...by].map(([d,es])=>`<section class="day"><h4 class="day-h"><b>${esc(niceDate(d,true))}</b>${es.length} ${es.length>1?"entries":"entry"}</h4><div class="list">${es.map(cardHTML).join("")}</div></section>`).join("");
 }
-$("#filterSeg").addEventListener("click",e=>{const b=e.target.closest("[data-f]");if(!b)return;ui.filter=b.dataset.f;document.querySelectorAll("#filterSeg button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));$("#techFilter").hidden=ui.filter!=="char";if(ui.filter!=="char"){ui.tech="";$("#techFilter").value=""}renderLog()});
-$("#techFilter").innerHTML=`<option value="">All techniques</option>`+Object.entries(TECH_GROUPS).map(([g,G])=>`<optgroup label="${G.name}">${TECH_ORDER[g].map(t=>`<option value="${t}">${TECH[t].n}</option>`).join("")}</optgroup>`).join("");
+$("#filterSeg").addEventListener("click",e=>{const b=e.target.closest("[data-f]");if(!b)return;ui.filter=b.dataset.f;document.querySelectorAll("#filterSeg button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));ui.tech="";techOpts();$("#techFilter").hidden=ui.filter==="all"||ui.filter==="dep";renderLog()});
+function techOpts(){const dev=ui.filter==="dev"; $("#techFilter").innerHTML=(dev?`<option value="">All devices</option>`+TECH_ORDER.dev.map(t=>`<option value="${t}">${TECH[t].n}</option>`).join(""):`<option value="">All techniques</option>`+CHAR_GROUPS.map(g=>`<optgroup label="${TECH_GROUPS[g].name}">${TECH_ORDER[g].map(t=>`<option value="${t}">${TECH[t].n}</option>`).join("")}</optgroup>`).join("")); $("#techFilter").value=""}
+techOpts();
 $("#techFilter").addEventListener("change",e=>{ui.tech=e.target.value;renderLog()});
 $("#search").addEventListener("input",e=>{ui.q=e.target.value;renderLog()});
 
@@ -1245,7 +1327,7 @@ function renderCal(){
   for(let i=0;i<42;i++){
     const d=new Date(start); d.setDate(start.getDate()+i); const s=ymd(d);
     if(i===35&&d.getMonth()!==m.getMonth()) break;
-    const types=byDay[s]?["dep","xray","opt","em","spm","oth"].filter(t=>byDay[s].has(t)):[];
+    const types=byDay[s]?["dep",...Object.keys(TECH_ORDER)].filter(t=>byDay[s].has(t)):[];
     h+=`<button class="cell${d.getMonth()!==m.getMonth()?" out":""}${s===today?" today":""}" data-day="${s}" aria-pressed="${s===ui.calDay}" aria-label="${niceDate(s,true)}${types.length?", "+types.map(t=>t==="dep"?"Deposition":TECH_GROUPS[t].name).join(", "):""}">${d.getDate()}<span class="dots">${types.map(t=>`<i data-type="${t}"></i>`).join("")}</span></button>`;
   }
   $("#calGrid").innerHTML=h;
@@ -1274,7 +1356,7 @@ function buildCSV(){
   for(let i=1;i<=nS;i++) head.push(`Stage ${i}`);
   head.push("Measurement","Other parameters","Comments");
   const rows=list.map(e=>{const k=kindOf(e), d=dmap.get(e.id);
-    const r=[e.date,e.time,k==="dep"?"Deposition":"Characterisation",d?ROUTES[d.route].name+(d.stages.length>1?" ("+d.stages.map(s=>STAGE_SHORT[s.kind]).join(" → ")+")":""):kindName(e),e.sample,subsOf(e).join("; ")];
+    const r=[e.date,e.time,SEC_NAME[secOf(k)],d?ROUTES[d.route].name+(d.stages.length>1?" ("+d.stages.map(s=>STAGE_SHORT[s.kind]).join(" → ")+")":""):kindName(e),e.sample,subsOf(e).join("; ")];
     for(let i=0;i<nS;i++) r.push(d&&d.stages[i]?stageText(d.stages[i]):"");
     r.push(d?"":flatItems(e).map(x=>`${x.l} ${x.v}${x.u?" "+x.u:""}`).join("; "));
     r.push((d?d.extra:normExtra(e.extra)).map(x=>`${x.k}=${x.v}`).join("; ")); r.push(e.notes);
@@ -1385,8 +1467,8 @@ $("#progEnter").addEventListener("click",()=>{
 });
 
 /* ---------- recipes ---------- */
-const REC_CAT={co:"Co-evaporation",seq:"Sequential evaporation",spin:"Spin coating",hyb:"Hybrid",te:"Thermal evaporation",pl:"PL",xrd:"XRD",char:"Characterisation",other:"Other"};
-const catType=c=>c==="pl"?"opt":c==="xrd"||c==="char"?"xray":(c&&c!=="other"?"dep":"");
+const REC_CAT={co:"Co-evaporation",seq:"Sequential evaporation",spin:"Spin coating",hyb:"Hybrid",te:"Thermal evaporation",pl:"PL",xrd:"XRD",char:"Characterisation",dev:"Device testing",other:"Other"};
+const catType=c=>c==="dev"?"dev":c==="pl"?"opt":c==="xrd"||c==="char"?"xray":(c&&c!=="other"?"dep":"");
 const rec={mode:"list",id:null,pushed:false,confirmDel:false,q:""};
 const recipes=()=>Object.values(store.entries).filter(e=>e&&!e.deleted&&e.type==="recipe");
 function recShow(){ $("#recListView").hidden=rec.mode!=="list"; $("#recDetail").hidden=rec.mode!=="view"; $("#recForm").hidden=rec.mode!=="edit"; $("#recAdd").hidden=rec.mode!=="list"; }
