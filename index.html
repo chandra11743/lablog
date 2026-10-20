@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-ihFVPLeP5SXpK8snYdKd07QsqEpPdjgMX74B3l16wFw='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-RkK6cPjiY4J5L4czI6UHBtQhK+i8j07W3Wv2WQdEND4='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0E6E6B">
@@ -20,7 +20,7 @@
   --bg:#EDF0F2; --panel:#FFFFFF; --panel2:#F6F8F9; --ink:#14202B; --muted:#5B6975; --line:#D5DCE1;
   --accent:#0E6E6B; --accent-ink:#FFFFFF;
   --te:#B45A22; --pl:#7045C8; --xrd:#1D68B0;
-  --danger:#B3261E; --ok:#2E7D4F; --warn:#9A6A00; --spin:#3C7D23;
+  --danger:#B3261E; --ok:#2E7D4F; --warn:#9A6A00; --spin:#3C7D23; --em:#A1475E; --spm:#0F7C8C;
   --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   --cond:"IBM Plex Sans Condensed","IBM Plex Sans",-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -32,7 +32,7 @@
     --bg:#0F151A; --panel:#172027; --panel2:#1C272F; --ink:#E4EAEE; --muted:#93A2AD; --line:#2A3640;
     --accent:#3FB8B1; --accent-ink:#06201F;
     --te:#E08A52; --pl:#A68BF0; --xrd:#62A6E8;
-    --danger:#F2877F; --ok:#6CC592; --warn:#E3B341; --spin:#8BC86B;
+    --danger:#F2877F; --ok:#6CC592; --warn:#E3B341; --spin:#8BC86B; --em:#E88AA0; --spm:#4FC3D1;
   }
 }
 :root[data-theme="dark"]{
@@ -40,7 +40,7 @@
   --bg:#0F151A; --panel:#172027; --panel2:#1C272F; --ink:#E4EAEE; --muted:#93A2AD; --line:#2A3640;
   --accent:#3FB8B1; --accent-ink:#06201F;
   --te:#E08A52; --pl:#A68BF0; --xrd:#62A6E8;
-  --danger:#F2877F; --ok:#6CC592; --warn:#E3B341; --spin:#8BC86B;
+  --danger:#F2877F; --ok:#6CC592; --warn:#E3B341; --spin:#8BC86B; --em:#E88AA0; --spm:#4FC3D1;
 }
 [hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
@@ -161,7 +161,10 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 .csvbox{margin-top:12px}
 .csvbox textarea{font-family:var(--mono);font-size:12px;min-height:160px}
 
-[data-type="te"],[data-type="dep"]{--tc:var(--te)} [data-type="pl"]{--tc:var(--pl)} [data-type="xrd"]{--tc:var(--xrd)}
+[data-type="te"],[data-type="dep"]{--tc:var(--te)} [data-type="pl"],[data-type="opt"]{--tc:var(--pl)} [data-type="xrd"],[data-type="xray"]{--tc:var(--xrd)} [data-type="em"]{--tc:var(--em)} [data-type="spm"]{--tc:var(--spm)} [data-type="oth"]{--tc:var(--muted)}
+[data-kind="xray"]{--sc:var(--xrd)} [data-kind="opt"]{--sc:var(--pl)} [data-kind="em"]{--sc:var(--em)} [data-kind="spm"]{--sc:var(--spm)} [data-kind="oth"]{--sc:var(--muted)}
+.chip-btn.grp[aria-pressed="true"],.chip-btn.tech[aria-pressed="true"]{border-color:var(--tc);color:var(--tc);background:color-mix(in srgb,var(--tc) 10%,var(--panel))}
+.chip-btn.tech,.chip-btn.grp{font-family:var(--sans)} #techFilter{width:auto;max-width:180px}
 
 /* recipes */
 .rec-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:4px 0 12px}
@@ -236,7 +239,7 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 /* ---- v12: experiment chooser, stages ---- */
 .stack{display:grid;gap:12px}
 .card>h3,.card .grp-h h3{margin:0}
-.kinds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.kinds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .kind{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);cursor:pointer;min-width:0}
 .kind b{font-size:15px}.kind small{font-size:11.5px;color:var(--muted);line-height:1.3}
 .kind[aria-pressed="true"]{border-color:var(--tc);box-shadow:inset 0 0 0 1px var(--tc);background:color-mix(in srgb,var(--tc) 10%,var(--panel))}
@@ -291,7 +294,7 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 .chemchip[aria-pressed="true"]{border-color:var(--sc);color:var(--sc);background:color-mix(in srgb,var(--sc) 12%,var(--panel))}
 .stepbtn:hover{border-color:var(--sc);color:var(--sc)}
 .stepbtn.on{border-color:color-mix(in srgb,var(--sc) 45%,transparent);background:color-mix(in srgb,var(--sc) 9%,transparent);color:var(--sc)}
-.xrow{align-items:end}
+.xrow{align-items:end;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) auto}
 .savebar{position:sticky;bottom:0;z-index:3;padding:14px 0 12px;background:linear-gradient(to bottom,transparent,var(--bg) 40%)}
 /* entry cards */
 .flow{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:12.5px}
@@ -310,8 +313,7 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
   .tabbar button[aria-selected="true"]{color:var(--accent)}
   .tabbar svg{width:22px;height:22px}
   main{padding-bottom:96px}
-  .kinds{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .kind small{display:none}
+  .kinds{grid-template-columns:repeat(2,minmax(0,1fr))}
   .savebar{bottom:calc(62px + env(safe-area-inset-bottom,0px))}
   .route{padding:9px 10px}
   .savebar .primary{flex:1}
@@ -369,7 +371,7 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
       <div id="typeFields" class="stack"></div>
 
       <section class="card stack">
-        <div class="grp-h"><h3>Other parameters</h3><button type="button" class="btn sm" id="addParam">＋ Add</button></div>
+        <div class="grp-h"><h3 id="xHead">Other parameters</h3><button type="button" class="btn sm" id="addParam">＋ Add</button></div>
         <div id="extraRows" class="stack"></div>
       </section>
 
@@ -383,7 +385,7 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
         <button type="submit" class="btn primary" id="saveBtn">Save entry</button>
         <button type="button" class="btn ghost" id="clearBtn">Clear form</button>
       </div>
-      <datalist id="chemList"></datalist><datalist id="solvList"></datalist><datalist id="asList"></datalist>
+      <datalist id="chemList"></datalist><datalist id="xList"></datalist><datalist id="solvList"></datalist><datalist id="asList"></datalist>
     </form>
     <aside class="aside"><h3>Logged today</h3><div id="todayList" class="list"></div></aside>
   </section>
@@ -394,9 +396,9 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
       <div class="seg" id="filterSeg" role="group" aria-label="Filter by type">
         <button data-f="all" aria-pressed="true">All</button>
         <button data-f="dep" aria-pressed="false">Deposition</button>
-        <button data-f="pl" aria-pressed="false">PL</button>
-        <button data-f="xrd" aria-pressed="false">XRD</button>
+        <button data-f="char" aria-pressed="false">Characterisation</button>
       </div>
+      <select id="techFilter" aria-label="Technique" hidden></select>
       <input type="search" id="search" placeholder="Search sample, chemical, solvent…">
       <span class="spacer"></span>
       <button class="btn sm" id="exportBtn">Export CSV</button>
@@ -420,7 +422,7 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
         </div>
         <div class="grid7" id="calGrid"></div>
         <div class="legend">
-          <span data-type="dep"><i></i>Deposition</span><span data-type="pl"><i></i>PL</span><span data-type="xrd"><i></i>XRD</span>
+          <span data-type="dep"><i></i>Deposition</span><span data-type="xray"><i></i>X-ray</span><span data-type="opt"><i></i>Optical</span><span data-type="em"><i></i>Electron</span><span data-type="spm"><i></i>Probe</span>
         </div>
       </div>
       <div>
@@ -442,7 +444,7 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
       <div class="card" style="display:grid;gap:12px">
         <label class="f"><span class="lab">Title of experiment</span><input type="text" id="rTitle" placeholder="e.g. FAPbI₃ co-evaporation, 2-step spin coating with CB"></label>
         <div class="row">
-          <label class="f"><span class="lab">Experiment type (optional)</span><select id="rCat"><option value="">—</option><option value="co">Co-evaporation</option><option value="seq">Sequential evaporation</option><option value="spin">Spin coating</option><option value="hyb">Hybrid</option><option value="pl">PL</option><option value="xrd">XRD</option><option value="other">Other</option></select></label>
+          <label class="f"><span class="lab">Experiment type (optional)</span><select id="rCat"><option value="">—</option><option value="co">Co-evaporation</option><option value="seq">Sequential evaporation</option><option value="spin">Spin coating</option><option value="hyb">Hybrid</option><option value="char">Characterisation</option><option value="pl">PL</option><option value="xrd">XRD</option><option value="other">Other</option></select></label>
           <label class="f"><span class="lab">Date (optional)</span><input type="date" id="rDate"></label>
         </div>
         <label class="f"><span class="lab">Learned from (optional)</span><input type="text" id="rSource" placeholder="Person, paper or lab manual"></label>
@@ -493,11 +495,14 @@ const CHEMS=[{id:"PbI2",l:"PbI₂"},{id:"MAI",l:"MAI",org:1},{id:"FAI",l:"FAI",o
 const DEF_CHEMS=["PbI2","MAI","FAI","CsI"], DEF_SEQ=["PbI2","FAI"];
 const chemById=id=>CHEMS.find(c=>c.id===id);
 /* what kind of entry */
-const KINDS={
-  dep:{name:"Deposition",sub:"Evaporation, spin coating, hybrid"},
-  pl:{name:"PL",sub:"Intensity, acquisition time"},
-  xrd:{name:"XRD",sub:"Scan rate, angle, time"}
+const TECH_GROUPS={
+  xray:{name:"X-ray",sub:"Diffraction, reflectivity, fluorescence, photoemission"},
+  opt:{name:"Optical",sub:"PL, TRPL, PL mapping, UV-Vis"},
+  em:{name:"Electron",sub:"SEM, TEM, LEED"},
+  spm:{name:"Scanning probe",sub:"AFM, STM"},
+  oth:{name:"Other",sub:"Any other technique"}
 };
+const TECH_ORDER={xray:["xrd","gixrd","giwaxs","pole","xrr","xrf","xps"],opt:["pl","trpl","plmap","uvvis"],em:["sem","tem","leed"],spm:["afm","stm"],oth:["other"]};
 /* deposition routes; a route is a chain of stages (te = thermal evaporation, spin = spin coating) */
 const ROUTES={
   co:{name:"Co-evaporation",short:"Co-evap",sub:"Single step, all sources together",flow:["te"]},
@@ -537,22 +542,65 @@ const ANN_F=[{k:"t",l:"Annealing temperature",d:"Anneal T",u:"°C"},{k:"time",l:
 const SOLVENTS=["DMF","DMSO","DMF:DMSO 4:1","DMF:DMSO 9:1","GBL","NMP","2-ME","IPA","Chlorobenzene","Ethanol"];
 const ANTISOLV=["Chlorobenzene","Toluene","Diethyl ether","Ethyl acetate","Anisole","Chloroform"];
 /* characterisation (flat fields) */
-const TYPES={
-  pl:{groups:[
-    {title:"Measurement",fields:[
-      {k:"intensity",l:"Intensity",u:["mW/cm²","mW","µW","%","counts"]},
-      {k:"collTime",l:"Data acquisition time",d:"Acquisition time",u:["s","ms","min"]},
-      {k:"exWl",l:"Excitation wavelength (optional)",d:"Excitation λ",u:"nm"}]}
-  ]},
-  xrd:{groups:[
-    {title:"Scan",fields:[
-      {k:"scanRate",l:"Scan rate",u:"°/s"},
-      {k:"collTime",l:"Data acquisition time",d:"Acquisition time",u:["min","s","h"]},
-      {k:"incAngle",l:"Incident angle ω",d:"Incident ω",u:"°"}]},
-    {title:"Range (optional)",fields:[
-      {k:"tthStart",l:"2θ start",u:"°"},{k:"tthEnd",l:"2θ end",u:"°"},{k:"step",l:"Step size",u:"°"}]}
-  ]}
+const F=(k,l,u,o)=>({k,l,...(u!=null?{u}:{}),...(o||{})});
+const TX=(k,l,ph,o)=>({k,l,txt:1,ph,...(o||{})});
+const T2=["min","s","h"], TS=["s","ms","min"];
+const TECH={
+  xrd:{n:"XRD",g:"xray",sub:"Scan rate, angle, range",groups:[
+    {title:"Scan",fields:[F("scanRate","Scan rate","°/s"),F("collTime","Data acquisition time",T2,{d:"Acquisition time"}),F("incAngle","Incident angle ω","°",{d:"Incident ω"})]},
+    {title:"Range (optional)",fields:[F("tthStart","2θ start","°"),F("tthEnd","2θ end","°"),F("step","Step size","°")]}]},
+  gixrd:{n:"GIXRD",g:"xray",sub:"Grazing-incidence XRD",groups:[
+    {title:"Geometry",fields:[F("incAngle","Incidence angle ω","°",{d:"Incidence ω"})]},
+    {title:"Scan",fields:[F("tthStart","2θ start","°"),F("tthEnd","2θ end","°"),F("step","Step size","°"),F("scanRate","Scan rate","°/s"),F("collTime","Data acquisition time",T2,{d:"Acquisition time"})]}]},
+  giwaxs:{n:"GIWAXS",g:"xray",sub:"Grazing-incidence wide-angle scattering",groups:[
+    {title:"Beam & geometry",fields:[F("energy","X-ray energy","keV"),F("incAngle","Incidence angle","°",{d:"Incidence angle"}),F("sdd","Sample–detector distance","mm",{d:"Detector distance"})]},
+    {title:"Acquisition",fields:[F("expTime","Exposure time",TS),F("frames","Number of frames"),TX("beamline","Beamline / instrument","e.g. lab source, beamline name")]}]},
+  pole:{n:"Pole figure",g:"xray",sub:"Texture: ψ / φ scan of one reflection",groups:[
+    {title:"Reflection",fields:[TX("hkl","Reflection (hkl)","e.g. (100)"),F("tth","2θ position","°")]},
+    {title:"Scan",fields:[F("psiStart","ψ start","°"),F("psiEnd","ψ end","°"),F("psiStep","ψ step","°"),F("phiStep","φ step","°"),F("tpp","Time per point",["s","ms"])]}]},
+  xrr:{n:"XRR",g:"xray",sub:"Reflectivity: thickness, roughness, density",groups:[
+    {title:"Scan",fields:[F("tthStart","2θ start","°"),F("tthEnd","2θ end","°"),F("step","Step size","°"),F("scanRate","Scan rate","°/s")]},
+    {title:"Fit results (optional)",fields:[F("thick","Thickness",["nm","Å"]),F("rough","Roughness",["nm","Å"]),F("dens","Density","g/cm³")]}]},
+  xrf:{n:"XRF",g:"xray",sub:"X-ray fluorescence",groups:[
+    {title:"Source",fields:[TX("anode","Anode / source","e.g. Rh"),F("kv","Voltage","kV"),F("current","Current",["µA","mA"])]},
+    {title:"Acquisition",fields:[F("collTime","Acquisition time",["s","min"],{d:"Acquisition time"}),TX("elements","Elements","e.g. Pb, I, Cs, Br"),TX("filter","Filter / atmosphere","e.g. vacuum, He")]}]},
+  xps:{n:"XPS",g:"xray",sub:"X-ray photoelectron spectroscopy",groups:[
+    {title:"Source",fields:[TX("src","X-ray source","e.g. Al Kα"),F("spot","Spot size","µm")]},
+    {title:"Acquisition",fields:[F("passE","Pass energy","eV"),F("stepE","Step size","eV"),F("dwell","Dwell time","ms"),F("scans","Number of scans")]},
+    {title:"Analysis",fields:[TX("regions","Regions","e.g. Pb 4f, I 3d, C 1s, O 1s"),TX("ref","Charge reference","e.g. C 1s 284.8 eV"),TX("sputter","Sputtering (optional)","e.g. Ar⁺ 500 eV, 30 s")]}]},
+  pl:{n:"PL",g:"opt",sub:"Intensity, acquisition time",groups:[
+    {title:"Measurement",fields:[F("intensity","Intensity",["mW/cm²","mW","µW","%","counts"]),F("collTime","Data acquisition time",TS,{d:"Acquisition time"}),F("exWl","Excitation wavelength (optional)","nm",{d:"Excitation λ"})]}]},
+  trpl:{n:"TRPL",g:"opt",sub:"Time-resolved PL",groups:[
+    {title:"Excitation",fields:[F("exWl","Excitation wavelength","nm",{d:"Excitation λ"}),F("rep","Repetition rate",["MHz","kHz"]),F("power","Power / fluence",["µW","nW","mW","µJ/cm²","nJ/cm²"])]},
+    {title:"Detection",fields:[F("emWl","Detection wavelength","nm",{d:"Detection λ"}),F("window","Time window",["ns","µs"]),F("collTime","Acquisition time",["s","min"])]},
+    {title:"Fit (optional)",fields:[F("tau1","τ₁","ns"),F("tau2","τ₂","ns"),F("tauAvg","τ average","ns")]}]},
+  plmap:{n:"PL mapping",g:"opt",sub:"Spatially resolved PL",groups:[
+    {title:"Excitation",fields:[F("exWl","Excitation wavelength","nm",{d:"Excitation λ"}),F("power","Power",["µW","nW","mW"])]},
+    {title:"Map",fields:[TX("area","Map area","e.g. 50 × 50 µm"),F("stepXY","Step size","µm"),F("intTime","Integration time per point",["ms","s"],{d:"Integration / point"})]}]},
+  uvvis:{n:"UV-Vis",g:"opt",sub:"Absorbance, transmittance, reflectance",groups:[
+    {title:"Measurement",fields:[TX("mode","Mode","Absorbance / transmittance / reflectance"),F("wlStart","λ start","nm"),F("wlEnd","λ end","nm"),F("stepWl","Step / interval","nm"),F("scanSpeed","Scan speed","nm/min"),TX("acc","Accessory (optional)","e.g. integrating sphere")]}]},
+  sem:{n:"SEM",g:"em",sub:"Scanning electron microscopy",groups:[
+    {title:"Imaging",fields:[F("kv","Accelerating voltage","kV"),F("wd","Working distance","mm"),F("mag","Magnification","×"),F("current","Probe current",["pA","nA"]),TX("detector","Detector","e.g. SE / BSE / InLens"),TX("view","View","e.g. top view / cross-section")]}]},
+  tem:{n:"TEM",g:"em",sub:"Transmission electron microscopy",groups:[
+    {title:"Imaging",fields:[F("kv","Accelerating voltage","kV"),F("mag","Magnification","×"),TX("mode","Mode","e.g. BF / HRTEM / SAED / STEM"),TX("prep","Sample preparation","e.g. FIB lamella")]}]},
+  leed:{n:"LEED",g:"em",sub:"Low-energy electron diffraction",groups:[
+    {title:"Measurement",fields:[F("energy","Electron energy","eV"),F("current","Beam current",["µA","nA"]),F("temp","Sample temperature",["K","°C"]),TX("pattern","Pattern","e.g. (1×1), (√2×√2)R45°")]}]},
+  afm:{n:"AFM",g:"spm",sub:"Atomic force microscopy",groups:[
+    {title:"Scan",fields:[TX("mode","Mode","e.g. tapping / contact / KPFM"),F("size","Scan size","µm"),F("rate","Scan rate","Hz"),TX("res","Resolution","e.g. 512 × 512"),TX("tip","Tip","e.g. Si, 300 kHz")]},
+    {title:"Result (optional)",fields:[F("rms","RMS roughness","nm")]}]},
+  stm:{n:"STM",g:"spm",sub:"Scanning tunnelling microscopy",groups:[
+    {title:"Scan",fields:[F("bias","Bias voltage",["V","mV"]),F("iset","Setpoint current",["pA","nA"]),F("size","Scan size","nm"),F("speed","Scan speed","nm/s"),F("temp","Temperature",["K","°C"]),TX("tip","Tip","e.g. W / PtIr")]}]},
+  other:{n:"Other",g:"oth",sub:"Name the technique",groups:[
+    {title:"Technique",fields:[TX("tech","Technique name","e.g. Raman, EQE, J–V"),TX("instr","Instrument (optional)","")]}]}
 };
+const KINDS={dep:{name:"Deposition",sub:"Evaporation, spin coating, hybrid"}};
+Object.entries(TECH).forEach(([k,t])=>{KINDS[k]={name:t.n,sub:t.sub,g:t.g}});
+const TYPES=TECH;
+const grpOf=k=>k==="dep"?"dep":(TECH[k]?TECH[k].g:"oth");
+const kindName=e=>{const k=kindOf(e); return k==="other"&&T_(obj(e.f).tech)?T_(obj(e.f).tech):KINDS[k].name};
+const LTKEY="perovLabLog.lastTech";
+function lastTech(g){const m=obj(lsGet(LTKEY,{})); const t=g?m[g]:m._; return TECH[t]&&(!g||TECH[t].g===g)?t:(g?TECH_ORDER[g][0]:"xrd")}
+function rememberTech(t){if(!TECH[t]) return; const m=obj(lsGet(LTKEY,{})); m._=t; m[TECH[t].g]=t; lsSet(LTKEY,m)}
 const fieldsOf=t=>TYPES[t]?TYPES[t].groups.flatMap(g=>g.fields):[];
 /* step programs (temperature and rate pop-up) */
 const PK={
@@ -604,6 +652,7 @@ const blankSol=()=>({name:"",conc:"",concU:"",solv:"",vol:"",prog:[],ann:{on:tru
 const normSpin=rows=>arr(rows).slice(0,10).map(r=>{r=obj(r);return {rpm:str(r.rpm),ramp:str(r.ramp),time:str(r.time),as:!!r.as,asName:str(r.asName),asVol:str(r.asVol),asAt:str(r.asAt)}}).filter(r=>r.rpm||r.ramp||r.time||r.as);
 function normSrc(s){s=obj(s);return {chem:T_(s.chem),t:str(s.t),tP:normRows(s.tP,"temp"),m:str(s.m),mU:str(s.mU),r:str(s.r),rP:normRows(s.rP,"rate"),q:str(s.q),k:str(s.k),kU:str(s.kU)}}
 function normAnn(a,def){a=obj(a);return {on:a.on==null?!!def:!!a.on,t:str(a.t),time:str(a.time),timeU:str(a.timeU)}}
+const normX=x=>arr(x).slice(0,30).map(o=>{o=obj(o);return {k:str(o.k),v:str(o.v)}});
 function normStage(s){s=obj(s);
   if(s.kind==="spin"){
     const sol=arr(s.sol).slice(0,10).map(x=>{x=obj(x);return {name:str(x.name),conc:str(x.conc),concU:str(x.concU),solv:str(x.solv),vol:str(x.vol),prog:normSpin(x.prog),ann:normAnn(x.ann,false)}});
@@ -614,10 +663,10 @@ function normStage(s){s=obj(s);
         so.prog.push(...normSpin([st])); if(so.prog.length>10) so.prog.length=10;
         if(st.an&&!so.ann.on) so.ann={on:true,t:str(st.anT),time:str(st.anTime),timeU:str(st.anTimeU)}})}
     const sa=normAnn(s.ann,false); if(sa.on&&(sa.t||sa.time)&&sol.length){const last=sol[sol.length-1]; if(!last.ann.on||(!last.ann.t&&!last.ann.time)) last.ann=sa}
-    return {kind:"spin",sol,ann:{on:false,t:"",time:"",timeU:""}};
+    return {kind:"spin",sol,ann:{on:false,t:"",time:"",timeU:""},x:normX(s.x)};
   }
   const f={},sf=obj(s.f); TE_F.forEach(fd=>{f[fd.k]=str(sf[fd.k]); if(Array.isArray(fd.u)) f[fd.k+"_u"]=str(sf[fd.k+"_u"])});
-  return {kind:"te",mode:s.mode==="seq"?"seq":"co",f,src:arr(s.src).slice(0,30).map(normSrc),ann:normAnn(s.ann,false)};
+  return {kind:"te",mode:s.mode==="seq"?"seq":"co",f,src:arr(s.src).slice(0,30).map(normSrc),ann:normAnn(s.ann,false),x:normX(s.x)};
 }
 const normExtra=x=>arr(x).slice(0,60).map(o=>{o=obj(o);return {k:str(o.k),v:str(o.v)}}).filter(o=>o.k||o.v);
 const kindOf=e=>e.type==="te"?"dep":e.type;
@@ -654,7 +703,7 @@ let unitPref=obj(lsGet(UKEY,{}));
 let entries=new Map();
 function live(){entries=new Map(Object.entries(store.entries).filter(([id,e])=>e&&!e.deleted&&KINDS[kindOf(e)]))}
 live();
-const ui={tab:"new",filter:"all",q:"",calMonth:null,calDay:ymd(new Date()),editing:null,confirmDel:null,col:new Set()};
+const ui={tab:"new",filter:"all",tech:"",q:"",calMonth:null,calDay:ymd(new Date()),editing:null,confirmDel:null,col:new Set()};
 let draft;
 
 const CHKEY="perovLabLog.chems";
@@ -677,9 +726,9 @@ function renderSub(){const cur=draft.subs||[];
   $("#subCount").textContent=cur.length?`· ${cur.length} selected`:""}
 
 function newStage(kind,mode){
-  if(kind==="spin") return {kind:"spin",sol:[blankSol()],ann:{on:false,t:"",time:"",timeU:""}};
+  if(kind==="spin") return {kind:"spin",sol:[blankSol()],ann:{on:false,t:"",time:"",timeU:""},x:[]};
   const m=mode==="seq"?"seq":"co";
-  return {kind:"te",mode:m,f:{},src:(m==="seq"?lastSeq():lastChems()).map(blankSrc),ann:{on:false,t:"",time:"",timeU:""}};
+  return {kind:"te",mode:m,f:{},src:(m==="seq"?lastSeq():lastChems()).map(blankSrc),ann:{on:false,t:"",time:"",timeU:""},x:[]};
 }
 /* build the stages for a route, re-using stages already filled in (matched by kind, in order) */
 function stagesFor(route,old,flow){
@@ -854,16 +903,21 @@ function renderForm(){
 }
 function dateHint(){$("#dateHint").textContent=draft.date===ymd(new Date())?"Date and time are filled in automatically. Pick another day in Calendar to log for that date.":"Logging for "+niceDate(draft.date,true)+"."}
 function renderKind(){
-  $("#kinds").innerHTML=Object.entries(KINDS).map(([k,t])=>`<button type="button" class="kind" data-type="${k}" data-kindsel="${k}" aria-pressed="${draft.type===k}"><b>${t.name}</b><small>${t.sub}</small></button>`).join("");
+  const isDep=draft.type==="dep";
+  $("#kinds").innerHTML=`<button type="button" class="kind" data-type="dep" data-kindsel="dep" aria-pressed="${isDep}"><b>Deposition</b><small>Making films: evaporation, spin coating, hybrid</small></button><button type="button" class="kind" data-type="${isDep?"xray":grpOf(draft.type)}" data-kindsel="char" aria-pressed="${!isDep}"><b>Characterisation</b><small>X-ray, optical, electron, scanning probe</small></button>`;
   const rb=$("#routeBox");
-  if(draft.type!=="dep"){rb.innerHTML="";rb.hidden=true;return}
   rb.hidden=false;
+  if(draft.type!=="dep"){const g=grpOf(draft.type);
+    rb.innerHTML=`<div class="lab2">Technique group</div><div class="chips">${Object.entries(TECH_GROUPS).map(([gk,G])=>`<button type="button" class="chip-btn grp" data-type="${gk}" data-grp="${gk}" aria-pressed="${gk===g}">${G.name}</button>`).join("")}</div>
+      <div class="lab2">Technique</div><div class="chips">${TECH_ORDER[g].map(t=>`<button type="button" class="chip-btn tech" data-type="${g}" data-tech="${t}" aria-pressed="${t===draft.type}">${TECH[t].n}</button>`).join("")}</div>`;
+    return}
   const flow=draft.stages.map(s=>s.kind).join(",");
   rb.innerHTML=`<div class="lab2">Deposition route</div><div class="routes">${Object.entries(ROUTES).map(([k,r])=>`<button type="button" class="route" data-route="${k}" aria-pressed="${draft.route===k}"><span class="ricon">${ICON[k]}</span><span><b>${r.name.replace(/-/g,"\u2011")}</b><small>${r.sub}</small></span></button>`).join("")}</div>`+
     (draft.route==="hyb"?`<div class="lab2">Order of stages</div><div class="chips">${HYB_PRESETS.map(p=>`<button type="button" class="chip-btn" data-flow="${p.join(",")}" aria-pressed="${flow===p.join(",")}">${p.map(k=>STAGE_SHORT[k]).join(" → ")}</button>`).join("")}</div><div class="hint">Another order? Add, move or remove stages below.</div>`:"");
 }
 function renderTypeFields(){
   const tf=$("#typeFields"), nav=$("#stageNav");
+  $("#xHead").textContent=draft.type==="dep"&&draft.route==="hyb"?"Other parameters · whole run":"Other parameters";
   if(draft.type!=="dep"){nav.innerHTML="";nav.hidden=true;tf.innerHTML=flatHTML(draft.type);return}
   const n=draft.stages.length;
   nav.hidden=n<2;
@@ -879,7 +933,12 @@ function stageHTML(s,i){
   const head=`<div class="stage-h"><button type="button" class="stage-tog" data-col="${i}" aria-expanded="${!col}"><span class="stage-n">${i+1}</span><span class="stage-t"><b>${STAGE_NAME[s.kind]}</b><small>${esc(sub)}</small></span><span class="chev" aria-hidden="true">${col?"▸":"▾"}</span></button><div class="stage-tools">${tools}</div></div>`;
   if(col) return `<section class="card stage" data-kind="${s.kind}" id="stage_${i}">${head}${confirm}</section>`;
   const mode=hyb&&s.kind==="te"?`<div class="seg" role="group" aria-label="Evaporation mode">${["co","seq"].map(m=>`<button type="button" data-smode="${i}:${m}" aria-pressed="${s.mode===m}">${TE_MODE[m]}</button>`).join("")}</div>`:"";
-  return `<section class="card stage" data-kind="${s.kind}" id="stage_${i}">${head}${confirm}${mode}${s.kind==="te"?teBody(s,i,P):spinBody(s,i,P)}</section>`;
+  return `<section class="card stage" data-kind="${s.kind}" id="stage_${i}">${head}${confirm}${mode}${s.kind==="te"?teBody(s,i,P):spinBody(s,i,P)}${draft.route==="hyb"?stageXHTML(s,i,P):""}</section>`;
+}
+function stageXHTML(s,i,P){
+  return `<div class="grp"><div class="grp-h"><h4>Other parameters · stage ${i+1}</h4><button type="button" class="btn sm" data-addx="${i}">＋ Add</button></div>
+    ${s.x.map((x,j)=>`<div class="xrow">${fld({p:`${P}.x.${j}.k`,v:x.k,l:"Name",txt:1,ph:"e.g. Glovebox O₂ (ppm)",list:"xList"})}${fld({p:`${P}.x.${j}.v`,v:x.v,l:"Value",txt:1,ph:"e.g. 0.5"})}<button type="button" class="btn icon-x" data-del="${P}.x.${j}" aria-label="Remove stage ${i+1} parameter ${j+1}">✕</button></div>`).join("")
+      ||`<div class="hint">Conditions for this stage only, e.g. glovebox O₂/H₂O, humidity, room temperature.</div>`}</div>`;
 }
 function teBody(s,i,P){
   const seq=s.mode==="seq";
@@ -925,10 +984,10 @@ function spinBody(s,i,P){
 function annHTML(s,P){const a=s.ann;
   return `<div class="grp"><label class="check"><input type="checkbox" data-p="${P}.ann.on"${a.on?" checked":""}><span>${s.kind==="spin"?"Final annealing after all steps":"Annealed after this stage"}</span></label>${a.on?`<div class="row">${fld({p:`${P}.ann.t`,v:a.t,l:ANN_F[0].l,u:"°C"})}${fld({p:`${P}.ann.time`,v:a.time,l:ANN_F[1].l,u:ANN_F[1].u,up:`${P}.ann.timeU`,uv:a.timeU,uk:"timeU"})}</div>`:""}</div>`}
 function flatHTML(t){
-  return `<section class="card stage" data-kind="${t}"><div class="stage-h"><span class="stage-t"><b>${KINDS[t].name}</b><small>${KINDS[t].sub}</small></span></div>${TYPES[t].groups.map(g=>`<div class="grp"><h4>${g.title}</h4><div class="row">${g.fields.map(fd=>fld({p:"f."+fd.k,v:draft.f[fd.k],l:fd.l,u:fd.u,up:"f."+fd.k+"_u",uv:draft.f[fd.k+"_u"],uk:t+"."+fd.k})).join("")}</div></div>`).join("")}</section>`;
+  return `<section class="card stage" data-kind="${grpOf(t)}"><div class="stage-h"><span class="stage-t"><b>${KINDS[t].name}</b><small>${TECH_GROUPS[grpOf(t)].name} · ${KINDS[t].sub}</small></span></div>${TYPES[t].groups.map(g=>`<div class="grp"><h4>${g.title}</h4><div class="row">${g.fields.map(fd=>fld({p:"f."+fd.k,v:draft.f[fd.k],l:fd.l,u:fd.u,up:"f."+fd.k+"_u",uv:draft.f[fd.k+"_u"],uk:t+"."+fd.k,txt:fd.txt,ph:fd.ph})).join("")}</div></div>`).join("")}</section>`;
 }
 function renderExtra(){
-  $("#extraRows").innerHTML=draft.extra.map((x,i)=>`<div class="xrow">${fld({p:`extra.${i}.k`,v:x.k,l:"Name",txt:1,ph:"e.g. Tool factor"})}${fld({p:`extra.${i}.v`,v:x.v,l:"Value (with unit)",txt:1,ph:"e.g. 1.2"})}<button type="button" class="btn icon-x" data-del="extra.${i}" aria-label="Remove parameter ${i+1}">✕</button></div>`).join("")
+  $("#extraRows").innerHTML=draft.extra.map((x,i)=>`<div class="xrow">${fld({p:`extra.${i}.k`,v:x.k,l:"Name",txt:1,ph:"e.g. Tool factor",list:"xList"})}${fld({p:`extra.${i}.v`,v:x.v,l:"Value (with unit)",txt:1,ph:"e.g. 1.2"})}<button type="button" class="btn icon-x" data-del="extra.${i}" aria-label="Remove parameter ${i+1}">✕</button></div>`).join("")
     ||`<div class="hint">Anything else worth recording, e.g. tool factor, glovebox O₂/H₂O, humidity.</div>`;
 }
 function renderLists_dl(){
@@ -936,6 +995,9 @@ function renderLists_dl(){
   entries.forEach(e=>{if(kindOf(e)!=="dep") return; depOf(e).stages.forEach(s=>{
     if(s.kind==="te") s.src.forEach(c=>c.chem&&chems.add(c.chem)); else s.sol.forEach(x=>{T_(x.solv)&&solv.add(T_(x.solv)); x.prog.forEach(r=>T_(r.asName)&&as.add(T_(r.asName)))})})});
   const o=set=>[...set].slice(0,80).map(n=>`<option value="${esc(n)}">`).join("");
+  const xn=new Set(["Glovebox O₂ (ppm)","Glovebox H₂O (ppm)","Relative humidity (%)","Room temperature (°C)","Atmosphere","Tool factor"]);
+  entries.forEach(e=>{normExtra(e.extra).forEach(x=>T_(x.k)&&xn.add(T_(x.k))); if(kindOf(e)==="dep") depOf(e).stages.forEach(st=>st.x.forEach(x=>T_(x.k)&&xn.add(T_(x.k))))});
+  $("#xList").innerHTML=o(xn);
   $("#chemList").innerHTML=o(chems); $("#solvList").innerHTML=o(solv); $("#asList").innerHTML=o(as);
 }
 
@@ -988,7 +1050,9 @@ form.addEventListener("click",e=>{
   const q=sel=>e.target.closest(sel);
   let b;
   if(b=q("[data-disarm]")){ui.arm=null;clearTimeout(armT);rerender();return}
-  if(b=q("[data-kindsel]")){draft.type=b.dataset.kindsel; lsSet(TKEY,draft.type); touch(); renderForm(); return}
+  if(b=q("[data-kindsel]")){const v=b.dataset.kindsel; if(v==="dep") draft.type="dep"; else if(draft.type==="dep") draft.type=lastTech(); lsSet(TKEY,draft.type); touch(); renderForm(); return}
+  if(b=q("[data-grp]")){draft.type=lastTech(b.dataset.grp); rememberTech(draft.type); lsSet(TKEY,draft.type); touch(); renderForm(); return}
+  if(b=q("[data-tech]")){const t=b.dataset.tech; if(!TECH[t]) return; draft.type=t; rememberTech(t); lsSet(TKEY,t); touch(); renderForm(); return}
   if(b=q("[data-route]")){setRoute(b.dataset.route);return}
   if(b=q("[data-flow]")){draft.stages=stagesFor("hyb",draft.stages,b.dataset.flow.split(",")); ui.col.clear(); touch(); rerender(); return}
   if(b=q("[data-smode]")){const [i,m]=b.dataset.smode.split(":"); const s=draft.stages[+i]; if(s){setMode(s,m==="seq"?"seq":"co"); touch(); rerender()} return}
@@ -1007,6 +1071,7 @@ form.addEventListener("click",e=>{
   if(b=q("[data-srcdel]")){const [i,j]=b.dataset.srcdel.split(":").map(Number), s=draft.stages[i]; if(!s||!s.src[j]) return;
     if(srcHasData(s.src[j])&&!arm(`srcdel:${i}:${j}`)){rerender();return} s.src.splice(j,1); if(s.mode!=="seq") lsSet(CHKEY,s.src.map(c=>c.chem)); touch(); rerender(); return}
   if(b=q("[data-prog]")){openProg(b.dataset.prog,b.dataset.pf); return}
+  if(b=q("[data-addx]")){const st=draft.stages[+b.dataset.addx]; if(!st) return; if(st.x.length>=30){toast("Up to 30 rows");return} st.x.push({k:"",v:""}); touch(); rerender(); const el=document.getElementById(pid(`stages.${b.dataset.addx}.x.${st.x.length-1}.k`)); el&&el.scrollIntoView({block:"nearest"}); return}
   if(b=q("[data-sprog]")){openProg(b.dataset.sprog,"prog"); return}
   if(b=q("[data-solmove]")){const [i,j,d]=b.dataset.solmove.split(":").map(Number), st=draft.stages[i]; if(!st||st.kind!=="spin") return; const k=j+d; if(k<0||k>=st.sol.length) return; [st.sol[j],st.sol[k]]=[st.sol[k],st.sol[j]]; touch(); rerender(); return}
   if(b=q("[data-soldel]")){const [i,j]=b.dataset.soldel.split(":").map(Number), st=draft.stages[i]; if(!st||st.kind!=="spin"||!st.sol[j]||st.sol.length<2) return;
@@ -1033,11 +1098,12 @@ function numIssues(d){
     else s.sol.forEach((x,j)=>{const m=`${n}solution ${j+1} `; chk(`${P}.sol.${j}.conc`,m+"concentration",x.conc); chk(`${P}.sol.${j}.vol`,m+"volume",x.vol);
       if(x.ann.on){chk(`${P}.sol.${j}.ann.t`,m+"annealing temperature",x.ann.t); chk(`${P}.sol.${j}.ann.time`,m+"annealing time",x.ann.time)}});
     if(s.kind==="te"&&s.ann.on){chk(`${P}.ann.t`,n+"annealing temperature",s.ann.t);chk(`${P}.ann.time`,n+"annealing time",s.ann.time)}});
-  else fieldsOf(d.type).forEach(fd=>chk("f."+fd.k,fd.l,d.f[fd.k]));
+  else fieldsOf(d.type).forEach(fd=>{if(!fd.txt) chk("f."+fd.k,fd.l,d.f[fd.k])});
   return out;
 }
 function buildDep(d){
   let filled=0; const v=x=>{x=T_(x); if(x) filled++; return x};
+  const xOut=st=>d.route==="hyb"?st.x.map(x=>({k:v(x.k),v:T_(x.v)})).filter(x=>x.k||x.v):[];
   const annOut=a=>{if(!a.on) return {on:false}; const t=v(a.t), time=v(a.time); return t||time?{on:true,t,time,timeU:unitOf(a.timeU,ANN_F[1].u)||uPref("timeU",ANN_F[1].u)}:{on:false}};
   const stages=d.stages.map(s=>{
     if(s.kind==="te"){const f={}; TE_F.forEach(fd=>{const x=v(s.f[fd.k]); if(x){f[fd.k]=x; if(Array.isArray(fd.u)) f[fd.k+"_u"]=fd.u.includes(s.f[fd.k+"_u"])?s.f[fd.k+"_u"]:uPref(fd.k+"_u",fd.u)}});
@@ -1047,11 +1113,11 @@ function buildDep(d){
           let x=v(c[fd.k]); if(pr){o[fd.k+"P"]=pr; if(!x){x=pr[pr.length-1].t;filled++}}
           if(x){o[fd.k]=x; if(Array.isArray(fd.u)) o[fd.k+"U"]=fd.u.includes(c[fd.k+"U"])?c[fd.k+"U"]:uPref(fd.k+"U",fd.u)}});
         return o});
-      return {kind:"te",mode:s.mode,f,src,ann:annOut(s.ann)}}
+      return {kind:"te",mode:s.mode,f,src,ann:annOut(s.ann),x:xOut(s)}}
     const sol=s.sol.map(x=>{const prog=x.prog.map(r=>{const o={rpm:v(r.rpm),ramp:v(r.ramp),time:v(r.time)}; if(r.as){o.as=true;o.asName=v(r.asName);o.asVol=v(r.asVol);o.asAt=v(r.asAt)} return o});
       return {name:v(x.name),conc:v(x.conc),concU:SOL_F[1].u.includes(x.concU)?x.concU:uPref("concU",SOL_F[1].u),solv:v(x.solv),vol:v(x.vol),prog,ann:annOut(x.ann)}})
       .filter(x=>x.name||x.conc||x.solv||x.vol||x.prog.length||x.ann.on);
-    return {kind:"spin",sol,ann:{on:false}}});
+    return {kind:"spin",sol,ann:{on:false},x:xOut(s)}});
   return {out:{route:d.route,stages},filled};
 }
 form.addEventListener("submit",async e=>{
@@ -1076,7 +1142,7 @@ form.addEventListener("submit",async e=>{
   const keepDate=draft.date;
   draft=freshDraft(entry.type, keepDate!==ymd(new Date())?keepDate:null);
   renderForm();
-  toast(wasEdit?"Entry updated":`${entry.type==="dep"?ROUTES[entry.route].name:KINDS[entry.type].name} saved for ${niceDate(entry.date)}`);
+  toast(wasEdit?"Entry updated":`${entry.type==="dep"?ROUTES[entry.route].name:kindName(entry)} saved for ${niceDate(entry.date)}`);
   if(wasEdit) setTab("log"); else window.scrollTo(0,0);
   await put(entry);
 });
@@ -1097,9 +1163,10 @@ function stageItems(s){
       if(x.ann.on){add(`${nm} anneal T`,x.ann.t,"°C"); add(`${nm} anneal time`,x.ann.time,unitOf(x.ann.timeU,ANN_F[1].u))}});
   }
   if(s.ann.on){const fin=s.kind==="spin"?"Final anneal":"Anneal"; add(fin+" T",s.ann.t,"°C"); add(fin+" time",s.ann.time,unitOf(s.ann.timeU,ANN_F[1].u))}
+  (s.x||[]).forEach(x=>{if(T_(x.k)||T_(x.v)) it.push({l:T_(x.k)||"Other",v:T_(x.v)||"—",u:""})});
   return it;
 }
-function flatItems(e){const f=obj(e.f);return fieldsOf(e.type).filter(fd=>T_(f[fd.k])).map(fd=>({l:fd.d||fd.l,v:T_(f[fd.k]),u:unitOf(str(f[fd.k+"_u"]),fd.u)}))}
+function flatItems(e){const f=obj(e.f);return fieldsOf(e.type).filter(fd=>T_(f[fd.k])&&!(e.type==="other"&&fd.k==="tech")).map(fd=>({l:fd.d||fd.l,v:T_(f[fd.k]),u:unitOf(str(f[fd.k+"_u"]),fd.u)}))}
 const itemHTML=x=>`<div${x.prog?' class="wide"':""}><dt>${fmtChem(x.l)}</dt><dd${x.muted?' class="muted"':""}>${x.sci?fmtVal(x.v,1):esc(x.v)}${x.u?" "+esc(x.u):""}</dd>${x.prog?`<dd class="progline">${progText(x.prog,x.kind)}</dd>`:""}</div>`;
 const extraHTML=list=>list.length?`<dl class="params">${list.map(x=>`<div><dt>${esc(x.k||"Other")}</dt><dd>${esc(x.v)}</dd></div>`).join("")}</dl>`:"";
 
@@ -1112,13 +1179,13 @@ function cardHTML(e){
     const flow=d.stages.length>1?`<div class="flow">${d.stages.map((s,i)=>`<span class="fstep" data-kind="${s.kind}">${i+1} · ${STAGE_SHORT[s.kind]}${s.kind==="te"?" "+(s.mode==="seq"?"seq":"co"):""}</span>`).join('<span class="arr" aria-hidden="true">→</span>')}</div>`:"";
     const brief=d.stages.map(stageBrief).filter(Boolean);
     sum=flow+(brief.length?`<div class="brief">${brief.map(x=>fmtChem(x)).join('<br>')}</div>`:"");
-    body=`<details class="more"><summary>All parameters</summary>${d.stages.map((s,i)=>{const it=stageItems(s);return `<div class="dstage" data-kind="${s.kind}"><h5>${d.stages.length>1?(i+1)+". ":""}${esc(stageTitle(s))}</h5>${it.length?`<dl class="params">${it.map(itemHTML).join("")}</dl>`:'<div class="hint">No values recorded.</div>'}</div>`}).join("")}${d.extra.length?`<div class="dstage" data-kind="x"><h5>Other parameters</h5>${extraHTML(d.extra)}</div>`:""}</details>`;
+    body=`<details class="more"><summary>All parameters</summary>${d.stages.map((s,i)=>{const it=stageItems(s);return `<div class="dstage" data-kind="${s.kind}"><h5>${d.stages.length>1?(i+1)+". ":""}${esc(stageTitle(s))}</h5>${it.length?`<dl class="params">${it.map(itemHTML).join("")}</dl>`:'<div class="hint">No values recorded.</div>'}</div>`}).join("")}${d.extra.length?`<div class="dstage" data-kind="x"><h5>Other parameters${d.route==="hyb"?" · whole run":""}</h5>${extraHTML(d.extra)}</div>`:""}</details>`;
   } else {
-    head=`<span class="chip">${KINDS[k].name}</span>`;
+    head=`<span class="chip">${esc(kindName(e))}</span>`;
     const it=flatItems(e); body=(it.length?`<dl class="params">${it.map(itemHTML).join("")}</dl>`:"")+extraHTML(normExtra(e.extra));
   }
   const confirming=ui.confirmDel===e.id;
-  return `<article class="entry" data-type="${k}" data-id="${esc(e.id)}">
+  return `<article class="entry" data-type="${grpOf(k)}" data-id="${esc(e.id)}">
     <div class="entry-h">${head}${e.time?`<time>${esc(e.time)}</time>`:""}${e.sample?`<span class="sample">${esc(e.sample)}</span>`:""}${subsOf(e).map(x=>`<span class="chip sub">${esc(x)}</span>`).join("")}</div>
     ${sum}${body}
     ${e.notes?`<div class="notes">${esc(e.notes)}</div>`:""}
@@ -1150,34 +1217,36 @@ $("#dayList").addEventListener("click",onCardAction);
 /* ---------- entries view ---------- */
 function searchText(e){
   const p=[e.sample,subsOf(e).join(" "),e.notes];
-  if(kindOf(e)==="dep"){const d=depOf(e); p.push(ROUTES[d.route].name); d.stages.forEach(s=>{p.push(STAGE_NAME[s.kind]); if(s.kind==="te") s.src.forEach(c=>p.push(c.chem,chemPlain(c.chem))); else s.sol.forEach(x=>{p.push(x.name,x.solv); x.prog.forEach(r=>p.push(r.asName))})}); d.extra.forEach(x=>p.push(x.k,x.v))}
-  else {p.push(KINDS[kindOf(e)].name); normExtra(e.extra).forEach(x=>p.push(x.k,x.v))}
+  if(kindOf(e)==="dep"){const d=depOf(e); p.push(ROUTES[d.route].name); d.stages.forEach(s=>{p.push(STAGE_NAME[s.kind]); if(s.kind==="te") s.src.forEach(c=>p.push(c.chem,chemPlain(c.chem))); else s.sol.forEach(x=>{p.push(x.name,x.solv); x.prog.forEach(r=>p.push(r.asName))}); s.x.forEach(x=>p.push(x.k,x.v))}); d.extra.forEach(x=>p.push(x.k,x.v))}
+  else {const k=kindOf(e); p.push(kindName(e),TECH_GROUPS[grpOf(k)].name,"characterisation"); fieldsOf(k).forEach(fd=>{if(fd.txt) p.push(obj(e.f)[fd.k])}); normExtra(e.extra).forEach(x=>p.push(x.k,x.v))}
   return p.map(str).join(" ").toLowerCase();
 }
 function renderLog(){
   const q=ui.q.trim().toLowerCase();
-  const list=sorted().filter(e=>(ui.filter==="all"||kindOf(e)===ui.filter)&&(!q||searchText(e).includes(q)));
+  const list=sorted().filter(e=>{const k=kindOf(e); return (ui.filter==="all"||(ui.filter==="dep"?k==="dep":k!=="dep"&&(!ui.tech||k===ui.tech)))&&(!q||searchText(e).includes(q))});
   const el=$("#logList");
   if(!entries.size){el.innerHTML=`<div class="empty"><b>No experiments logged yet</b>Your saved entries appear here, newest first, grouped by day.</div>`;return}
   if(!list.length){el.innerHTML=`<div class="empty"><b>No matching entries</b>Try another type or search term.</div>`;return}
   const by=new Map(); list.forEach(e=>{if(!by.has(e.date))by.set(e.date,[]);by.get(e.date).push(e)});
   el.innerHTML=[...by].map(([d,es])=>`<section class="day"><h4 class="day-h"><b>${esc(niceDate(d,true))}</b>${es.length} ${es.length>1?"entries":"entry"}</h4><div class="list">${es.map(cardHTML).join("")}</div></section>`).join("");
 }
-$("#filterSeg").addEventListener("click",e=>{const b=e.target.closest("[data-f]");if(!b)return;ui.filter=b.dataset.f;document.querySelectorAll("#filterSeg button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));renderLog()});
+$("#filterSeg").addEventListener("click",e=>{const b=e.target.closest("[data-f]");if(!b)return;ui.filter=b.dataset.f;document.querySelectorAll("#filterSeg button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));$("#techFilter").hidden=ui.filter!=="char";if(ui.filter!=="char"){ui.tech="";$("#techFilter").value=""}renderLog()});
+$("#techFilter").innerHTML=`<option value="">All techniques</option>`+Object.entries(TECH_GROUPS).map(([g,G])=>`<optgroup label="${G.name}">${TECH_ORDER[g].map(t=>`<option value="${t}">${TECH[t].n}</option>`).join("")}</optgroup>`).join("");
+$("#techFilter").addEventListener("change",e=>{ui.tech=e.target.value;renderLog()});
 $("#search").addEventListener("input",e=>{ui.q=e.target.value;renderLog()});
 
 /* ---------- calendar ---------- */
 function renderCal(){
   if(!ui.calMonth){const d=parseD(ui.calDay);ui.calMonth=new Date(d.getFullYear(),d.getMonth(),1)}
   const m=ui.calMonth; $("#calTitle").textContent=MONTHS[m.getMonth()]+" "+m.getFullYear();
-  const byDay={}; entries.forEach(e=>{(byDay[e.date]=byDay[e.date]||new Set()).add(kindOf(e))});
+  const byDay={}; entries.forEach(e=>{(byDay[e.date]=byDay[e.date]||new Set()).add(grpOf(kindOf(e)))});
   const start=new Date(m); start.setDate(1-((m.getDay()+6)%7));
   const today=ymd(new Date()); let h=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>`<div class="dow">${d}</div>`).join("");
   for(let i=0;i<42;i++){
     const d=new Date(start); d.setDate(start.getDate()+i); const s=ymd(d);
     if(i===35&&d.getMonth()!==m.getMonth()) break;
-    const types=byDay[s]?["dep","pl","xrd"].filter(t=>byDay[s].has(t)):[];
-    h+=`<button class="cell${d.getMonth()!==m.getMonth()?" out":""}${s===today?" today":""}" data-day="${s}" aria-pressed="${s===ui.calDay}" aria-label="${niceDate(s,true)}${types.length?", "+types.map(t=>KINDS[t].name).join(", "):""}">${d.getDate()}<span class="dots">${types.map(t=>`<i data-type="${t}"></i>`).join("")}</span></button>`;
+    const types=byDay[s]?["dep","xray","opt","em","spm","oth"].filter(t=>byDay[s].has(t)):[];
+    h+=`<button class="cell${d.getMonth()!==m.getMonth()?" out":""}${s===today?" today":""}" data-day="${s}" aria-pressed="${s===ui.calDay}" aria-label="${niceDate(s,true)}${types.length?", "+types.map(t=>t==="dep"?"Deposition":TECH_GROUPS[t].name).join(", "):""}">${d.getDate()}<span class="dots">${types.map(t=>`<i data-type="${t}"></i>`).join("")}</span></button>`;
   }
   $("#calGrid").innerHTML=h;
   $("#dayTitle").textContent=niceDate(ui.calDay,true);
@@ -1201,15 +1270,13 @@ function buildCSV(){
   const q=v=>{v=v==null?"":String(v); if(/^[=+@\t\r]/.test(v)||/^-[^0-9.]/.test(v)) v="'"+v; return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v};
   const list=sorted().reverse(), deps=list.filter(e=>kindOf(e)==="dep").map(e=>[e.id,depOf(e)]), dmap=new Map(deps);
   const nS=Math.max(1,...deps.map(([,d])=>d.stages.length));
-  const flat=[]; ["pl","xrd"].forEach(t=>fieldsOf(t).forEach(fd=>flat.push({t,fd})));
-  const head=["Date","Time","Experiment","Route","Sample","Substrates"];
+  const head=["Date","Time","Experiment","Route / technique","Sample","Substrates"];
   for(let i=1;i<=nS;i++) head.push(`Stage ${i}`);
-  flat.forEach(({t,fd})=>head.push(`${KINDS[t].name}: ${fd.d||fd.l}`,`${KINDS[t].name}: ${fd.d||fd.l} unit`));
-  head.push("Other parameters","Comments");
+  head.push("Measurement","Other parameters","Comments");
   const rows=list.map(e=>{const k=kindOf(e), d=dmap.get(e.id);
-    const r=[e.date,e.time,KINDS[k].name,d?ROUTES[d.route].name+(d.stages.length>1?" ("+d.stages.map(s=>STAGE_SHORT[s.kind]).join(" → ")+")":""):"",e.sample,subsOf(e).join("; ")];
+    const r=[e.date,e.time,k==="dep"?"Deposition":"Characterisation",d?ROUTES[d.route].name+(d.stages.length>1?" ("+d.stages.map(s=>STAGE_SHORT[s.kind]).join(" → ")+")":""):kindName(e),e.sample,subsOf(e).join("; ")];
     for(let i=0;i<nS;i++) r.push(d&&d.stages[i]?stageText(d.stages[i]):"");
-    const f=obj(e.f); flat.forEach(({t,fd})=>{ if(k===t&&T_(f[fd.k])){r.push(f[fd.k]);r.push(unitOf(str(f[fd.k+"_u"]),fd.u))} else r.push("","") });
+    r.push(d?"":flatItems(e).map(x=>`${x.l} ${x.v}${x.u?" "+x.u:""}`).join("; "));
     r.push((d?d.extra:normExtra(e.extra)).map(x=>`${x.k}=${x.v}`).join("; ")); r.push(e.notes);
     return r.map(q).join(",")});
   return "﻿"+[head.map(q).join(","),...rows].join("\n");
@@ -1318,8 +1385,8 @@ $("#progEnter").addEventListener("click",()=>{
 });
 
 /* ---------- recipes ---------- */
-const REC_CAT={co:"Co-evaporation",seq:"Sequential evaporation",spin:"Spin coating",hyb:"Hybrid",te:"Thermal evaporation",pl:"PL",xrd:"XRD",other:"Other"};
-const catType=c=>c==="pl"||c==="xrd"?c:(c&&c!=="other"?"dep":"");
+const REC_CAT={co:"Co-evaporation",seq:"Sequential evaporation",spin:"Spin coating",hyb:"Hybrid",te:"Thermal evaporation",pl:"PL",xrd:"XRD",char:"Characterisation",other:"Other"};
+const catType=c=>c==="pl"?"opt":c==="xrd"||c==="char"?"xray":(c&&c!=="other"?"dep":"");
 const rec={mode:"list",id:null,pushed:false,confirmDel:false,q:""};
 const recipes=()=>Object.values(store.entries).filter(e=>e&&!e.deleted&&e.type==="recipe");
 function recShow(){ $("#recListView").hidden=rec.mode!=="list"; $("#recDetail").hidden=rec.mode!=="view"; $("#recForm").hidden=rec.mode!=="edit"; $("#recAdd").hidden=rec.mode!=="list"; }
