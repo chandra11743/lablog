@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-fszW+C7w54cCPYPmrjzG9TZQAG6tf0gKuhrtAFmYIDE='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-o80jPiBQLiljYeuoSvsPAhUDfq1RyoG/40XPXpfuuLU='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0E6E6B">
@@ -405,6 +405,11 @@ input.sw:checked::before{left:19px}
 .stbl input{padding:6px 6px;text-align:right;font-size:13px;height:34px}
 .stbl .na{height:34px;border-radius:7px;background:repeating-linear-gradient(135deg,var(--panel2) 0 6px,var(--bg) 6px 12px);display:grid;place-items:center;font-size:11px;color:var(--muted)}
 .mini{width:auto;padding:0 0 0 2px;border:0;background:none;font:inherit;color:var(--accent);cursor:pointer;display:inline}
+.pcell{height:34px;border:1px solid var(--line);border-radius:7px;background:var(--panel2);font:500 13px var(--mono);color:var(--ink);cursor:pointer;padding:0 6px;display:flex;align-items:center;justify-content:flex-end;gap:3px;min-width:0;overflow:hidden;position:relative}
+.pcell i{font:11.5px var(--sans);color:var(--accent);font-style:normal}
+.pcell small{position:absolute;left:4px;top:1px;font:600 9px var(--sans);color:var(--sc)}
+.pcell.on{border-color:color-mix(in srgb,var(--sc) 55%,var(--line))}
+.pline{grid-column:2/-1;display:flex;flex-wrap:wrap;gap:2px 10px;font:11.5px var(--mono);color:var(--sc);margin-top:-3px}
 .rbtn{height:34px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--muted);font:600 12px var(--mono);cursor:pointer;padding:0}
 .rbtn.on{border-color:var(--sc);background:color-mix(in srgb,var(--sc) 12%,var(--panel));color:var(--sc)}
 .rbtn[aria-expanded="true"]{box-shadow:inset 0 0 0 1px var(--sc)}
@@ -670,11 +675,11 @@ button.pks{text-align:left;background:var(--panel);cursor:pointer;width:100%;fon
 <div class="modal" id="progModal" hidden role="dialog" aria-modal="true" aria-labelledby="progTitle" data-type="dep">
   <div class="sheet">
     <div class="sheet-h"><h2 id="progTitle">Temperature program</h2><button type="button" class="btn icon-x" id="progX" aria-label="Close">✕</button></div>
-    <div class="pcount"><label for="progN">Total steps</label>
+    <div class="pcount"><label for="progN">Number of steps</label>
       <div class="stepper"><button type="button" class="btn sm" id="progMinus" aria-label="Fewer steps">−</button><input type="text" id="progN" class="num" readonly tabindex="-1" inputmode="none" aria-live="polite"><button type="button" class="btn sm" id="progPlus" aria-label="More steps">+</button></div></div>
-    <svg id="progSvg" viewBox="0 0 320 130" role="img" aria-label="Program profile"></svg>
     <div class="prow phead" id="progHead"></div>
     <div id="progRows"></div>
+    <svg id="progSvg" viewBox="0 0 320 130" role="img" aria-label="Program profile"></svg>
     <div class="hint" id="progHint" hidden>Tick anti-solvent on any step. “At (s)” is the second, counted from the start of that step, when it is dropped.</div>
     <div class="err" id="progErr" hidden></div>
     <div class="actions pact"><button type="button" class="btn primary" id="progEnter">Enter</button><button type="button" class="btn" id="progCancel">Cancel</button><span class="spacer"></span><button type="button" class="btn sm ghost danger" id="progClear">Remove steps</button></div>
@@ -1325,7 +1330,7 @@ function teBody(s,i,P){
     ?`<button type="button" class="chemchip add" data-addchem="${i}" data-chem="${esc(id)}" aria-label="Add ${esc(chemPlain(id))} layer">＋ ${fmtChem(chemPlain(id))}</button>`
     :`<button type="button" class="chemchip" data-addchem="${i}" data-chem="${esc(id)}" aria-pressed="${s.src.some(c=>c.chem===id)}">${fmtChem(chemPlain(id))}</button>`).join("");
   return `<div class="grp"><h4>Chamber</h4><div class="row two">${ff("chamber")}</div></div>
-    <div class="grp"><div class="grp-h"><h4>${seq?"Layers, in order":"Sources"} · ${s.src.length}</h4><span class="hint">⤴ = temperature / rate steps</span></div>
+    <div class="grp"><div class="grp-h"><h4>${seq?"Layers, in order":"Sources"} · ${s.src.length}</h4><span class="hint">tap T or Rate to set steps</span></div>
       <div class="chips" role="group" aria-label="Chemicals">${chips}</div>
       <div class="subnew"><input type="text" id="cc_${i}" placeholder="Other chemical, e.g. SnF2" aria-label="Other chemical" list="chemList" autocomplete="off" autocapitalize="off" enterkeyhint="done" data-ccin="${i}"><button type="button" class="btn sm" data-addcustom="${i}">＋ Add</button></div>
       ${s.src.length?srcTable(s,i):`<div class="hint">${seq?"Tap a chemical above to add it as the next layer.":"Tap the chemicals you're evaporating together."}</div>`}</div>
@@ -1338,17 +1343,20 @@ function srcTable(s,i){
   const mU=SRC_F[1].u, curM=mU.includes(s.src[0]&&s.src[0].mU)?s.src[0].mU:uPref("mU",mU);
   const kU=SRC_F[4].u, curK=kU.includes(s.src[0]&&s.src[0].kU)?s.src[0].kU:uPref("kU",kU);
   const usel=(attr,list,cur,label)=>`<select class="mini" ${attr}="${i}" aria-label="${label}">${list.map(x=>`<option${x===cur?" selected":""}>${esc(x)}</option>`).join("")}</select>`;
-  let h=`<div class="stbl${seq?" seq":""}"><span class="th">${seq?"Layer":"Source"}</span><span class="th">T °C</span><span class="th">Mass ${usel("data-massu",mU,curM,"Mass unit")}</span><span class="th">Rate Å/s</span><span class="th">QCM %</span>${seq?`<span class="th">Thick. ${usel("data-thku",kU,curK,"Layer thickness unit")}</span>`:""}<span class="th c" aria-hidden="true">⤴</span>`;
+  let h=`<div class="stbl${seq?" seq":""}"><span class="th">${seq?"Layer":"Source"}</span><span class="th">T °C</span><span class="th">Mass ${usel("data-massu",mU,curM,"Mass unit")}</span><span class="th">Rate Å/s</span><span class="th">QCM %</span>${seq?`<span class="th">Thick. ${usel("data-thku",kU,curK,"Layer thickness unit")}</span>`:""}<span class="th c" aria-hidden="true"></span>`;
   s.src.forEach((c,j)=>{
     const SP=`${P}.src.${j}`, nm=chemPlain(c.chem), org=isOrg(c.chem), key=`${i}:${j}`, open=ui.srcOpen===key, nP=(c.tP||[]).length+(c.rP||[]).length;
     const cell=(k,lab)=>`<input type="text" class="num" inputmode="decimal" id="${pid(SP+"."+k)}" data-p="${SP}.${k}" value="${esc(c[k])}" aria-label="${esc(nm)} ${lab}" autocomplete="off">`;
-    h+=`<span class="nm" title="${esc(nm)}">${seq?`${j+1}. `:""}${fmtChem(nm)}</span>${cell("t","temperature (°C)")}${cell("m","powder mass")}${org?`<span class="na" title="No deposition rate for organic sources">n/a</span>`:cell("r","deposition rate (Å/s)")}${cell("q","QCM life at start (%)")}${seq?cell("k","layer thickness"):""}`;
-    h+=`<button type="button" class="rbtn${nP?" on":""}" data-srcx="${key}" aria-expanded="${open}" aria-label="${esc(nm)}: steps and options${nP?`, ${nP} steps set`:""}">${nP?nP:"⤴"}</button>`;
+    /* temperature and rate are step programs: the cell opens the pop-up (steps → temp, ramp, soak) */
+    const pcell=(k,kind,lab)=>{const pr=c[k+"P"]||[], v=T_(c[k])||(pr.length?pr[pr.length-1].t:"");
+      return `<button type="button" class="pcell${pr.length?" on":""}" data-prog="${SP}" data-pf="${k}" id="pb_${pid(SP)}_${k}" aria-label="${esc(nm)} ${lab}: ${pr.length?pr.length+" step"+(pr.length>1?"s":"")+", final "+esc(v):v?esc(v):"set steps"}">${v?`<b>${esc(v)}</b>`:`<i>steps</i>`}${pr.length>1?`<small>${pr.length} st</small>`:""}</button>`};
+    h+=`<span class="nm" title="${esc(nm)}">${seq?`${j+1}. `:""}${fmtChem(nm)}</span>${pcell("t","temp","temperature program")}${cell("m","powder mass")}${org?`<span class="na" title="No deposition rate for organic sources">n/a</span>`:pcell("r","rate","deposition rate program")}${cell("q","QCM life at start (%)")}${seq?cell("k","layer thickness"):""}`;
+    h+=`<button type="button" class="rbtn" data-srcx="${key}" aria-expanded="${open}" aria-label="${esc(nm)}: more options">⋯</button>`;
+    const tP=c.tP||[], rP=c.rP||[];
+    if(tP.length>1||rP.length>1) h+=`<div class="pline">${tP.length>1?`<span>T ${tP.map(x=>esc(x.t)).join(" → ")} °C</span>`:""}${rP.length>1?`<span>Rate ${rP.map(x=>esc(x.t)).join(" → ")} Å/s</span>`:""}</div>`;
     if(open){const armed=ui.arm===`srcdel:${i}:${j}`, n=s.src.length;
-      const pb=(k,kind)=>{const pr=c[k+"P"]; return `<button type="button" class="stepbtn${pr&&pr.length?" on":""}" data-prog="${SP}" data-pf="${k}" id="pb_${pid(SP)}_${k}">${pr&&pr.length?(kind==="temp"?"T ":"Rate ")+stepSummary(pr):PK[kind].btn}</button>`};
-      h+=`<div class="srcd">${pb("t","temp")}${org?"":pb("r","rate")}<span class="spacer"></span>${seq&&n>1?`<button type="button" class="btn sm icon" data-srcmove="${i}:${j}:-1"${j===0?" disabled":""} aria-label="Move layer ${j+1} earlier">↑</button><button type="button" class="btn sm icon" data-srcmove="${i}:${j}:1"${j===n-1?" disabled":""} aria-label="Move layer ${j+1} later">↓</button>`:""}<button type="button" class="btn sm ghost danger" data-srcdel="${i}:${j}">Remove</button>
-        ${armed?`<div class="confirm" role="alert" style="flex:1 1 100%"><span>Remove ${fmtChem(nm)} and its values?</span><button type="button" class="btn sm danger solid" data-srcdel="${i}:${j}">Remove</button><button type="button" class="btn sm" data-disarm>Keep</button></div>`:""}
-        ${(c.tP&&c.tP.length)||(c.rP&&c.rP.length)?`<div class="progline" style="flex:1 1 100%">${c.tP&&c.tP.length?progText(c.tP,"temp"):""}${c.tP&&c.tP.length&&c.rP&&c.rP.length?"<br>":""}${c.rP&&c.rP.length?progText(c.rP,"rate"):""}</div>`:""}</div>`}
+      h+=`<div class="srcd">${(tP.length||rP.length)?`<div class="progline" style="flex:1 1 100%">${tP.length?"<b>Temperature</b><br>"+progText(tP,"temp"):""}${tP.length&&rP.length?"<br>":""}${rP.length?"<b>Rate</b><br>"+progText(rP,"rate"):""}</div>`:""}<span class="spacer"></span>${seq&&n>1?`<button type="button" class="btn sm icon" data-srcmove="${i}:${j}:-1"${j===0?" disabled":""} aria-label="Move layer ${j+1} earlier">↑</button><button type="button" class="btn sm icon" data-srcmove="${i}:${j}:1"${j===n-1?" disabled":""} aria-label="Move layer ${j+1} later">↓</button>`:""}<button type="button" class="btn sm ghost danger" data-srcdel="${i}:${j}">Remove ${fmtChem(nm)}</button>
+        ${armed?`<div class="confirm" role="alert" style="flex:1 1 100%"><span>Remove ${fmtChem(nm)} and its values?</span><button type="button" class="btn sm danger solid" data-srcdel="${i}:${j}">Remove</button><button type="button" class="btn sm" data-disarm>Keep</button></div>`:""}</div>`}
   });
   return h+`</div>`;
 }
