@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-49WNdMBTwNbKzcbJ/TQDrlzj+F4iuY6/RjqxCG+7f1Q='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-fszW+C7w54cCPYPmrjzG9TZQAG6tf0gKuhrtAFmYIDE='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0E6E6B">
-<meta name="description" content="Log perovskite depositions (co-evaporation, sequential evaporation, spin coating, hybrid), PL and XRD.">
+<meta name="description" content="Log perovskite depositions, characterisation scans and device tests.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -324,6 +324,201 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
   .savebar .primary{flex:1}
 }
 @media (min-width:761px){.tabbar{display:none}.toast{bottom:24px}}
+/* ---- v19: compact layout, sized for a 412 px phone (Galaxy S25 Ultra) ---- */
+.top-in{padding:6px 8px 6px 14px;gap:10px;min-height:48px}
+.brand{flex-direction:row;align-items:baseline;gap:8px}
+.brand b{font:600 17px/1.2 var(--sans)}
+.brand span{white-space:nowrap}
+input,select,textarea{padding:7px 8px}
+.unit{padding:7px 7px;font-size:12px}
+label.f,div.f{gap:3px;font-size:12px}
+.lab{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+label.f .lab{display:block}
+.row{gap:8px;grid-template-columns:repeat(auto-fit,minmax(104px,1fr))}
+.row.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.wide2{grid-column:1/-1}
+.card{padding:12px 14px}
+.stack{gap:10px}
+form{gap:8px;grid-template-columns:minmax(0,1fr)}
+.stack{grid-template-columns:minmax(0,1fr)}
+form>*,.stack>*{min-width:0}
+.grp{gap:8px;padding-top:10px}
+.hint{font-size:11.5px}
+.expcard{padding:2px 0 0;gap:8px}
+.kinds{grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;background:color-mix(in srgb,var(--line) 75%,var(--bg));border-radius:10px;padding:3px}
+.kind{height:32px;border:0;background:none;justify-content:center;align-items:center;padding:0 4px;border-radius:8px;box-shadow:none}
+.kinds .kind{padding:0 4px}
+.kinds .kind b{font-size:13px;font-weight:500;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.kind[aria-pressed="true"]{background:var(--panel);box-shadow:0 1px 2px rgba(0,0,0,.14);border:0}
+.kind[aria-pressed="true"] b{font-weight:600}
+.chips{gap:6px}
+.chips.scroll{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}
+.chips.scroll::-webkit-scrollbar{display:none}
+.chips.scroll>*{flex:none}
+.chip-btn{padding:5px 12px;font:500 13px var(--sans);min-height:30px;white-space:nowrap}
+.chip-btn.grp{min-height:28px;padding:4px 11px;font-size:12.5px}
+.chips.techs{border-top:1px solid var(--line);padding-top:8px}
+.chip-btn.tech[aria-pressed="true"]{background:var(--tc);color:var(--panel);border-color:var(--tc)}
+.chemchip{padding:5px 11px;font-size:13px}
+.dchip{border:0;background:none;padding:2px 0;font:500 12.5px var(--mono);color:var(--ink);display:inline-flex;gap:5px;align-items:center;cursor:pointer;white-space:nowrap}
+.dchip svg{width:12px;height:12px;color:var(--muted)}
+.dchip.other{color:var(--warn)}
+.lastrun{display:flex;align-items:center;gap:8px;padding:0 6px 0 12px;min-height:40px;border:1px dashed var(--line);border-radius:10px;font-size:12.5px;color:var(--muted)}
+.lastrun:empty{display:none}
+.lastrun span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lastrun b{color:var(--ink);font:500 12.5px var(--mono)}
+.lastrun svg{width:16px;height:16px;color:var(--accent);flex:none}
+.subgrid{display:flex;flex-wrap:wrap;gap:6px}
+.subbox{position:relative;padding:5px 11px;border-radius:99px;font:500 12.5px var(--mono);min-height:30px;gap:4px}
+.subbox input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.subbox:has(input:checked){border-color:var(--te);color:var(--te)}
+.subbox:has(input:checked)::before{content:"✓"}
+.subbox:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.subbox span{padding:0}
+.subnew{margin-top:6px}
+#notesCard textarea{min-height:60px}
+.xq{display:flex;flex-wrap:wrap;gap:6px}
+.xq button{border:1px solid var(--line);background:var(--panel);border-radius:99px;padding:3px 10px;font-size:12px;color:var(--muted);cursor:pointer;min-height:26px}
+.savebar{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
+.ssum{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.ssum b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ssum span{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ssum span.bad{color:var(--danger)}
+.savebar .primary{min-width:0;padding:9px 18px}
+.stagenav{top:calc(49px + env(safe-area-inset-top,0px))}
+.stage{border-left:0;gap:10px}
+.stage-t b{font:600 15px/1.2 var(--sans)}
+/* switch */
+input.sw{appearance:none;-webkit-appearance:none;width:38px!important;height:22px!important;border-radius:11px;background:var(--line);position:relative;cursor:pointer;padding:0;border:0;flex:none;transition:background .15s}
+input.sw::before{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:var(--panel);transition:left .15s}
+input.sw:checked{background:var(--accent)}
+input.sw:checked::before{left:19px}
+.check.swrow{justify-content:space-between;flex-direction:row-reverse}
+/* source table */
+.stbl{display:grid;gap:6px;align-items:center;grid-template-columns:50px repeat(4,minmax(0,1fr)) 32px}
+.stbl.seq{grid-template-columns:50px repeat(5,minmax(0,1fr)) 32px}
+.stbl .th{font-size:11px;line-height:1.2;color:var(--muted);text-align:right;align-self:end;overflow:hidden}
+.stbl .th .mini{display:block;margin-left:auto}
+.stbl .th:first-child{text-align:left}
+.stbl .th.c{text-align:center}
+.stbl .nm{font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stbl input{padding:6px 6px;text-align:right;font-size:13px;height:34px}
+.stbl .na{height:34px;border-radius:7px;background:repeating-linear-gradient(135deg,var(--panel2) 0 6px,var(--bg) 6px 12px);display:grid;place-items:center;font-size:11px;color:var(--muted)}
+.mini{width:auto;padding:0 0 0 2px;border:0;background:none;font:inherit;color:var(--accent);cursor:pointer;display:inline}
+.rbtn{height:34px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--muted);font:600 12px var(--mono);cursor:pointer;padding:0}
+.rbtn.on{border-color:var(--sc);background:color-mix(in srgb,var(--sc) 12%,var(--panel));color:var(--sc)}
+.rbtn[aria-expanded="true"]{box-shadow:inset 0 0 0 1px var(--sc)}
+.srcd{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:2px 0 8px;border-bottom:1px dashed var(--line)}
+.srcd .spacer{flex:1}
+.spt{display:grid;grid-template-columns:22px repeat(3,minmax(0,1fr)) minmax(0,1.5fr);gap:4px 6px;font:12.5px var(--mono);align-items:center}
+.spt .th{font:11px var(--sans);color:var(--muted)}
+.spt .as{color:var(--spin);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.annrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.annrow>.check{flex:1}
+.annrow .unitwrap{width:104px}
+.annf .lab{display:none}
+/* characterisation and device blocks */
+.uh{display:flex;align-items:center;gap:8px;min-width:0}
+.un{flex:none;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--sc);color:var(--panel);font:600 12px var(--mono);display:grid;place-items:center}
+.ut{display:flex;flex-direction:column;min-width:0;flex:1}
+.ut b{font:600 14px/1.3 var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ut small{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.uh .devid{width:76px;font:600 14px var(--mono);padding:4px 6px}
+.scan{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel)}
+.scan.open{border-color:var(--sc)}
+.sch{display:flex;align-items:center;gap:4px;padding:0 4px 0 10px;min-height:38px}
+.scan.open .sch{background:color-mix(in srgb,var(--sc) 10%,var(--panel))}
+.sch .stage-tog{gap:6px}
+.sch b{font-size:13.5px;flex:none}
+.scan.open .sch b{color:var(--sc)}
+.sch small{font:12px var(--mono);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.scb{padding:10px;display:grid;gap:10px}
+.scb .grp:first-child{border-top:0;padding-top:0}
+.btn.addm{border:1px dashed var(--sc);color:var(--sc);background:var(--panel);font-weight:600;width:100%;padding:8px}
+.btn.addu{border:1px dashed var(--line);color:var(--accent);width:100%;font-weight:600;background:none;padding:10px}
+.picker .stepn{width:20px;height:20px;border-radius:10px;background:var(--sc);color:var(--panel);font:600 11.5px var(--sans);display:inline-grid;place-items:center;flex:none}
+.pk-h{display:flex;align-items:center;gap:8px}
+.pk-h b{flex:1;font-size:14px}
+.pk-h input[type=date]{width:auto;padding:4px 6px;font-size:12.5px}
+.wk{display:grid;grid-template-columns:18px repeat(7,minmax(0,1fr)) 18px;gap:4px;align-items:center}
+.wd{height:56px;border:1px solid var(--line);border-radius:10px;background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:0;cursor:pointer;color:var(--muted);min-width:0}
+.wd b{font:600 15px/1.1 var(--mono);color:inherit}
+.wd small{font-size:10.5px}
+.wd i{font:600 10px/1.1 var(--sans);font-style:normal;color:var(--te);min-height:11px}
+.wd.has{color:var(--ink)}
+.wd[aria-pressed="true"]{background:var(--sc);border-color:var(--sc);color:var(--panel)}
+.wd[aria-pressed="true"] i{color:var(--panel)}
+.wnav{border:0;background:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0}
+.wnav:disabled{opacity:.3}
+.pks{border:1px solid var(--line);border-radius:10px;padding:10px;display:grid;gap:8px}
+.pks.sel{border-color:var(--sc)}
+button.pks{text-align:left;background:var(--panel);cursor:pointer;width:100%;font:inherit;color:inherit}
+.pks-h{display:flex;align-items:baseline;gap:6px;min-width:0}
+.pks-h b{font:500 14px var(--mono);flex:none}
+.pks-h span{font-size:12px;color:var(--muted);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pks-h .linkb{border:0;background:none;padding:0;font:500 12px var(--sans);color:var(--accent);cursor:pointer;flex:none}
+.tog{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 10px 0 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel);font:500 12.5px var(--mono);cursor:pointer;color:var(--ink)}
+.tog::before{content:"";width:16px;height:16px;border-radius:4px;border:1.5px solid var(--muted);box-sizing:border-box;flex:none}
+.tog[aria-pressed="true"]{border-color:var(--sc);background:color-mix(in srgb,var(--sc) 10%,var(--panel));color:var(--sc)}
+.tog[aria-pressed="true"]::before{background:var(--sc);border-color:var(--sc);box-shadow:inset 0 0 0 3px var(--panel)}
+.tog:disabled{opacity:.55;border-style:dashed;cursor:default}
+.pk-sum{display:flex;align-items:center;gap:8px;min-width:0}
+.pk-sum span{flex:1;min-width:0;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pk-sum b{font:600 14px var(--mono)}
+.muted{color:var(--muted)}
+.dstage h6{margin:8px 0 4px;font:600 12px var(--sans);color:var(--muted)}
+.ebrief{font-size:12.5px;color:var(--muted);font-family:var(--mono);overflow-wrap:anywhere}
+.badge{font:600 10.5px var(--sans);letter-spacing:.03em;padding:3px 6px;border-radius:6px;color:var(--tc);background:color-mix(in srgb,var(--tc) 12%,var(--panel));text-transform:uppercase}
+.rec-top .btn{margin-left:auto}
+#filterSeg button[data-type]::before{content:"";display:inline-block;width:8px;height:8px;border-radius:4px;background:var(--tc);margin-right:5px;vertical-align:1px}
+@media (max-width:760px){
+  main{padding:0 0 calc(126px + env(safe-area-inset-bottom,0px))}
+  .card{border-radius:0;border-left:0;border-right:0}
+  .expcard,#lastRun{margin:8px 14px 0}
+  #lastRun:empty{display:none}
+  .stagenav{padding:8px 14px;margin:0;background:var(--panel);border-bottom:1px solid var(--line)}
+  .banner{margin:8px 14px 0}
+  #formErr{margin:0 14px}
+  .savebar .primary{flex:none}
+  .savebar{position:fixed;left:0;right:0;bottom:calc(57px + env(safe-area-inset-bottom,0px));z-index:9;background:var(--panel);border-top:1px solid var(--line);padding:8px 14px;height:56px}
+  .tabbar{padding:4px 8px calc(4px + env(safe-area-inset-bottom,0px))}
+  .tabbar button{padding:4px 0;font-size:11px}
+  .tabbar svg{width:20px;height:20px}
+  .toast{bottom:calc(124px + env(safe-area-inset-bottom,0px))}
+  .addstage{padding:0 14px}
+  /* entries */
+  .toolbar{padding:10px 14px 4px;margin:0;gap:8px}
+  .toolbar input{max-width:none;flex:1 1 0}
+  #filterSeg{order:3;flex:1 1 100%;border:0;background:none;gap:6px;overflow-x:auto;scrollbar-width:none;border-radius:0}
+  #filterSeg button{flex:none;border:1px solid var(--line);border-radius:99px;background:var(--panel);padding:4px 11px;min-height:30px;color:var(--ink)}
+  #filterSeg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  #techFilter{order:4;max-width:none;flex:1 1 100%}
+  .csvbox{padding:0 14px}
+  .day{margin:0}
+  .day-h{padding:12px 14px 6px;margin:0;font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+  .day-h b{font-size:11px;color:var(--muted)}
+  .list{gap:0}
+  .entry{border-radius:0;border-left:0;border-right:0;border-top:0;padding:10px 14px;gap:6px}
+  .empty{margin:12px 14px}
+  /* calendar */
+  .calwrap{gap:0}
+  .calwrap>.card{padding:6px 10px 10px}
+  .cal-h{margin-bottom:4px}
+  .cell{aspect-ratio:auto;height:44px;padding:5px 2px}
+  .legend{gap:4px 10px;font-size:11px;margin-top:8px}
+  .dayhead{padding:12px 14px 6px;margin:0}
+  .dayhead h2{font:600 15px var(--sans)}
+  /* recipes, sync */
+  .rec-top{padding:12px 14px 0;margin:0 0 8px}
+  .rec-top h2{font:600 17px var(--sans)}
+  #recSearch{margin:0 14px 8px;width:calc(100% - 28px)}
+  .rec-list{gap:0}
+  .rec-item{border-radius:0;border-left:0;border-right:0;border-top:0;padding:11px 14px}
+  .rec-item b{font:600 15px/1.25 var(--sans)}
+  #recDetail,#recForm{padding:12px 14px}
+  #view-sync{padding:12px 14px}
+  h2{font-size:19px}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
 </head>
@@ -331,9 +526,9 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 
 <header class="top">
   <div class="top-in">
-    <div class="brand"><b>Perovskite Lab Log</b><span id="subtitle">Experiment record</span></div>
+    <div class="brand"><b>Lab Log</b><span id="subtitle">Experiment record</span></div>
     <nav class="nav" role="tablist" aria-label="Sections">
-      <button role="tab" data-tab="new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Home</button>
+      <button role="tab" data-tab="new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6L4.5 18.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3"/><path d="M7 15h10"/></svg>Log</button>
       <button role="tab" data-tab="log"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Entries</button>
       <button role="tab" data-tab="cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendar</button>
       <button role="tab" data-tab="rec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H20v-3"/><path d="M8 7h8M8 11h6"/></svg>Recipes</button>
@@ -348,50 +543,47 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
     <form id="entryForm" novalidate autocomplete="off">
       <div class="banner" id="editBanner" hidden><span id="editText">Editing entry</span><button type="button" class="btn sm" id="cancelEdit">Cancel edit</button></div>
 
-      <section class="card stack" aria-labelledby="hExp">
-        <h3 id="hExp">Experiment</h3>
+      <section class="expcard stack" id="expCard" aria-label="Experiment">
         <div class="kinds" id="kinds" role="group" aria-label="Experiment type"></div>
         <div id="routeBox" class="stack"></div>
       </section>
+      <div id="lastRun"></div>
 
-      <section class="card stack" aria-labelledby="hSample">
-        <h3 id="hSample">Sample</h3>
-        <div class="row">
+      <section class="card stack" id="sampleCard" aria-labelledby="hSample">
+        <div class="grp-h"><h3 id="hSample">Sample</h3><button type="button" class="dchip" id="dateChip" aria-expanded="false"></button></div>
+        <div class="row" id="dtRow" hidden>
           <label class="f"><span class="lab">Date</span><input type="date" id="fDate" required></label>
           <label class="f"><span class="lab">Time</span><input type="time" id="fTime"></label>
-          <label class="f"><span class="lab">Sample ID</span><input type="text" id="fSample" placeholder="e.g. S-0926-A" autocapitalize="characters"></label>
-          <label class="f" id="devNoBox" hidden><span class="lab">Device no. on this sample</span><input type="text" id="fDevNo" placeholder="e.g. D1" autocapitalize="characters" autocomplete="off"></label>
         </div>
-        <fieldset class="subs" id="subsBox" style="border:0;padding:0;margin:0">
-          <legend class="lab">Substrates <span class="hint" id="subCount"></span></legend>
-          <div class="subgrid" id="subGrid"></div>
-          <div class="subnew">
-            <input type="text" id="subNewIn" placeholder="Add new substrate, e.g. FTO" aria-label="New substrate name" enterkeyhint="done">
-            <button type="button" class="btn sm" id="subNewAdd">＋ Add</button>
-          </div>
-        </fieldset>
-        <div class="hint" id="dateHint"></div>
+        <div id="sampleBody" class="stack">
+          <label class="f"><span class="lab">Sample ID</span><input type="text" id="fSample" placeholder="e.g. S-0926-A" autocapitalize="characters"></label>
+          <fieldset class="subs" id="subsBox" style="border:0;padding:0;margin:0">
+            <legend class="lab">Substrates <span class="hint" id="subCount"></span></legend>
+            <div class="subgrid" id="subGrid"></div>
+            <div class="subnew">
+              <input type="text" id="subNewIn" placeholder="New substrate, e.g. FTO" aria-label="New substrate name" enterkeyhint="done">
+              <button type="button" class="btn sm" id="subNewAdd">＋ Add</button>
+            </div>
+          </fieldset>
+        </div>
       </section>
 
       <nav class="stagenav" id="stageNav" aria-label="Jump to stage" hidden></nav>
       <div id="typeFields" class="stack"></div>
 
-      <section class="card stack">
-        <div class="grp-h"><h3 id="xHead">Other parameters</h3><button type="button" class="btn sm" id="addParam">＋ Add</button></div>
+      <section class="card stack" id="notesCard">
+        <div class="grp-h"><h3 id="xHead">Notes</h3><button type="button" class="btn sm" id="addParam">＋ Parameter</button></div>
         <div id="extraRows" class="stack"></div>
-      </section>
-
-      <section class="card stack">
-        <h3><label for="fNotes">Comments</label></h3>
-        <textarea id="fNotes" placeholder="Changes during the process, observations, film colour, anything unusual"></textarea>
+        <textarea id="fNotes" aria-label="Comments" placeholder="Comments: changes during the process, observations, film colour, anything unusual"></textarea>
       </section>
 
       <div class="err" id="formErr" role="alert" hidden></div>
       <div class="savebar">
-        <button type="submit" class="btn primary" id="saveBtn">Save entry</button>
-        <button type="button" class="btn ghost" id="clearBtn">Clear form</button>
+        <div class="ssum"><b id="saveSum"></b><span id="saveSub"></span></div>
+        <button type="button" class="btn ghost" id="clearBtn">Clear</button>
+        <button type="submit" class="btn primary" id="saveBtn">Save</button>
       </div>
-      <datalist id="chemList"></datalist><datalist id="xList"></datalist><datalist id="solvList"></datalist><datalist id="asList"></datalist>
+      <datalist id="chemList"></datalist><datalist id="xList"></datalist><datalist id="solvList"></datalist><datalist id="asList"></datalist><datalist id="subList"></datalist>
     </form>
     <aside class="aside"><h3>Logged today</h3><div id="todayList" class="list"></div></aside>
   </section>
@@ -399,16 +591,15 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
   <!-- ENTRIES -->
   <section class="view" id="view-log" hidden>
     <div class="toolbar">
+      <input type="search" id="search" placeholder="Search sample, chemical, technique…" aria-label="Search entries">
+      <button class="btn sm" id="exportBtn" aria-label="Export CSV">⤓ CSV</button>
       <div class="seg" id="filterSeg" role="group" aria-label="Filter by type">
         <button data-f="all" aria-pressed="true">All</button>
-        <button data-f="dep" aria-pressed="false">Deposition</button>
-        <button data-f="char" aria-pressed="false">Characterisation</button>
-        <button data-f="dev" aria-pressed="false">Devices</button>
+        <button data-f="dep" aria-pressed="false" data-type="dep">Deposition</button>
+        <button data-f="char" aria-pressed="false" data-type="xray">Characterisation</button>
+        <button data-f="dev" aria-pressed="false" data-type="dev">Devices</button>
       </div>
       <select id="techFilter" aria-label="Technique" hidden></select>
-      <input type="search" id="search" placeholder="Search sample, chemical, solvent…">
-      <span class="spacer"></span>
-      <button class="btn sm" id="exportBtn">Export CSV</button>
     </div>
     <div id="csvBox" class="csvbox" hidden>
       <div class="hint" style="margin-bottom:6px">Copy the CSV below and paste it into Excel or a .csv file.</div>
@@ -433,7 +624,7 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
         </div>
       </div>
       <div>
-        <div class="grp-h" style="margin-bottom:10px"><h2 id="dayTitle" style="margin:0"></h2><button class="btn sm primary" id="newOnDay">New entry on this day</button></div>
+        <div class="grp-h dayhead"><h2 id="dayTitle" style="margin:0"></h2><button class="btn sm primary" id="newOnDay">＋ Log on this day</button></div>
         <div id="dayList" class="list"></div>
       </div>
     </div>
@@ -441,7 +632,7 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
   <!-- RECIPES -->
   <section class="view" id="view-rec" hidden>
     <div id="recListView">
-      <div class="rec-top"><h2 style="margin:0">Recipes</h2><span class="hint" id="recCount"></span></div>
+      <div class="rec-top"><h2 style="margin:0">Recipes <span class="hint" id="recCount"></span></h2><button type="button" class="btn primary sm" id="recAdd">＋ New</button></div>
       <input type="search" id="recSearch" placeholder="Search recipes" aria-label="Search recipes" hidden>
       <div id="recList" class="rec-list"></div>
     </div>
@@ -460,7 +651,6 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
       <div class="err" id="recErr" hidden></div>
       <div class="savebar"><button type="submit" class="btn primary" id="recSave">Save recipe</button><button type="button" class="btn ghost" id="recCancel2">Cancel</button></div>
     </form>
-    <button type="button" class="fab" id="recAdd" aria-label="New recipe" title="New recipe">+</button>
   </section>
   <!-- SYNC -->
   <section class="view" id="view-sync" hidden>
@@ -471,7 +661,7 @@ select.unit{width:auto;padding-right:4px;color:var(--ink);cursor:pointer}
 </main>
 
 <nav class="tabbar" role="tablist" aria-label="Sections">
-  <button role="tab" data-tab="new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Home</button>
+  <button role="tab" data-tab="new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6L4.5 18.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3"/><path d="M7 15h10"/></svg>Log</button>
   <button role="tab" data-tab="log"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Entries</button>
   <button role="tab" data-tab="cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendar</button>
   <button role="tab" data-tab="rec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H20v-3"/><path d="M8 7h8M8 11h6"/></svg>Recipes</button>
@@ -693,7 +883,9 @@ const TYPES=TECH;
 const grpOf=k=>k==="dep"?"dep":(TECH[k]?TECH[k].g:"oth");
 const secOf=k=>k==="dep"?"dep":grpOf(k)==="dev"?"dev":"char";
 const SEC_NAME={dep:"Deposition",char:"Characterisation",dev:"Device testing"};
-const kindName=e=>{const k=kindOf(e); return (k==="other"||k==="devo")&&T_(obj(e.f).tech)?T_(obj(e.f).tech):KINDS[k].name};
+const kindName=e=>{const k=kindOf(e); let nm="";
+  if(k==="other"){const u=charOf(e); nm=T_(u[0]&&u[0].scans[0].f.tech)} else if(k==="devo") nm=T_(obj(e.f).tech);
+  return nm||KINDS[k].name};
 const LTKEY="perovLabLog.lastTech";
 function lastTech(g){const m=obj(lsGet(LTKEY,{})); const t=g?m[g]:m._; return TECH[t]&&(!g||TECH[t].g===g)&&(g||TECH[t].g!=="dev")?t:(g?TECH_ORDER[g][0]:"xrd")}
 function rememberTech(t){if(!TECH[t]) return; const m=obj(lsGet(LTKEY,{})); if(TECH[t].g!=="dev") m._=t; m[TECH[t].g]=t; lsSet(LTKEY,m)}
@@ -707,6 +899,20 @@ const sig=x=>{const r=Number(x.toPrecision(3)); return String(r)};
 const CALC={ci:f=>{const t=parseNum(T_(f.tox)), k=parseNum(T_(f.k)); if(!(t>0)||!(k>0)) return ""; const nm=f.tox_u==="µm"?t*1000:t; return sig(885.4187*k/nm)}};
 const DIEL_K={SiO2:"3.9",Al2O3:"9",HfO2:"25",ZrO2:"25",PMMA:"3.6"};
 const nextDev=v=>{v=T_(v); const m=/^(.*?)(\d+)$/.exec(v); return m?m[1]+String(+m[2]+1).padStart(m[2].length,"0"):v};
+/* v19: device testing = structure once per sample, then devices, each with its own measurements */
+const DEVCFG={tft:{shared:["diel","tox","k","ci","elec"],unit:["L","W"],types:[["mTr","Transfer"],["mOut","Output"],["mBs","Bias stress"]]},
+  pd:{shared:["type","stack"],unit:["area","gap"]},devo:{shared:["tech","stack"],unit:["area"]}};
+const fdByK=(t,k)=>fieldsOf(t).find(f=>f.k===k);
+const sharedGroups=t=>{const c=DEVCFG[t]; return c?[{title:"",fields:c.shared.map(k=>fdByK(t,k)).filter(Boolean)}]:[]};
+const unitGroups=t=>{const c=DEVCFG[t]; return c?[{title:"",fields:c.unit.map(k=>fdByK(t,k)).filter(Boolean)}]:[]};
+function measGroups(t,m){const c=DEVCFG[t]; if(!c) return [];
+  return TYPES[t].groups.filter(g=>!g.tog||g.tog===m).map(g=>({...g,title:g.tog?"Sweep":g.title,fields:g.fields.filter(fd=>!c.shared.includes(fd.k)&&!c.unit.includes(fd.k))})).filter(g=>g.fields.length)}
+const measName=(t,m)=>{const c=DEVCFG[t]; const x=c&&c.types&&c.types.find(y=>y[0]===m); return x?x[1]:""};
+const isResultGroup=g=>/result|fit/i.test(g.title||"");
+/* copy only the settings (not results / fits) so a new scan or substrate starts from the same conditions */
+function settingsOnly(groups,f){const o={}, skip=new Set(); groups.filter(isResultGroup).forEach(g=>g.fields.forEach(fd=>{skip.add(fd.k);skip.add(fd.k+"_u")}));
+  Object.entries(obj(f)).forEach(([k,v])=>{if(!skip.has(k)) o[k]=v}); return o}
+const visG=(groups,f)=>groups.flatMap(g=>g.fields.filter(fd=>fdOn(fd,f)));
 /* step programs (temperature and rate pop-up) */
 const PK={
   temp:{title:"temperature program",btn:"Set temperature steps",vu:"°C",base:25,baseLabel:"RT",rise:.42,
@@ -775,6 +981,27 @@ function normStage(s){s=obj(s);
 }
 const normExtra=x=>arr(x).slice(0,60).map(o=>{o=obj(o);return {k:str(o.k),v:str(o.v)}}).filter(o=>o.k||o.v);
 const kindOf=e=>e.type==="te"?"dep":e.type;
+const okDate=s=>typeof s==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(s)?s:"";
+const normF=f=>Object.fromEntries(Object.entries(obj(f)).filter(([k])=>/^[A-Za-z0-9_]{1,40}$/.test(k)&&!BAD_ID.has(k)).slice(0,120).map(([k,v])=>[k,str(v)]));
+const normUnits=u=>arr(u).slice(0,40).map(x=>{x=obj(x);const scans=arr(x.scans).slice(0,30).map(s=>({f:normF(obj(s).f)}));
+  return {sample:str(x.sample),sub:str(x.sub),dep:okDate(x.dep),scans:scans.length?scans:[{f:{}}]}});
+const normDevs=d=>arr(d).slice(0,40).map(x=>{x=obj(x);const meas=arr(x.meas).slice(0,30).map(m=>{m=obj(m);return {m:/^m[A-Za-z]{1,6}$/.test(m.m)?m.m:"",f:normF(m.f)}});
+  return {id:str(x.id).slice(0,24),f:normF(x.f),meas}});
+/* characterisation: v19 entries hold substrates → scans; older entries are one flat set of values */
+function charOf(e){ if(Array.isArray(e.units)) return normUnits(e.units);
+  return [{sample:str(e.sample),sub:subsOf(e).join(", "),dep:"",scans:[{f:normF(e.f)}]}] }
+/* device testing: v19 entries hold shared structure + devices → measurements; older entries are one device */
+function devOf(e){
+  const t=e.type, c=DEVCFG[t];
+  if(Array.isArray(e.devs)) return {f:normF(e.f),devs:normDevs(e.devs),dep:okDate(e.dep)};
+  const F=normF(e.f), pick=(keys)=>{const o={}; keys.forEach(k=>{if(F[k]!=null){o[k]=F[k]; if(F[k+"_u"]!=null) o[k+"_u"]=F[k+"_u"]}}); return o};
+  if(!c) return {f:{},devs:[{id:T_(F.devId)||"D1",f:{},meas:[{m:"",f:F}]}],dep:""};
+  const meas=[];
+  if(c.types){ c.types.forEach(([m])=>{ if(F[m]==="1") meas.push({m,f:pick(visG(measGroups(t,m),F).map(fd=>fd.k).concat(m==="mTr"?["trMode","pw","pp","vbase"]:[]))}) });
+    if(!meas.length) meas.push({m:"mTr",f:pick(visG(measGroups(t,"mTr"),F).map(fd=>fd.k))}) }
+  else meas.push({m:"",f:pick(measGroups(t).flatMap(g=>g.fields.map(fd=>fd.k)))});
+  return {f:pick(c.shared),devs:[{id:T_(F.devId)||"D1",f:pick(c.unit),meas}],dep:""};
+}
 /* entries saved before v12 (type "te", flat fields) are shown and edited as a co-evaporation stage */
 function legacyChems(e){const f=obj(e.f); if(Array.isArray(e.chems)&&e.chems.length) return e.chems.filter(id=>chemById(id));
   return CHEMS.map(c=>c.id).filter(id=>["t","m","r","q"].some(p=>f[p+id]!=null&&f[p+id]!==""))}
@@ -808,7 +1035,9 @@ let unitPref=obj(lsGet(UKEY,{}));
 let entries=new Map();
 function live(){entries=new Map(Object.entries(store.entries).filter(([id,e])=>e&&!e.deleted&&KINDS[kindOf(e)]))}
 live();
-const ui={tab:"new",filter:"all",tech:"",q:"",calMonth:null,calDay:ymd(new Date()),editing:null,confirmDel:null,col:new Set()};
+const ui={tab:"new",filter:"all",tech:"",q:"",calMonth:null,calDay:ymd(new Date()),editing:null,confirmDel:null,col:new Set(),
+  pick:{open:false,day:null,sel:new Set()},ucol:new Set(),scol:new Set(),srcOpen:null,dtOpen:false};
+function resetFormUI(){ui.col.clear();ui.ucol.clear();ui.scol.clear();ui.srcOpen=null;ui.dtOpen=false;ui.pick={open:false,day:null,sel:new Set()}}
 let draft;
 
 const CHKEY="perovLabLog.chems";
@@ -848,13 +1077,23 @@ function setMode(s,m){ if(s.mode===m) return; s.mode=m; if(!s.src.some(srcHasDat
 function freshDraft(type,date){
   const now=new Date(); let t=type||lsGet(TKEY,"dep"); if(t==="te"||!KINDS[t]) t="dep";
   const r=lsGet(RKEY,"co"), route=ROUTES[r]?r:"co";
-  return {date:date||ymd(now),time:hm(now),sample:"",subs:lastSubs(),type:t,route,stages:stagesFor(route,[]),f:{},extra:[],notes:"",touched:false};
+  return {date:date||ymd(now),time:hm(now),sample:"",subs:lastSubs(),type:t,route,stages:stagesFor(route,[]),f:{},units:[],devs:[],tpl:null,devDep:"",extra:[],notes:"",touched:false};
 }
 function normDraft(d){d=obj(d); const t=KINDS[d.type]?d.type:"dep", route=ROUTES[d.route]?d.route:"co";
   const stages=arr(d.stages).slice(0,8).map(normStage);
   return {date:/^\d{4}-\d{2}-\d{2}$/.test(d.date)?d.date:ymd(new Date()),time:str(d.time),sample:str(d.sample),subs:arr(d.subs).map(str),type:t,route,
-    stages:stages.length?stages:stagesFor(route,[]),f:Object.fromEntries(Object.entries(obj(d.f)).filter(([k])=>/^[A-Za-z0-9_]+$/.test(k)).map(([k,v])=>[k,str(v)])),
+    stages:stages.length?stages:stagesFor(route,[]),f:normF(d.f),units:normUnits(d.units),devs:normDevs(d.devs),tpl:d.tpl?normF(d.tpl):null,devDep:okDate(d.devDep),
     extra:arr(d.extra).slice(0,60).map(o=>{o=obj(o);return {k:str(o.k),v:str(o.v)}}),notes:String(d.notes==null?"":d.notes).slice(0,20000),touched:!!d.touched}}
+const blankMeas=t=>({m:DEVCFG[t]&&DEVCFG[t].types?"mTr":"",f:{}});
+/* make sure the draft has the containers the current experiment needs */
+function ensureShape(){
+  if(!Array.isArray(draft.units)) draft.units=[]; if(!Array.isArray(draft.devs)) draft.devs=[]; if(!draft.f) draft.f={};
+  if(secOf(draft.type)!=="dev") return;
+  const c=DEVCFG[draft.type]; if(!c) return;
+  if(!draft.devs.length) draft.devs=[{id:"D1",f:{},meas:[blankMeas(draft.type)]}];
+  draft.devs.forEach(d=>{ if(!d.meas.length) d.meas.push(blankMeas(draft.type));
+    d.meas.forEach(m=>{ m.m=c.types?(c.types.some(x=>x[0]===m.m)?m.m:"mTr"):"" }) });
+}
 /* unsaved form survives closing the app */
 let dTimer=null;
 function saveDraft(){clearTimeout(dTimer);dTimer=setTimeout(()=>lsSet(DKEY,{d:draft,editing:ui.editing}),300)}
@@ -971,8 +1210,8 @@ function fld(o){
   if(Array.isArray(o.u)){const cur=o.u.includes(o.uv)?o.uv:uPref(o.uk,o.u); if(cur!==o.uv&&o.up) setPath(draft,o.up,cur);
     unit=`<select class="unit" data-p="${o.up}" data-uk="${esc(o.uk)}" aria-label="${esc(o.l)} unit">${o.u.map(x=>`<option${x===cur?" selected":""}>${esc(x)}</option>`).join("")}</select>`}
   else if(o.u) unit=`<span class="unit">${esc(o.u)}</span>`;
-  const inp=`<input type="text"${o.txt?' autocapitalize="off"':` class="num" inputmode="${o.sci?"text":"decimal"}"`} id="${id}" data-p="${o.p}" value="${esc(o.v)}" placeholder="${esc(o.ph||"")}"${o.list?` list="${o.list}"`:""} autocomplete="off">`;
-  return `<label class="f"><span class="lab">${esc(o.l)}</span>${unit?`<span class="unitwrap">${inp}${unit}</span>`:inp}</label>`;
+  const inp=`<input type="text"${o.txt?' autocapitalize="off"':` class="num" inputmode="${o.sci?"text":"decimal"}"`} id="${id}" data-p="${o.p}" value="${esc(o.v)}" placeholder="${esc(o.ph||"")}"${o.list?` list="${o.list}"`:""} autocomplete="off"${o.aria?` aria-label="${esc(o.aria)}"`:""}>`;
+  return `<label class="f${o.wide?" wide2":""}"><span class="lab">${esc(o.l)}</span>${unit?`<span class="unitwrap">${inp}${unit}</span>`:inp}</label>`;
 }
 const ICON={
   co:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20h16"/><path d="M6 4l4 12M12 4v12M18 4l-4 12"/></svg>',
@@ -999,39 +1238,67 @@ function stageBrief(s){
 
 /* ---------- form rendering ---------- */
 function renderForm(){
+  ensureShape();
   $("#fDate").value=draft.date; $("#fTime").value=draft.time; $("#fSample").value=draft.sample; $("#fNotes").value=draft.notes; renderSub(); sampleMode();
   renderKind(); renderTypeFields(); renderExtra(); renderLists_dl();
   const eb=$("#editBanner");
-  if(ui.editing){eb.hidden=false;$("#editText").textContent="Editing entry from "+niceDate(draft.date,true);$("#saveBtn").textContent="Update entry"}
-  else{eb.hidden=true;$("#saveBtn").textContent="Save entry"}
-  $("#formErr").hidden=true; dateHint();
+  if(ui.editing){eb.hidden=false;$("#editText").textContent="Editing entry from "+niceDate(draft.date,true);$("#saveBtn").textContent="Update"}
+  else{eb.hidden=true;$("#saveBtn").textContent="Save"}
+  $("#formErr").hidden=true; dateHint(); renderLastRun(); updateSum();
 }
-function sampleMode(){const dev=secOf(draft.type)==="dev"; $("#devNoBox").hidden=!dev; $("#subsBox").hidden=dev; $("#fDevNo").value=dev?str(draft.f.devId):""}
-function dateHint(){$("#dateHint").textContent=draft.date===ymd(new Date())?"Date and time are filled in automatically. Pick another day in Calendar to log for that date.":"Logging for "+niceDate(draft.date,true)+"."}
+function sampleMode(){const sec=secOf(draft.type);
+  $("#hSample").textContent=sec==="dep"?"Sample":"Measured"; $("#sampleBody").hidden=sec!=="dep"; $("#dtRow").hidden=!ui.dtOpen}
+const shortDate=s=>parseD(s).toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"});
+function dateHint(){const c=$("#dateChip"), today=draft.date===ymd(new Date());
+  c.innerHTML=`${esc(shortDate(draft.date))}${draft.time?" · "+esc(draft.time):""}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`;
+  c.classList.toggle("other",!today); c.setAttribute("aria-expanded",String(ui.dtOpen));
+  c.setAttribute("aria-label",`${secOf(draft.type)==="dep"?"Date":"Measured"} ${niceDate(draft.date,true)}${draft.time?" at "+draft.time:""}. Change date or time`)}
+$("#dateChip").addEventListener("click",()=>{ui.dtOpen=!ui.dtOpen; $("#dtRow").hidden=!ui.dtOpen; dateHint()});
 function renderKind(){
   const sec=secOf(draft.type);
-  $("#kinds").innerHTML=`<button type="button" class="kind" data-type="dep" data-kindsel="dep" aria-pressed="${sec==="dep"}"><b>Deposition</b><small>Making films: evaporation, spin coating, hybrid</small></button><button type="button" class="kind" data-type="${sec==="char"?grpOf(draft.type):"xray"}" data-kindsel="char" aria-pressed="${sec==="char"}"><b>Characterisation</b><small>X-ray, optical, electron, probe, surface, electrical</small></button><button type="button" class="kind" data-type="dev" data-kindsel="dev" aria-pressed="${sec==="dev"}"><b>Device testing</b><small>TFTs, photodetectors, other devices</small></button>`;
+  $("#kinds").innerHTML=[["dep","Deposition","dep"],["char","Characterisation",sec==="char"?grpOf(draft.type):"xray"],["dev","Device","dev"]]
+    .map(([k,l,tc])=>`<button type="button" class="kind" data-type="${tc}" data-kindsel="${k}" aria-pressed="${sec===k}"><b>${l}</b></button>`).join("");
   const rb=$("#routeBox");
   rb.hidden=false;
   if(sec==="dev"){
-    rb.innerHTML=`<div class="lab2">Device</div><div class="chips">${TECH_ORDER.dev.map(t=>`<button type="button" class="chip-btn tech" data-type="dev" data-tech="${t}" aria-pressed="${t===draft.type}">${TECH[t].n}</button>`).join("")}</div>`;
+    rb.innerHTML=`<div class="chips" role="group" aria-label="Device">${TECH_ORDER.dev.map(t=>`<button type="button" class="chip-btn tech" data-type="dev" data-tech="${t}" aria-pressed="${t===draft.type}">${TECH[t].n}</button>`).join("")}</div>`;
     return}
   if(sec==="char"){const g=grpOf(draft.type);
-    rb.innerHTML=`<div class="lab2">Technique group</div><div class="chips">${CHAR_GROUPS.map(gk=>[gk,TECH_GROUPS[gk]]).map(([gk,G])=>`<button type="button" class="chip-btn grp" data-type="${gk}" data-grp="${gk}" aria-pressed="${gk===g}">${G.name}</button>`).join("")}</div>
-      <div class="lab2">Technique</div><div class="chips">${TECH_ORDER[g].map(t=>`<button type="button" class="chip-btn tech" data-type="${g}" data-tech="${t}" aria-pressed="${t===draft.type}">${TECH[t].n}</button>`).join("")}</div>`;
+    rb.innerHTML=`<div class="chips scroll" role="group" aria-label="Technique group">${CHAR_GROUPS.map(gk=>[gk,TECH_GROUPS[gk]]).map(([gk,G])=>`<button type="button" class="chip-btn grp" data-type="${gk}" data-grp="${gk}" aria-pressed="${gk===g}">${G.name}</button>`).join("")}</div>
+      <div class="chips techs" role="group" aria-label="Technique">${TECH_ORDER[g].map(t=>`<button type="button" class="chip-btn tech" data-type="${g}" data-tech="${t}" aria-pressed="${t===draft.type}">${TECH[t].n}</button>`).join("")}</div>`;
     return}
   const flow=draft.stages.map(s=>s.kind).join(",");
-  rb.innerHTML=`<div class="lab2">Deposition route</div><div class="routes">${Object.entries(ROUTES).map(([k,r])=>`<button type="button" class="route" data-route="${k}" aria-pressed="${draft.route===k}"><span class="ricon">${ICON[k]}</span><span><b>${r.name.replace(/-/g,"\u2011")}</b><small>${r.sub}</small></span></button>`).join("")}</div>`+
-    (draft.route==="hyb"?`<div class="lab2">Order of stages</div><div class="chips">${HYB_PRESETS.map(p=>`<button type="button" class="chip-btn" data-flow="${p.join(",")}" aria-pressed="${flow===p.join(",")}">${p.map(k=>STAGE_SHORT[k]).join(" → ")}</button>`).join("")}</div><div class="hint">Another order? Add, move or remove stages below.</div>`:"");
+  rb.innerHTML=`<div class="chips" role="group" aria-label="Deposition route">${Object.entries(ROUTES).map(([k,r])=>`<button type="button" class="chip-btn" data-route="${k}" aria-pressed="${draft.route===k}">${k==="spin"?"Spin coating":r.short}</button>`).join("")}</div>`+
+    (draft.route==="hyb"?`<div class="chips" role="group" aria-label="Order of stages"><span class="lab2" style="margin:0;align-self:center">Order</span>${HYB_PRESETS.map(p=>`<button type="button" class="chip-btn" data-flow="${p.join(",")}" aria-pressed="${flow===p.join(",")}">${p.map(k=>STAGE_SHORT[k]).join(" → ")}</button>`).join("")}</div>`:"");
+}
+/* "start from last run": copies the settings of the latest entry of the same kind */
+function lastRunEntry(){ if(ui.editing||draft.touched) return null; const t=draft.type;
+  return sorted().find(x=>kindOf(x)===t&&(t!=="dep"||depOf(x).route===draft.route))||null }
+function renderLastRun(){const e=lastRunEntry(), box=$("#lastRun");
+  if(!e){box.innerHTML="";box.className="";return}
+  const what=draft.type==="dep"?ROUTES[draft.route].short.toLowerCase():kindName(e);
+  box.className="lastrun";
+  box.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span>Start from last ${esc(what)}${e.sample?` <b>${esc(e.sample)}</b>`:""} · ${esc(niceDate(e.date))}</span><button type="button" class="btn sm" data-lastrun="${esc(e.id)}">Copy setup</button>`}
+/* the save bar says what will be saved */
+function updateSum(){
+  const t=draft.type, sec=secOf(t); let a="", n=0;
+  if(sec==="dep"){const src=draft.stages.reduce((s,x)=>s+(x.kind==="te"?x.src.length:x.sol.length),0), allSpin=draft.stages.every(s=>s.kind==="spin");
+    a=`${ROUTES[draft.route].short} · ${draft.stages.length>1?draft.stages.map(s=>STAGE_SHORT[s.kind]).join(" → ")+" · ":""}${src} ${allSpin?"solution":"source"}${src===1?"":"s"}${T_(draft.sample)?" · "+T_(draft.sample):""}`}
+  else if(sec==="char"){n=draft.units.reduce((s,u)=>s+u.scans.length,0);
+    a=`${TECH[t].n} · ${draft.units.length} substrate${draft.units.length===1?"":"s"} · ${n} scan${n===1?"":"s"}`}
+  else {n=draft.devs.reduce((s,d)=>s+d.meas.length,0);
+    a=`${TECH[t].n}${T_(draft.sample)?" · "+T_(draft.sample):""} · ${draft.devs.length} device${draft.devs.length===1?"":"s"} · ${n} measurement${n===1?"":"s"}`}
+  $("#saveSum").textContent=a;
+  $("#saveSub").textContent=ui.editing?"Editing entry from "+niceDate(draft.date):draft.touched?"Draft kept on this device":(draft.date===ymd(new Date())?"New entry":"New entry for "+niceDate(draft.date));
 }
 function renderTypeFields(){
-  const tf=$("#typeFields"), nav=$("#stageNav");
-  $("#xHead").textContent=draft.type==="dep"&&draft.route==="hyb"?"Other parameters · whole run":"Other parameters";
-  if(draft.type!=="dep"){nav.innerHTML="";nav.hidden=true;tf.innerHTML=flatHTML(draft.type);return}
+  const tf=$("#typeFields"), nav=$("#stageNav"), sec=secOf(draft.type);
+  $("#xHead").textContent=draft.type==="dep"&&draft.route==="hyb"?"Notes · whole run":"Notes";
+  if(sec!=="dep"){nav.innerHTML="";nav.hidden=true; tf.innerHTML=sec==="char"?charHTML():devHTML(); return}
   const n=draft.stages.length;
   nav.hidden=n<2;
   nav.innerHTML=n<2?"":draft.stages.map((s,i)=>`${i?'<span class="arr" aria-hidden="true">→</span>':""}<button type="button" class="navpill" data-kind="${s.kind}" data-goto="${i}"><span class="stage-n">${i+1}</span>${STAGE_SHORT[s.kind]}${s.kind==="te"?` <small>${s.mode==="seq"?"seq":"co"}</small>`:""}</button>`).join("");
-  tf.innerHTML=draft.stages.map(stageHTML).join("")+(draft.route==="hyb"?`<div class="addstage"><button type="button" class="btn" data-addstage="spin">＋ Spin coating stage</button><button type="button" class="btn" data-addstage="te">＋ Evaporation stage</button></div>`:"");
+  tf.innerHTML=draft.stages.map(stageHTML).join("")+(draft.route==="hyb"?`<div class="addstage"><button type="button" class="btn sm" data-addstage="spin">＋ Spin coating stage</button><button type="button" class="btn sm" data-addstage="te">＋ Evaporation stage</button></div>`:"");
 }
 function stageHTML(s,i){
   const n=draft.stages.length, hyb=draft.route==="hyb", col=ui.col.has(i), P=`stages.${i}`;
@@ -1045,70 +1312,162 @@ function stageHTML(s,i){
   return `<section class="card stage" data-kind="${s.kind}" id="stage_${i}">${head}${confirm}${mode}${s.kind==="te"?teBody(s,i,P):spinBody(s,i,P)}${draft.route==="hyb"?stageXHTML(s,i,P):""}</section>`;
 }
 function stageXHTML(s,i,P){
-  return `<div class="grp"><div class="grp-h"><h4>Other parameters · stage ${i+1}</h4><button type="button" class="btn sm" data-addx="${i}">＋ Add</button></div>
+  return `<div class="grp"><div class="grp-h"><h4>Stage ${i+1} parameters</h4><button type="button" class="btn sm" data-addx="${i}">＋ Add</button></div>
     ${s.x.map((x,j)=>`<div class="xrow">${fld({p:`${P}.x.${j}.k`,v:x.k,l:"Name",txt:1,ph:"e.g. Glovebox O₂ (ppm)",list:"xList"})}${fld({p:`${P}.x.${j}.v`,v:x.v,l:"Value",txt:1,ph:"e.g. 0.5"})}<button type="button" class="btn icon-x" data-del="${P}.x.${j}" aria-label="Remove stage ${i+1} parameter ${j+1}">✕</button></div>`).join("")
-      ||`<div class="hint">Conditions for this stage only, e.g. glovebox O₂/H₂O, humidity, room temperature.</div>`}</div>`;
+      ||`<div class="hint">Conditions for this stage only, e.g. glovebox O₂/H₂O, humidity.</div>`}</div>`;
 }
 function teBody(s,i,P){
   const seq=s.mode==="seq";
-  const ff=g=>TE_F.filter(fd=>fd.g===g).map(fd=>fld({p:`${P}.f.${fd.k}`,v:s.f[fd.k],l:fd.k==="thickness"&&seq?"Total film thickness":fd.l,u:fd.u,up:`${P}.f.${fd.k}_u`,uv:s.f[fd.k+"_u"],uk:fd.k+"_u",sci:fd.sci,ph:fd.ph})).join("");
+  const ff=g=>TE_F.filter(fd=>fd.g===g).map(fd=>fld({p:`${P}.f.${fd.k}`,v:s.f[fd.k],l:fd.k==="thickness"?(seq?"Total thickness":"Film thickness"):(fd.d||fd.l),u:fd.u,up:`${P}.f.${fd.k}_u`,uv:s.f[fd.k+"_u"],uk:fd.k+"_u",sci:fd.sci,ph:fd.ph,aria:fd.l})).join("");
   const pool=[...CHEMS.map(c=>c.id),...customChems()]; s.src.forEach(c=>{if(c.chem&&!pool.includes(c.chem)) pool.push(c.chem)});
   const uniq=pool.filter((v,j)=>pool.indexOf(v)===j);
   const chips=uniq.map(id=>seq
     ?`<button type="button" class="chemchip add" data-addchem="${i}" data-chem="${esc(id)}" aria-label="Add ${esc(chemPlain(id))} layer">＋ ${fmtChem(chemPlain(id))}</button>`
     :`<button type="button" class="chemchip" data-addchem="${i}" data-chem="${esc(id)}" aria-pressed="${s.src.some(c=>c.chem===id)}">${fmtChem(chemPlain(id))}</button>`).join("");
-  const srcs=s.src.map((c,j)=>srcHTML(s,c,i,j)).join("")||`<div class="hint">${seq?"Tap a chemical above to add it as the next layer.":"Tap the chemicals you're evaporating together."}</div>`;
-  return `<div class="grp"><h4>Chamber</h4><div class="row">${ff("chamber")}</div><div class="hint">Type pressures like 5e-6 or 5x10^-6.</div></div>
-    <div class="grp"><h4>${seq?"Layers, in order of evaporation":"Sources evaporated together"}</h4>
+  return `<div class="grp"><h4>Chamber</h4><div class="row two">${ff("chamber")}</div></div>
+    <div class="grp"><div class="grp-h"><h4>${seq?"Layers, in order":"Sources"} · ${s.src.length}</h4><span class="hint">⤴ = temperature / rate steps</span></div>
       <div class="chips" role="group" aria-label="Chemicals">${chips}</div>
       <div class="subnew"><input type="text" id="cc_${i}" placeholder="Other chemical, e.g. SnF2" aria-label="Other chemical" list="chemList" autocomplete="off" autocapitalize="off" enterkeyhint="done" data-ccin="${i}"><button type="button" class="btn sm" data-addcustom="${i}">＋ Add</button></div>
-      <div class="srcs">${srcs}</div>
-      <div class="hint">“Set … steps” records a ramp program like the Control Temperature Panel; the final value fills in automatically.</div></div>
+      ${s.src.length?srcTable(s,i):`<div class="hint">${seq?"Tap a chemical above to add it as the next layer.":"Tap the chemicals you're evaporating together."}</div>`}</div>
     <div class="grp"><h4>Substrate &amp; film</h4><div class="row">${ff("sub")}</div></div>
     ${annHTML(s,P)}`;
 }
-function srcHTML(s,c,i,j){
-  const seq=s.mode==="seq", P=`stages.${i}.src.${j}`, n=s.src.length, armed=ui.arm===`srcdel:${i}:${j}`;
-  const fields=SRC_F.filter(fd=>(!fd.seq||seq)&&!(fd.noOrg&&isOrg(c.chem))).map(fd=>{
-    const f=fld({p:`${P}.${fd.k}`,v:c[fd.k],l:fd.l+(fd.prog?" · final":""),u:fd.u,up:`${P}.${fd.k}U`,uv:c[fd.k+"U"],uk:fd.k+"U"});
-    if(!fd.prog) return f;
-    const pr=c[fd.k+"P"];
-    return `<div class="fcell">${f}<button type="button" class="stepbtn${pr&&pr.length?" on":""}" data-prog="${P}" data-pf="${fd.k}" id="pb_${pid(P)}_${fd.k}">${pr&&pr.length?stepSummary(pr):PK[fd.prog].btn}</button></div>`}).join("");
-  return `<div class="src"><div class="src-h">${seq?`<span class="layer-n">Layer ${j+1}</span>`:""}<b>${fmtChem(chemPlain(c.chem))}</b><span class="spacer"></span>${seq&&n>1?`<button type="button" class="btn sm icon" data-srcmove="${i}:${j}:-1"${j===0?" disabled":""} aria-label="Move layer ${j+1} earlier">↑</button><button type="button" class="btn sm icon" data-srcmove="${i}:${j}:1"${j===n-1?" disabled":""} aria-label="Move layer ${j+1} later">↓</button>`:""}<button type="button" class="btn sm icon" data-srcdel="${i}:${j}" aria-label="Remove ${esc(chemPlain(c.chem))}">✕</button></div>${armed?`<div class="confirm" role="alert"><span>Remove ${fmtChem(chemPlain(c.chem))} and its values?</span><button type="button" class="btn sm danger solid" data-srcdel="${i}:${j}">Remove</button><button type="button" class="btn sm" data-disarm>Keep</button></div>`:""}<div class="row">${fields}</div></div>`;
+/* sources as a table: one row per chemical, ⤴ opens that source's step programs and tools */
+function srcTable(s,i){
+  const seq=s.mode==="seq", P=`stages.${i}`;
+  const mU=SRC_F[1].u, curM=mU.includes(s.src[0]&&s.src[0].mU)?s.src[0].mU:uPref("mU",mU);
+  const kU=SRC_F[4].u, curK=kU.includes(s.src[0]&&s.src[0].kU)?s.src[0].kU:uPref("kU",kU);
+  const usel=(attr,list,cur,label)=>`<select class="mini" ${attr}="${i}" aria-label="${label}">${list.map(x=>`<option${x===cur?" selected":""}>${esc(x)}</option>`).join("")}</select>`;
+  let h=`<div class="stbl${seq?" seq":""}"><span class="th">${seq?"Layer":"Source"}</span><span class="th">T °C</span><span class="th">Mass ${usel("data-massu",mU,curM,"Mass unit")}</span><span class="th">Rate Å/s</span><span class="th">QCM %</span>${seq?`<span class="th">Thick. ${usel("data-thku",kU,curK,"Layer thickness unit")}</span>`:""}<span class="th c" aria-hidden="true">⤴</span>`;
+  s.src.forEach((c,j)=>{
+    const SP=`${P}.src.${j}`, nm=chemPlain(c.chem), org=isOrg(c.chem), key=`${i}:${j}`, open=ui.srcOpen===key, nP=(c.tP||[]).length+(c.rP||[]).length;
+    const cell=(k,lab)=>`<input type="text" class="num" inputmode="decimal" id="${pid(SP+"."+k)}" data-p="${SP}.${k}" value="${esc(c[k])}" aria-label="${esc(nm)} ${lab}" autocomplete="off">`;
+    h+=`<span class="nm" title="${esc(nm)}">${seq?`${j+1}. `:""}${fmtChem(nm)}</span>${cell("t","temperature (°C)")}${cell("m","powder mass")}${org?`<span class="na" title="No deposition rate for organic sources">n/a</span>`:cell("r","deposition rate (Å/s)")}${cell("q","QCM life at start (%)")}${seq?cell("k","layer thickness"):""}`;
+    h+=`<button type="button" class="rbtn${nP?" on":""}" data-srcx="${key}" aria-expanded="${open}" aria-label="${esc(nm)}: steps and options${nP?`, ${nP} steps set`:""}">${nP?nP:"⤴"}</button>`;
+    if(open){const armed=ui.arm===`srcdel:${i}:${j}`, n=s.src.length;
+      const pb=(k,kind)=>{const pr=c[k+"P"]; return `<button type="button" class="stepbtn${pr&&pr.length?" on":""}" data-prog="${SP}" data-pf="${k}" id="pb_${pid(SP)}_${k}">${pr&&pr.length?(kind==="temp"?"T ":"Rate ")+stepSummary(pr):PK[kind].btn}</button>`};
+      h+=`<div class="srcd">${pb("t","temp")}${org?"":pb("r","rate")}<span class="spacer"></span>${seq&&n>1?`<button type="button" class="btn sm icon" data-srcmove="${i}:${j}:-1"${j===0?" disabled":""} aria-label="Move layer ${j+1} earlier">↑</button><button type="button" class="btn sm icon" data-srcmove="${i}:${j}:1"${j===n-1?" disabled":""} aria-label="Move layer ${j+1} later">↓</button>`:""}<button type="button" class="btn sm ghost danger" data-srcdel="${i}:${j}">Remove</button>
+        ${armed?`<div class="confirm" role="alert" style="flex:1 1 100%"><span>Remove ${fmtChem(nm)} and its values?</span><button type="button" class="btn sm danger solid" data-srcdel="${i}:${j}">Remove</button><button type="button" class="btn sm" data-disarm>Keep</button></div>`:""}
+        ${(c.tP&&c.tP.length)||(c.rP&&c.rP.length)?`<div class="progline" style="flex:1 1 100%">${c.tP&&c.tP.length?progText(c.tP,"temp"):""}${c.tP&&c.tP.length&&c.rP&&c.rP.length?"<br>":""}${c.rP&&c.rP.length?progText(c.rP,"rate"):""}</div>`:""}</div>`}
+  });
+  return h+`</div>`;
 }
 function spinBody(s,i,P){
   const n=s.sol.length;
   const sols=s.sol.map((x,j)=>{const SP=`${P}.sol.${j}`, pr=x.prog, a=x.ann, armed=ui.arm===`soldel:${i}:${j}`;
-    return `<div class="src sol"><div class="src-h"><span class="layer-n">Solution ${j+1}</span>${T_(x.name)?`<b class="solname">${fmtChem(T_(x.name))}</b>`:""}<span class="spacer"></span>${n>1?`<button type="button" class="btn sm icon" data-solmove="${i}:${j}:-1"${j===0?" disabled":""} aria-label="Move solution ${j+1} earlier">↑</button><button type="button" class="btn sm icon" data-solmove="${i}:${j}:1"${j===n-1?" disabled":""} aria-label="Move solution ${j+1} later">↓</button><button type="button" class="btn sm icon" data-soldel="${i}:${j}" aria-label="Remove solution ${j+1}">✕</button>`:""}</div>
+    const table=pr.length?`<div class="spt"><span class="th">#</span><span class="th">rpm</span><span class="th">ramp rpm/s</span><span class="th">time s</span><span class="th">anti-solvent</span>${pr.map((r,k)=>`<span class="muted">${k+1}</span><span>${esc(T_(r.rpm)||"–")}</span><span>${esc(T_(r.ramp)||"–")}</span><span>${esc(T_(r.time)||"–")}</span><span class="as">${r.as?esc((T_(r.asName)||"anti-solvent")+(T_(r.asVol)?" "+T_(r.asVol)+"µL":"")+(T_(r.asAt)?" @"+T_(r.asAt)+"s":"")):"–"}</span>`).join("")}</div>`:"";
+    return `<div class="src sol"><div class="src-h"><span class="layer-n">Solution ${j+1}</span><span class="spacer"></span>${n>1?`<button type="button" class="btn sm icon" data-solmove="${i}:${j}:-1"${j===0?" disabled":""} aria-label="Move solution ${j+1} earlier">↑</button><button type="button" class="btn sm icon" data-solmove="${i}:${j}:1"${j===n-1?" disabled":""} aria-label="Move solution ${j+1} later">↓</button><button type="button" class="btn sm icon" data-soldel="${i}:${j}" aria-label="Remove solution ${j+1}">✕</button>`:""}</div>
       ${armed?`<div class="confirm" role="alert"><span>Remove solution ${j+1} with its spin program and annealing?</span><button type="button" class="btn sm danger solid" data-soldel="${i}:${j}">Remove</button><button type="button" class="btn sm" data-disarm>Keep</button></div>`:""}
-      <div class="row">${SOL_F.map(fd=>fld({p:`${SP}.${fd.k}`,v:x[fd.k],l:fd.l,u:fd.u,up:`${SP}.${fd.k}U`,uv:x[fd.k+"U"],uk:fd.k+"U",txt:fd.txt,ph:fd.ph,list:fd.list})).join("")}</div>
-      <div class="fcell"><span class="lab2">Spin program</span><button type="button" class="stepbtn${pr.length?" on":""}" data-sprog="${SP}" id="pb_${pid(SP)}_prog">${pr.length?esc(spinSummary(pr)):"Set spin program (steps, anti-solvent)"}</button>${pr.length?`<div class="progline">${progText(pr,"spin")}</div>`:""}</div>
-      <label class="check"><input type="checkbox" data-p="${SP}.ann.on"${a.on?" checked":""}><span>Annealed after this solution</span></label>
-      ${a.on?`<div class="row">${fld({p:`${SP}.ann.t`,v:a.t,l:"Anneal temp (°C)"})}${fld({p:`${SP}.ann.time`,v:a.time,l:"Anneal time",u:ANN_F[1].u,up:`${SP}.ann.timeU`,uv:a.timeU,uk:"timeU"})}</div>`:""}
+      <div class="row">${SOL_F.map(fd=>fld({p:`${SP}.${fd.k}`,v:x[fd.k],l:fd.k==="name"?"Name":fd.k==="vol"?"Volume":fd.k==="conc"?"Conc.":fd.l,aria:fd.l,u:fd.u,up:`${SP}.${fd.k}U`,uv:x[fd.k+"U"],uk:fd.k+"U",txt:fd.txt,ph:fd.ph,list:fd.list,wide:fd.k==="name"})).join("")}</div>
+      <div class="fcell"><div class="grp-h"><span class="lab2" style="margin:0">Spin program</span><button type="button" class="btn sm" data-sprog="${SP}" id="pb_${pid(SP)}_prog">${pr.length?"Edit steps":"＋ Set steps"}</button></div>${table||`<div class="hint">Steps, ramps and anti-solvent drop.</div>`}</div>
+      <div class="annrow"><label class="check"><input type="checkbox" class="sw" data-p="${SP}.ann.on"${a.on?" checked":""}><span>Anneal</span></label>${a.on?`${fld({p:`${SP}.ann.t`,v:a.t,l:"",u:"°C",aria:`Solution ${j+1} anneal temperature`}).replace('<label class="f">','<label class="f annf">')}${fld({p:`${SP}.ann.time`,v:a.time,l:"",u:ANN_F[1].u,up:`${SP}.ann.timeU`,uv:a.timeU,uk:"timeU",aria:`Solution ${j+1} anneal time`}).replace('<label class="f">','<label class="f annf">')}`:""}</div>
     </div>`}).join("");
   return `<div class="grp"><h4>${n>1?"Solutions, in order of coating":"Solution"}</h4><div class="srcs">${sols}</div>
-    <div><button type="button" class="btn sm" data-addrow="${P}.sol">＋ Add next solution</button></div>
-    <div class="hint">Each solution has its own spin program and annealing. For layer-by-layer coating, add the solutions in the order you coat them.</div></div>`;
+    <div><button type="button" class="btn sm" data-addrow="${P}.sol">＋ Add next solution</button></div></div>`;
 }
 function annHTML(s,P){const a=s.ann;
-  return `<div class="grp"><label class="check"><input type="checkbox" data-p="${P}.ann.on"${a.on?" checked":""}><span>${s.kind==="spin"?"Final annealing after all steps":"Annealed after this stage"}</span></label>${a.on?`<div class="row">${fld({p:`${P}.ann.t`,v:a.t,l:ANN_F[0].l,u:"°C"})}${fld({p:`${P}.ann.time`,v:a.time,l:ANN_F[1].l,u:ANN_F[1].u,up:`${P}.ann.timeU`,uv:a.timeU,uk:"timeU"})}</div>`:""}</div>`}
-function flatFld(t,fd){const f=draft.f;
+  return `<div class="grp"><label class="check swrow"><input type="checkbox" class="sw" data-p="${P}.ann.on"${a.on?" checked":""}><span>${s.kind==="spin"?"Final annealing after all steps":"Annealed after this stage"}</span></label>${a.on?`<div class="row two">${fld({p:`${P}.ann.t`,v:a.t,l:ANN_F[0].d,u:"°C",aria:ANN_F[0].l})}${fld({p:`${P}.ann.time`,v:a.time,l:ANN_F[1].d,u:ANN_F[1].u,up:`${P}.ann.timeU`,uv:a.timeU,uk:"timeU",aria:ANN_F[1].l})}</div>`:""}</div>`}
+
+/* ---------- technique fields (characterisation scans, device structure and measurements) ---------- */
+const shortL=fd=>fd.l.length>17&&fd.d?fd.d:fd.l;
+function flatFld(t,fd,f,P){
+  const kp=`${P}.${fd.k}`;
   if(fd.seg){const v=segVal(fd,f); f[fd.k]=v;
-    return `<div class="f wide2"><span class="lab">${esc(fd.l)}</span><div class="seg segf" role="group" aria-label="${esc(fd.l)}">${fd.seg.map(o=>`<button type="button" data-seg="${fd.k}" data-v="${esc(o)}" aria-pressed="${o===v}">${esc(o)}</button>`).join("")}</div></div>`}
+    return `<div class="f wide2"><span class="lab">${esc(fd.l)}</span><div class="seg segf" role="group" aria-label="${esc(fd.l)}">${fd.seg.map(o=>`<button type="button" data-seg="${kp}" data-v="${esc(o)}" aria-pressed="${o===v}">${esc(o)}</button>`).join("")}</div></div>`}
   if(fd.calc){const v=CALC[fd.calc](f); f[fd.k]=v;
-    return `<div class="f"><span class="lab">${esc(fd.l)}</span><span class="unitwrap calc"><output id="calc_${fd.k}">${v?esc(v):"—"}</output><span class="unit">${esc(fd.u)}</span></span></div>`}
-  const h=fld({p:"f."+fd.k,v:f[fd.k],l:fd.l,u:fd.u,up:"f."+fd.k+"_u",uv:f[fd.k+"_u"],uk:t+"."+fd.k,txt:fd.txt,ph:fd.ph,sci:fd.sci});
+    return `<div class="f"><span class="lab">${esc(shortL(fd))}</span><span class="unitwrap calc"><output id="calc_${pid(kp)}">${v?esc(v):"—"}</output><span class="unit">${esc(fd.u)}</span></span></div>`}
+  /* free-text fields whose hint lists the choices ("n / p") become tap-to-pick chips */
+  if(fd.txt&&!fd.pick&&fd.ph&&!/^e\.g\./.test(fd.ph)&&fd.ph.includes(" / ")){const opts=fd.ph.split(" / ").map(x=>x.trim()), v=T_(f[fd.k]);
+    return `<div class="f wide2 pickf"><span class="lab">${esc(fd.l)}</span><div class="chips picks" role="group" aria-label="${esc(fd.l)}">${opts.map(o=>`<button type="button" class="chip-btn" data-pick="${kp}" data-v="${esc(o)}" aria-pressed="${v.toLowerCase()===o.toLowerCase()}">${esc(o)}</button>`).join("")}</div></div>`}
+  const h=fld({p:kp,v:f[fd.k],l:shortL(fd),aria:fd.l,u:fd.u,up:kp+"_u",uv:f[fd.k+"_u"],uk:t+"."+fd.k,txt:fd.txt,ph:fd.ph,sci:fd.sci,wide:!!fd.txt&&!fd.pick});
   if(!fd.pick) return h;
-  return `<div class="f pickf">${h}<div class="chips picks">${fd.pick.map(o=>`<button type="button" class="chip-btn" data-pick="${fd.k}" data-v="${esc(o)}" aria-pressed="${T_(f[fd.k])===o}">${fmtChem(o)}</button>`).join("")}</div></div>`;
+  return `<div class="f pickf wide2">${h}<div class="chips picks">${fd.pick.map(o=>`<button type="button" class="chip-btn" data-pick="${kp}" data-v="${esc(o)}" aria-pressed="${T_(f[fd.k])===o}">${fmtChem(o)}</button>`).join("")}</div></div>`;
 }
-function flatHTML(t){const f=draft.f;
-  return `<section class="card stage" data-kind="${grpOf(t)}"><div class="stage-h"><span class="stage-t"><b>${KINDS[t].name}</b><small>${TECH_GROUPS[grpOf(t)].name} · ${KINDS[t].sub}</small></span></div>${TYPES[t].groups.map(g=>{const on=grpOn(g,f);
-    const head=g.tog?`<label class="check"><input type="checkbox" data-p="f.${g.tog}"${on?" checked":""}><span><b>${esc(g.title)}</b>${g.hint?` <small class="muted">· ${esc(g.hint)}</small>`:""}</span></label>`:`<h4>${g.title}</h4>`;
-    return `<div class="grp">${head}${on?`<div class="row">${g.fields.filter(fd=>fdOn(fd,f)).map(fd=>flatFld(t,fd)).join("")}</div>`:""}</div>`}).join("")}</section>`;
+function groupsHTML(t,groups,f,P){
+  return groups.map(g=>{const fs=g.fields.filter(fd=>fdOn(fd,f)); if(!fs.length) return "";
+    const opt=/\(optional\)/.test(g.title||"");
+    return `<div class="grp">${g.title?`<h4>${esc(g.title.replace(/ \(optional\)/,""))}${opt?' <span class="muted" style="text-transform:none;letter-spacing:0;font-weight:400">· optional</span>':""}</h4>`:""}<div class="row">${fs.map(fd=>flatFld(t,fd,f,P)).join("")}</div></div>`}).join("");
+}
+/* one-line summary of a collapsed scan or measurement */
+function fBrief(t,groups,f,n){const it=fItems(t,groups,f); return it.slice(0,n||3).map(x=>`${x.v}${x.u?" "+x.u:""}`).join(" · ")}
+function fItems(t,groups,f,pref){const out=[];
+  groups.forEach(g=>g.fields.forEach(fd=>{if(!fdOn(fd,f)) return; const v=T_(f[fd.k]); if(!v) return; if((t==="other"||t==="devo")&&fd.k==="tech") return;
+    out.push({l:(pref||"")+(fd.d||fd.l),v,u:Array.isArray(fd.u)?unitOf(str(f[fd.k+"_u"]),fd.u):(fd.u||""),sci:fd.sci})})); return out}
+
+/* ---------- characterisation: 1 date → 2 substrates → 3 scans per substrate → 4 add substrate ---------- */
+const addDays=(s,n)=>{const d=parseD(s); d.setDate(d.getDate()+n); return ymd(d)};
+function depsByDay(){const m={}; entries.forEach(e=>{if(kindOf(e)==="dep"&&okDate(e.date)) (m[e.date]=m[e.date]||[]).push(e)}); return m}
+function pickDay(){ if(ui.pick.day) return ui.pick.day; const today=ymd(new Date()), m=depsByDay();
+  const days=Object.keys(m).filter(d=>d<=today).sort(); ui.pick.day=days.length?days[days.length-1]:today; return ui.pick.day }
+function pickerHTML(mode){
+  const g=mode==="dev"?"dev":grpOf(draft.type), day=pickDay(), today=ymd(new Date()), byDay=depsByDay();
+  let start=addDays(day,-3); if(addDays(start,6)>today&&day<=today) start=addDays(today,-6);
+  const days=[...Array(7)].map((_,k)=>addDays(start,k));
+  const wk=days.map(d=>{const n=(byDay[d]||[]).length, dd=parseD(d);
+    return `<button type="button" class="wd${n?" has":""}" data-pkday="${d}" aria-pressed="${d===day}" aria-label="${esc(niceDate(d,true))}, ${n} deposition${n===1?"":"s"}"><small>${dd.toLocaleDateString(undefined,{weekday:"short"})}</small><b>${dd.getDate()}</b><i>${n||""}</i></button>`}).join("");
+  const list=(byDay[day]||[]).slice().sort((a,b)=>str(a.time).localeCompare(str(b.time)));
+  const used=new Set(draft.units.map(u=>u.sample+"|"+u.sub));
+  const rows=list.map(e=>{const d=depOf(e), brief=d.stages.map(stageBrief).filter(Boolean).join(" · "), head=`<span class="pks-h"><b>${esc(e.sample||"(no ID)")}</b><span>${esc(ROUTES[d.route].short)}${e.time?" · "+esc(e.time):""}${brief?" · "+fmtChem(brief):""}</span>`;
+    if(mode==="dev") return `<button type="button" class="pks${T_(draft.sample)===T_(e.sample)?" sel":""}" data-pksample="${esc(e.id)}">${head}</span></button>`;
+    const subs=subsOf(e).length?subsOf(e):[""], selAny=subs.some(s=>ui.pick.sel.has(e.id+"|"+s));
+    return `<div class="pks${selAny?" sel":""}">${head}${subs.length>1?`<button type="button" class="linkb" data-pkall="${esc(e.id)}">All</button>`:""}</span>
+      <div class="chips">${subs.map(s=>{const k=e.id+"|"+s, done=used.has(T_(e.sample||"(no ID)")+"|"+s);
+        return `<button type="button" class="tog" data-pksel="${esc(k)}" aria-pressed="${done||ui.pick.sel.has(k)}"${done?" disabled":""}>${esc(s||"whole sample")}${done?" · added":""}</button>`}).join("")}</div></div>`}).join("")
+    ||`<div class="hint">No depositions logged on ${esc(niceDate(day))}. Pick another day, or type the sample below.</div>`;
+  const nSel=ui.pick.sel.size;
+  return `<section class="card stack picker" data-kind="${g}" id="picker">
+    <div class="grp-h"><h3>${mode==="dev"?"Sample":draft.units.length?"Add substrate":"Films"}</h3>${(mode==="dev"?T_(draft.sample):draft.units.length)?`<button type="button" class="btn sm ghost" data-pickclose>Cancel</button>`:""}</div>
+    <div class="pk-h"><span class="stepn">1</span><b>${mode==="dev"?"Made on":"Films deposited on"}</b><input type="date" id="pkDate" value="${day}" max="${today}" aria-label="Pick another date"></div>
+    <div class="wk"><button type="button" class="wnav" data-pkwk="-7" aria-label="Earlier week">‹</button>${wk}<button type="button" class="wnav" data-pkwk="7" aria-label="Later week"${addDays(start,6)>=today?" disabled":""}>›</button></div>
+    <div class="pk-h"><span class="stepn">2</span><b>${mode==="dev"?"Sample":"Samples & substrates"} · ${esc(niceDate(day))}</b></div>
+    ${rows}
+    <div class="xrow" style="grid-template-columns:${mode==="dev"?"1fr auto":"1fr 1fr auto"}">
+      <input type="text" id="pkSample" placeholder="Other sample ID" aria-label="Sample ID" autocapitalize="characters" value="${mode==="dev"?esc(draft.sample):""}">
+      ${mode==="dev"?"":`<input type="text" id="pkSub" placeholder="Substrate" aria-label="Substrate" list="subList">`}
+      <button type="button" class="btn sm" data-pkmanual>${mode==="dev"?"Use":"＋ Add"}</button></div>
+    ${mode==="dev"?"":`<button type="button" class="btn primary" data-pkadd${nSel?"":" disabled"}>${nSel?`Add ${nSel} substrate${nSel>1?"s":""}`:"Tick the substrates you measured"}</button>`}
+  </section>`;
+}
+function charHTML(){
+  const t=draft.type, g=grpOf(t), G=TYPES[t].groups, showPick=!draft.units.length||ui.pick.open;
+  const units=draft.units.map((u,i)=>{
+    const col=ui.ucol.has(i), armed=ui.arm===`udel:${i}`, n=u.scans.length;
+    const head=`<div class="uh"><span class="un">${i+1}</span><button type="button" class="stage-tog" data-ucol="${i}" aria-expanded="${!col}"><span class="ut"><b>${esc(u.sample||"(no ID)")}${u.sub?" · "+esc(u.sub):""}</b><small>${u.dep?"deposited "+esc(niceDate(u.dep))+" · ":""}${n} scan${n>1?"s":""}</small></span><span class="chev" aria-hidden="true">${col?"▸":"▾"}</span></button><button type="button" class="btn sm icon" data-udel="${i}" aria-label="Remove substrate ${i+1}">✕</button></div>
+      ${armed?`<div class="confirm" role="alert"><span>Remove ${esc(u.sample)} ${esc(u.sub)} and its ${n} scan${n>1?"s":""}?</span><button type="button" class="btn sm danger solid" data-udel="${i}">Remove</button><button type="button" class="btn sm" data-disarm>Keep</button></div>`:""}`;
+    if(col) return `<section class="card stack ublk" data-kind="${g}" id="unit_${i}">${head}</section>`;
+    const scans=u.scans.map((s,j)=>{const k=`${i}:${j}`, open=!ui.scol.has(k), P=`units.${i}.scans.${j}.f`, sarm=ui.arm===`scdel:${k}`;
+      return `<div class="scan${open?" open":""}"><div class="sch"><button type="button" class="stage-tog" data-scol="${k}" aria-expanded="${open}"><b>Scan ${j+1}</b><small>${open?"":esc(fBrief(t,G,s.f))||"no values yet"}</small></button><button type="button" class="btn sm ghost" data-sdup="${k}">Duplicate</button>${n>1?`<button type="button" class="btn sm icon ghost" data-scdel="${k}" aria-label="Remove scan ${j+1}">✕</button>`:""}</div>
+        ${sarm?`<div class="confirm" role="alert" style="margin:0 10px 10px"><span>Remove scan ${j+1}?</span><button type="button" class="btn sm danger solid" data-scdel="${k}">Remove</button><button type="button" class="btn sm" data-disarm>Keep</button></div>`:""}
+        ${open?`<div class="scb">${groupsHTML(t,G,s.f,P)}</div>`:""}</div>`}).join("");
+    return `<section class="card stack ublk" data-kind="${g}" id="unit_${i}">${head}${scans}<button type="button" class="btn addm" data-sadd="${i}">＋ Add scan</button></section>`}).join("");
+  const pick=showPick?pickerHTML("char"):"";
+  if(!draft.units.length) return pick;
+  return units+(pick||`<div style="padding:0 14px"><button type="button" class="btn addu" data-pickopen>＋ Add substrate</button></div>`);
+}
+/* ---------- device testing: sample → structure → devices → measurements ---------- */
+function devHTML(){
+  const t=draft.type, c=DEVCFG[t]; if(!c) return "";
+  const showPick=!T_(draft.sample)||ui.pick.open;
+  const sample=showPick?pickerHTML("dev"):`<section class="card stack" data-kind="dev"><div class="grp-h"><h3>Sample</h3></div><div class="pk-sum"><span><b>${esc(draft.sample)}</b>${draft.devDep?` · made ${esc(niceDate(draft.devDep))}`:""}</span><button type="button" class="btn sm" data-pickopen>Change</button></div></section>`;
+  const structure=`<section class="card stack" data-kind="dev"><div class="grp-h"><h3>Device structure</h3><span class="hint">same for all devices</span></div>${groupsHTML(t,sharedGroups(t),draft.f,"f")}</section>`;
+  const UG=unitGroups(t);
+  const devs=draft.devs.map((d,i)=>{
+    const col=ui.ucol.has(i), armed=ui.arm===`ddel:${i}`, n=d.meas.length;
+    const head=`<div class="uh"><span class="un">${i+1}</span><input type="text" class="devid" data-p="devs.${i}.id" id="${pid(`devs.${i}.id`)}" value="${esc(d.id)}" aria-label="Device ${i+1} name" autocapitalize="characters" autocomplete="off"><button type="button" class="stage-tog" data-ucol="${i}" aria-expanded="${!col}"><span class="ut"><small>${n} measurement${n>1?"s":""}${col&&fBrief(t,UG,d.f)?" · "+esc(fBrief(t,UG,d.f)):""}</small></span><span class="chev" aria-hidden="true">${col?"▸":"▾"}</span></button>${draft.devs.length>1?`<button type="button" class="btn sm icon" data-ddel="${i}" aria-label="Remove device ${i+1}">✕</button>`:""}</div>
+      ${armed?`<div class="confirm" role="alert"><span>Remove device ${esc(d.id)} and its measurements?</span><button type="button" class="btn sm danger solid" data-ddel="${i}">Remove</button><button type="button" class="btn sm" data-disarm>Keep</button></div>`:""}`;
+    if(col) return `<section class="card stack ublk" data-kind="dev" id="dev_${i}">${head}</section>`;
+    const meas=d.meas.map((m,j)=>{const k=`${i}:${j}`, open=!ui.scol.has(k), P=`devs.${i}.meas.${j}.f`, MG=measGroups(t,m.m), marm=ui.arm===`mdel:${k}`, nm=measName(t,m.m);
+      const types=c.types?`<div class="seg segf" role="group" aria-label="Measurement type">${c.types.map(([mk,ml])=>`<button type="button" data-mtype="${k}:${mk}" aria-pressed="${m.m===mk}">${ml}</button>`).join("")}</div>`:"";
+      return `<div class="scan${open?" open":""}"><div class="sch"><button type="button" class="stage-tog" data-scol="${k}" aria-expanded="${open}"><b>Measurement ${j+1}</b><small>${open?(nm?"· "+nm:""):esc([nm,fBrief(t,MG,m.f,2)].filter(Boolean).join(" · "))||"no values yet"}</small></button><button type="button" class="btn sm ghost" data-mdup="${k}">Duplicate</button>${n>1?`<button type="button" class="btn sm icon ghost" data-mdel="${k}" aria-label="Remove measurement ${j+1}">✕</button>`:""}</div>
+        ${marm?`<div class="confirm" role="alert" style="margin:0 10px 10px"><span>Remove measurement ${j+1}?</span><button type="button" class="btn sm danger solid" data-mdel="${k}">Remove</button><button type="button" class="btn sm" data-disarm>Keep</button></div>`:""}
+        ${open?`<div class="scb">${types}${groupsHTML(t,MG,m.f,P)}</div>`:""}</div>`}).join("");
+    return `<section class="card stack ublk" data-kind="dev" id="dev_${i}">${head}${groupsHTML(t,UG,d.f,`devs.${i}.f`)}${meas}<button type="button" class="btn addm" data-madd="${i}">＋ Add measurement</button></section>`}).join("");
+  return sample+structure+devs+`<div style="padding:0 14px"><button type="button" class="btn addu" data-dadd>＋ Add device</button></div>`;
 }
 function renderExtra(){
+  const q=["Tool factor","Glovebox O₂ (ppm)","Glovebox H₂O (ppm)","Relative humidity (%)"].filter(k=>!draft.extra.some(x=>T_(x.k)===k));
   $("#extraRows").innerHTML=draft.extra.map((x,i)=>`<div class="xrow">${fld({p:`extra.${i}.k`,v:x.k,l:"Name",txt:1,ph:"e.g. Tool factor",list:"xList"})}${fld({p:`extra.${i}.v`,v:x.v,l:"Value (with unit)",txt:1,ph:"e.g. 1.2"})}<button type="button" class="btn icon-x" data-del="extra.${i}" aria-label="Remove parameter ${i+1}">✕</button></div>`).join("")
-    ||`<div class="hint">Anything else worth recording, e.g. tool factor, glovebox O₂/H₂O, humidity.</div>`;
+    +(q.length?`<div class="xq">${q.map(k=>`<button type="button" data-xq="${esc(k)}">＋ ${esc(k.replace(/ \(.*\)$/,""))}</button>`).join("")}</div>`:"");
 }
 function renderLists_dl(){
   const chems=new Set([...CHEMS.map(c=>c.id),...customChems()]), solv=new Set(SOLVENTS), as=new Set(ANTISOLV);
@@ -1118,7 +1477,7 @@ function renderLists_dl(){
   const xn=new Set(["Glovebox O₂ (ppm)","Glovebox H₂O (ppm)","Relative humidity (%)","Room temperature (°C)","Atmosphere","Tool factor"]);
   entries.forEach(e=>{normExtra(e.extra).forEach(x=>T_(x.k)&&xn.add(T_(x.k))); if(kindOf(e)==="dep") depOf(e).stages.forEach(st=>st.x.forEach(x=>T_(x.k)&&xn.add(T_(x.k))))});
   $("#xList").innerHTML=o(xn);
-  $("#chemList").innerHTML=o(chems); $("#solvList").innerHTML=o(solv); $("#asList").innerHTML=o(as);
+  $("#chemList").innerHTML=o(chems); $("#solvList").innerHTML=o(solv); $("#asList").innerHTML=o(as); $("#subList").innerHTML=o(new Set(subList()));
 }
 
 /* ---------- form events ---------- */
@@ -1133,13 +1492,12 @@ function addSub(){const v=$("#subNewIn").value.trim().slice(0,60); if(!v){$("#su
 $("#subNewAdd").addEventListener("click",addSub);
 $("#subNewIn").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();addSub()}});
 
-const touch=()=>{draft.touched=true;saveDraft()};
+const touch=()=>{draft.touched=true;saveDraft();updateSum(); if($("#lastRun").innerHTML) renderLastRun()};
 form.addEventListener("input",e=>{
   const t=e.target;
   if(t.id==="fDate"){draft.date=t.value;dateHint()}
-  else if(t.id==="fTime") draft.time=t.value;
+  else if(t.id==="fTime"){draft.time=t.value;dateHint()}
   else if(t.id==="fSample") draft.sample=t.value;
-  else if(t.id==="fDevNo") draft.f.devId=t.value;
   else if(t.id==="fNotes") draft.notes=t.value;
   else if(t.dataset.p&&t.type!=="checkbox"&&t.tagName==="INPUT"){setPath(draft,t.dataset.p,t.value); t.removeAttribute("aria-invalid"); $("#formErr").hidden=true; updCalc()}
   else return;
@@ -1147,16 +1505,20 @@ form.addEventListener("input",e=>{
 });
 form.addEventListener("change",e=>{
   const t=e.target;
+  if(t.id==="pkDate"){ if(okDate(t.value)){ui.pick.day=t.value>ymd(new Date())?ymd(new Date()):t.value; rerender()} return}
+  if(t.tagName==="SELECT"&&(t.dataset.massu!=null||t.dataset.thku!=null)){const s=draft.stages[+(t.dataset.massu??t.dataset.thku)], k=t.dataset.massu!=null?"mU":"kU"; if(!s) return;
+    s.src.forEach(c=>c[k]=t.value); unitPref["u."+k]=t.value; lsSet(UKEY,unitPref); touch(); return}
   if(t.tagName==="SELECT"&&t.dataset.p){setPath(draft,t.dataset.p,t.value); if(t.dataset.uk){unitPref["u."+t.dataset.uk]=t.value;lsSet(UKEY,unitPref)} updCalc(); touch()}
-  else if(t.type==="checkbox"&&t.dataset.p){setPath(draft,t.dataset.p,t.dataset.p.startsWith("f.")?(t.checked?"1":""):t.checked); touch(); rerender(t.dataset.p)}
+  else if(t.type==="checkbox"&&t.dataset.p){setPath(draft,t.dataset.p,/(^|\.)f\.[A-Za-z0-9_]+$/.test(t.dataset.p)?(t.checked?"1":""):t.checked); touch(); rerender(t.dataset.p)}
 });
-function updCalc(){if(draft.type==="dep") return; fieldsOf(draft.type).forEach(fd=>{if(!fd.calc) return; const v=CALC[fd.calc](draft.f); draft.f[fd.k]=v; const o=document.getElementById("calc_"+fd.k); if(o) o.textContent=v||"—"})}
+/* Cᵢ and any other calculated field lives in the device structure */
+function updCalc(){ if(secOf(draft.type)!=="dev") return; fieldsOf(draft.type).forEach(fd=>{if(!fd.calc) return; const v=CALC[fd.calc](draft.f); draft.f[fd.k]=v; const o=document.getElementById("calc_"+pid("f."+fd.k)); if(o) o.textContent=v||"—"})}
 /* re-draw the stage area but keep the page where it is */
-function rerender(focusP){const y=window.scrollY; renderTypeFields(); renderKind(); window.scrollTo(0,y);
+function rerender(focusP){const y=window.scrollY; renderTypeFields(); renderKind(); updateSum(); window.scrollTo(0,y);
   if(focusP){const el=document.querySelector(`[data-p="${CSS.escape(focusP)}"]`); if(el&&el.type==="checkbox") try{el.focus({preventScroll:true})}catch(e){}}}
 let armT=null;
 function arm(key,msg){ if(ui.arm===key){ui.arm=null;clearTimeout(armT);return true} ui.arm=key; clearTimeout(armT); armT=setTimeout(()=>{if(ui.arm===key){ui.arm=null;rerender()}},10000); if(msg) toast(msg); return false }
-function setRoute(r){ if(!ROUTES[r]) return; draft.route=r; draft.stages=stagesFor(r,draft.stages); lsSet(RKEY,r); ui.col.clear(); touch(); rerender() }
+function setRoute(r){ if(!ROUTES[r]) return; draft.route=r; draft.stages=stagesFor(r,draft.stages); lsSet(RKEY,r); ui.col.clear(); ui.srcOpen=null; touch(); rerender(); renderLastRun() }
 function addChem(i,id){
   const s=draft.stages[i]; if(!s||s.kind!=="te"||!id) return;
   if(s.mode==="seq"){ if(s.src.length>=30) return; s.src.push(blankSrc(id)); lsSet(SEQKEY,s.src.map(c=>c.chem)); toast(`${chemPlain(id)} added as layer ${s.src.length}`) }
@@ -1166,16 +1528,34 @@ function addChem(i,id){
     else { if(srcHasData(s.src[j])&&!arm(`chem:${i}:${id}`,`Tap ${chemPlain(id)} again to remove it and its values`)) return; s.src.splice(j,1) }
     lsSet(CHKEY,s.src.map(c=>c.chem));
   }
-  touch(); rerender();
+  ui.srcOpen=null; touch(); rerender();
 }
+/* open one scan / measurement of a block and fold the others */
+function focusOne(i,j,n){for(let k=0;k<n;k++) ui.scol.add(`${i}:${k}`); ui.scol.delete(`${i}:${j}`)}
+function clearKeys(i){[...ui.scol].forEach(k=>{if(k.startsWith(i+":")) ui.scol.delete(k)})}
+function addUnits(list){
+  const G=TYPES[draft.type].groups, first=draft.units[0];
+  const base=first?first.scans.map(s=>({f:settingsOnly(G,s.f)})):[{f:settingsOnly(G,draft.tpl||{})}];
+  let n=0;
+  list.forEach(x=>{ if(draft.units.length>=40) return; if(draft.units.some(u=>u.sample===x.sample&&u.sub===x.sub)) return;
+    draft.units.push({sample:x.sample,sub:x.sub,dep:x.dep||"",scans:base.map(s=>({f:{...s.f}}))}); n++ });
+  ui.pick={open:false,day:ui.pick.day,sel:new Set()};
+  touch(); rerender();
+  if(n) toast(`${n} substrate${n>1?"s":""} added${first?", with the scan settings of substrate 1":""}`);
+  const el=document.getElementById("unit_"+(draft.units.length-n)); el&&el.scrollIntoView({block:"start",behavior:"smooth"});
+}
+const selParts=k=>{const p=k.indexOf("|"); return [k.slice(0,p),k.slice(p+1)]};
 form.addEventListener("click",e=>{
   const q=sel=>e.target.closest(sel);
   let b;
   if(b=q("[data-disarm]")){ui.arm=null;clearTimeout(armT);rerender();return}
-  if(b=q("[data-kindsel]")){const v=b.dataset.kindsel; if(v==="dep") draft.type="dep"; else if(v==="dev"){if(secOf(draft.type)!=="dev") draft.type=lastTech("dev")} else if(secOf(draft.type)!=="char") draft.type=lastTech(); lsSet(TKEY,draft.type); touch(); renderForm(); return}
+  if(b=q("[data-lastrun]")){const x=entries.get(b.dataset.lastrun); if(x) loadEntry(x,false); return}
+  if(b=q("[data-xq]")){draft.extra.push({k:b.dataset.xq,v:""}); touch(); renderExtra(); const el=document.getElementById(pid(`extra.${draft.extra.length-1}.v`)); el&&el.focus(); return}
+  if(b=q("[data-kindsel]")){const v=b.dataset.kindsel; if(v==="dep") draft.type="dep"; else if(v==="dev"){if(secOf(draft.type)!=="dev") draft.type=lastTech("dev")} else if(secOf(draft.type)!=="char") draft.type=lastTech(); lsSet(TKEY,draft.type); ui.pick.open=false; touch(); renderForm(); return}
   if(b=q("[data-grp]")){draft.type=lastTech(b.dataset.grp); rememberTech(draft.type); lsSet(TKEY,draft.type); touch(); renderForm(); return}
-  if(b=q("[data-seg]")){draft.f[b.dataset.seg]=b.dataset.v; touch(); rerender(); return}
-  if(b=q("[data-pick]")){const k=b.dataset.pick, v=b.dataset.v; draft.f[k]=T_(draft.f[k])===v?"":v; if(k==="diel"&&draft.f[k]&&DIEL_K[v]&&!T_(draft.f.k)) draft.f.k=DIEL_K[v]; touch(); rerender(); return}
+  if(b=q("[data-seg]")){setPath(draft,b.dataset.seg,b.dataset.v); touch(); rerender(); return}
+  if(b=q("[data-pick]")){const p=b.dataset.pick, v=b.dataset.v, cur=T_(getPath(draft,p)), nv=cur.toLowerCase()===v.toLowerCase()?"":v; setPath(draft,p,nv);
+    if(/(^|\.)diel$/.test(p)&&nv&&DIEL_K[v]){const kp=p.replace(/diel$/,"k"); if(!T_(getPath(draft,kp))) setPath(draft,kp,DIEL_K[v])} updCalc(); touch(); rerender(); return}
   if(b=q("[data-tech]")){const t=b.dataset.tech; if(!TECH[t]) return; draft.type=t; rememberTech(t); lsSet(TKEY,t); touch(); renderForm(); return}
   if(b=q("[data-route]")){setRoute(b.dataset.route);return}
   if(b=q("[data-flow]")){draft.stages=stagesFor("hyb",draft.stages,b.dataset.flow.split(",")); ui.col.clear(); touch(); rerender(); return}
@@ -1191,9 +1571,10 @@ form.addEventListener("click",e=>{
     if(!known){const cc=customChems(); if(!cc.some(x=>x.toLowerCase()===v.toLowerCase())){cc.push(v);lsSet(CCKEY,cc.slice(-30))}}
     const s=draft.stages[i]; if(s&&s.mode!=="seq"&&s.src.some(c=>c.chem===id)){toast(`${chemPlain(id)} is already in this run`);return}
     addChem(i,id); return}
-  if(b=q("[data-srcmove]")){const [i,j,d]=b.dataset.srcmove.split(":").map(Number), s=draft.stages[i]; if(!s) return; const k=j+d; if(k<0||k>=s.src.length) return; [s.src[j],s.src[k]]=[s.src[k],s.src[j]]; lsSet(SEQKEY,s.src.map(c=>c.chem)); touch(); rerender(); return}
+  if(b=q("[data-srcx]")){const k=b.dataset.srcx; ui.srcOpen=ui.srcOpen===k?null:k; rerender(); return}
+  if(b=q("[data-srcmove]")){const [i,j,d]=b.dataset.srcmove.split(":").map(Number), s=draft.stages[i]; if(!s) return; const k=j+d; if(k<0||k>=s.src.length) return; [s.src[j],s.src[k]]=[s.src[k],s.src[j]]; lsSet(SEQKEY,s.src.map(c=>c.chem)); ui.srcOpen=`${i}:${k}`; touch(); rerender(); return}
   if(b=q("[data-srcdel]")){const [i,j]=b.dataset.srcdel.split(":").map(Number), s=draft.stages[i]; if(!s||!s.src[j]) return;
-    if(srcHasData(s.src[j])&&!arm(`srcdel:${i}:${j}`)){rerender();return} s.src.splice(j,1); if(s.mode!=="seq") lsSet(CHKEY,s.src.map(c=>c.chem)); touch(); rerender(); return}
+    if(srcHasData(s.src[j])&&!arm(`srcdel:${i}:${j}`)){rerender();return} s.src.splice(j,1); ui.srcOpen=null; if(s.mode!=="seq") lsSet(CHKEY,s.src.map(c=>c.chem)); touch(); rerender(); return}
   if(b=q("[data-prog]")){openProg(b.dataset.prog,b.dataset.pf); return}
   if(b=q("[data-addx]")){const st=draft.stages[+b.dataset.addx]; if(!st) return; if(st.x.length>=30){toast("Up to 30 rows");return} st.x.push({k:"",v:""}); touch(); rerender(); const el=document.getElementById(pid(`stages.${b.dataset.addx}.x.${st.x.length-1}.k`)); el&&el.scrollIntoView({block:"nearest"}); return}
   if(b=q("[data-sprog]")){openProg(b.dataset.sprog,"prog"); return}
@@ -1202,29 +1583,76 @@ form.addEventListener("click",e=>{
     const x=st.sol[j], has=["name","conc","solv","vol"].some(k=>T_(x[k]))||x.prog.length||T_(x.ann.t)||T_(x.ann.time);
     if(has&&!arm(`soldel:${i}:${j}`)){rerender();return} st.sol.splice(j,1); touch(); rerender(); return}
   if(b=q("[data-del]")){const p=b.dataset.del.split("."), idx=+p.pop(), a=getPath(draft,p.join(".")); if(Array.isArray(a)){a.splice(idx,1);
-      if(p[p.length-1]==="sol"){const st=getPath(draft,p.slice(0,-1).join(".")); (st.steps||[]).forEach(x=>{const k=+x.sol||1; x.sol=k===idx+1?"1":k>idx+1?String(k-1):String(k)})}
       touch(); p[0]==="extra"?renderExtra():rerender()} return}
   if(b=q("[data-addrow]")){const a=getPath(draft,b.dataset.addrow); if(!Array.isArray(a)) return; if(a.length>=10){toast("Up to 10 rows");return} a.push(blankSol()); touch(); rerender(); return}
+  /* picker: date → samples / substrates */
+  if(b=q("[data-pickopen]")){ui.pick.open=true; ui.pick.sel=new Set(); rerender(); const p=$("#picker"); p&&p.scrollIntoView({block:"start",behavior:"smooth"}); return}
+  if(b=q("[data-pickclose]")){ui.pick.open=false; ui.pick.sel=new Set(); rerender(); return}
+  if(b=q("[data-pkday]")){ui.pick.day=b.dataset.pkday; rerender(); return}
+  if(b=q("[data-pkwk]")){const d=addDays(pickDay(),+b.dataset.pkwk), today=ymd(new Date()); ui.pick.day=d>today?today:d; rerender(); return}
+  if(b=q("[data-pksel]")){const k=b.dataset.pksel; ui.pick.sel.has(k)?ui.pick.sel.delete(k):ui.pick.sel.add(k); rerender(); return}
+  if(b=q("[data-pkall]")){const x=entries.get(b.dataset.pkall); if(!x) return; const used=new Set(draft.units.map(u=>u.sample+"|"+u.sub)), smp=T_(x.sample)||"(no ID)";
+    const keys=(subsOf(x).length?subsOf(x):[""]).filter(s=>!used.has(smp+"|"+s)).map(s=>x.id+"|"+s); const all=keys.every(k=>ui.pick.sel.has(k));
+    keys.forEach(k=>all?ui.pick.sel.delete(k):ui.pick.sel.add(k)); rerender(); return}
+  if(b=q("[data-pkadd]")){const list=[...ui.pick.sel].map(k=>{const [id,sub]=selParts(k), x=entries.get(id); return x?{sample:T_(x.sample)||"(no ID)",sub,dep:x.date}:null}).filter(Boolean); if(list.length) addUnits(list); return}
+  if(b=q("[data-pkmanual]")){const si=$("#pkSample"), smp=si.value.trim().slice(0,60); if(!smp){si.focus();toast("Type the sample ID first");return}
+    if(secOf(draft.type)==="dev"){draft.sample=smp; draft.devDep=""; $("#fSample").value=smp; ui.pick.open=false; touch(); rerender(); return}
+    const sub=($("#pkSub").value||"").trim().slice(0,60); addUnits([{sample:smp,sub,dep:""}]); return}
+  if(b=q("[data-pksample]")){const x=entries.get(b.dataset.pksample); if(!x) return; draft.sample=T_(x.sample)||"(no ID)"; draft.devDep=x.date; $("#fSample").value=draft.sample; ui.pick.open=false; touch(); rerender(); return}
+  /* substrates (characterisation) and devices share the block controls */
+  if(b=q("[data-ucol]")){const i=+b.dataset.ucol; ui.ucol.has(i)?ui.ucol.delete(i):ui.ucol.add(i); rerender(); return}
+  if(b=q("[data-scol]")){const k=b.dataset.scol; ui.scol.has(k)?ui.scol.delete(k):ui.scol.add(k); rerender(); return}
+  if(b=q("[data-udel]")){const i=+b.dataset.udel, u=draft.units[i]; if(!u) return; if(!arm(`udel:${i}`)){rerender();return} draft.units.splice(i,1); ui.ucol.clear(); ui.scol.clear(); touch(); rerender(); toast("Substrate removed"); return}
+  if(b=q("[data-sadd]")){const i=+b.dataset.sadd, u=draft.units[i]; if(!u) return; if(u.scans.length>=30){toast("Up to 30 scans per substrate");return}
+    u.scans.push({f:settingsOnly(TYPES[draft.type].groups,u.scans[u.scans.length-1].f)}); focusOne(i,u.scans.length-1,u.scans.length); touch(); rerender(); toast(`Scan ${u.scans.length} added with the same settings. Change what differs.`); return}
+  if(b=q("[data-sdup]")){const [i,j]=b.dataset.sdup.split(":").map(Number), u=draft.units[i]; if(!u||!u.scans[j]) return; if(u.scans.length>=30){toast("Up to 30 scans per substrate");return}
+    u.scans.splice(j+1,0,{f:{...u.scans[j].f}}); clearKeys(i); focusOne(i,j+1,u.scans.length); touch(); rerender(); return}
+  if(b=q("[data-scdel]")){const [i,j]=b.dataset.scdel.split(":").map(Number), u=draft.units[i]; if(!u||u.scans.length<2) return; if(!arm(`scdel:${i}:${j}`)){rerender();return}
+    u.scans.splice(j,1); clearKeys(i); touch(); rerender(); return}
+  if(b=q("[data-mtype]")){const [i,j,m]=b.dataset.mtype.split(":"), d=draft.devs[+i], x=d&&d.meas[+j]; if(!x) return; x.m=m; touch(); rerender(); return}
+  if(b=q("[data-madd]")){const i=+b.dataset.madd, d=draft.devs[i]; if(!d) return; if(d.meas.length>=30){toast("Up to 30 measurements per device");return}
+    const last=d.meas[d.meas.length-1]; d.meas.push({m:last.m,f:settingsOnly(measGroups(draft.type,last.m),last.f)}); focusOne(i,d.meas.length-1,d.meas.length); touch(); rerender(); return}
+  if(b=q("[data-mdup]")){const [i,j]=b.dataset.mdup.split(":").map(Number), d=draft.devs[i]; if(!d||!d.meas[j]) return; if(d.meas.length>=30){toast("Up to 30 measurements per device");return}
+    d.meas.splice(j+1,0,{m:d.meas[j].m,f:{...d.meas[j].f}}); clearKeys(i); focusOne(i,j+1,d.meas.length); touch(); rerender(); return}
+  if(b=q("[data-mdel]")){const [i,j]=b.dataset.mdel.split(":").map(Number), d=draft.devs[i]; if(!d||d.meas.length<2) return; if(!arm(`mdel:${i}:${j}`)){rerender();return}
+    d.meas.splice(j,1); clearKeys(i); touch(); rerender(); return}
+  if(b=q("[data-dadd]")){ if(draft.devs.length>=40){toast("Up to 40 devices per entry");return}
+    const last=draft.devs[draft.devs.length-1], n=draft.devs.length; let id=nextDev(last.id); if(!id||id===last.id||draft.devs.some(d=>d.id===id)) id="D"+(n+1);
+    draft.devs.push({id,f:{...last.f},meas:last.meas.map(m=>({m:m.m,f:settingsOnly(measGroups(draft.type,m.m),m.f)}))});
+    for(let k=0;k<n;k++) ui.ucol.add(k); touch(); rerender(); toast(`Device ${id} added with the same size and measurements`);
+    const el=document.getElementById("dev_"+n); el&&el.scrollIntoView({block:"start",behavior:"smooth"}); return}
+  if(b=q("[data-ddel]")){const i=+b.dataset.ddel; if(draft.devs.length<2||!draft.devs[i]) return; if(!arm(`ddel:${i}`)){rerender();return}
+    draft.devs.splice(i,1); ui.ucol.clear(); ui.scol.clear(); touch(); rerender(); return}
 });
-form.addEventListener("keydown",e=>{const t=e.target; if(e.key==="Enter"&&t.dataset&&t.dataset.ccin!=null){e.preventDefault(); const b=form.querySelector(`[data-addcustom="${t.dataset.ccin}"]`); b&&b.click()}});
-$("#addParam").addEventListener("click",()=>{draft.extra.push({k:"",v:""});touch();renderExtra()});
+form.addEventListener("keydown",e=>{const t=e.target; if(e.key!=="Enter") return;
+  if(t.dataset&&t.dataset.ccin!=null){e.preventDefault(); const b=form.querySelector(`[data-addcustom="${t.dataset.ccin}"]`); b&&b.click()}
+  else if(t.id==="pkSample"||t.id==="pkSub"){e.preventDefault(); const b=form.querySelector("[data-pkmanual]"); b&&b.click()}});
+$("#addParam").addEventListener("click",()=>{draft.extra.push({k:"",v:""});touch();renderExtra(); const el=document.getElementById(pid(`extra.${draft.extra.length-1}.k`)); el&&el.focus()});
 $("#clearBtn").addEventListener("click",()=>{
-  if(draft.touched&&!ui.editing&&!arm("clear")){ $("#clearBtn").textContent="Tap again to clear"; setTimeout(()=>{$("#clearBtn").textContent="Clear form"},4000); return}
-  $("#clearBtn").textContent="Clear form"; ui.editing=null; ui.col.clear(); dropDraft(); draft=freshDraft(draft.type); renderForm(); window.scrollTo(0,0)});
-$("#cancelEdit").addEventListener("click",()=>{ui.editing=null;ui.col.clear();dropDraft();draft=freshDraft(draft.type);renderForm();setTab("log")});
+  if(draft.touched&&!ui.editing&&!arm("clear")){ $("#clearBtn").textContent="Tap again"; setTimeout(()=>{$("#clearBtn").textContent="Clear"},4000); return}
+  $("#clearBtn").textContent="Clear"; ui.editing=null; resetFormUI(); dropDraft(); draft=freshDraft(draft.type); renderForm(); window.scrollTo(0,0)});
+$("#cancelEdit").addEventListener("click",()=>{ui.editing=null;resetFormUI();dropDraft();draft=freshDraft(draft.type);renderForm();setTab("log")});
 
 /* ---------- checking and saving ---------- */
 function numIssues(d){
-  const out=[], chk=(p,l,v)=>{v=T_(v); if(v&&isNaN(parseNum(v))) out.push([p,l])};
+  const out=[], chk=(p,l,v)=>{v=T_(v); if(v&&isNaN(parseNum(v))) out.push([p,l])}, sec=secOf(d.type);
   if(d.type==="dep") d.stages.forEach((s,i)=>{const n=d.stages.length>1?`Stage ${i+1}, `:""; const P=`stages.${i}`;
     if(s.kind==="te"){TE_F.forEach(fd=>chk(`${P}.f.${fd.k}`,n+fd.l,s.f[fd.k]));
       s.src.forEach((c,j)=>SRC_F.forEach(fd=>{if(fd.seq&&s.mode!=="seq") return; if(fd.noOrg&&isOrg(c.chem)) return; chk(`${P}.src.${j}.${fd.k}`,`${n}${chemPlain(c.chem)} ${fd.l.toLowerCase()}`,c[fd.k])}))}
     else s.sol.forEach((x,j)=>{const m=`${n}solution ${j+1} `; chk(`${P}.sol.${j}.conc`,m+"concentration",x.conc); chk(`${P}.sol.${j}.vol`,m+"volume",x.vol);
       if(x.ann.on){chk(`${P}.sol.${j}.ann.t`,m+"annealing temperature",x.ann.t); chk(`${P}.sol.${j}.ann.time`,m+"annealing time",x.ann.time)}});
     if(s.kind==="te"&&s.ann.on){chk(`${P}.ann.t`,n+"annealing temperature",s.ann.t);chk(`${P}.ann.time`,n+"annealing time",s.ann.time)}});
-  else visFields(d.type,d.f).forEach(fd=>{if(!fd.txt) chk("f."+fd.k,(fd.gs?fd.gs+" ":"")+fd.l,d.f[fd.k])});
+  else if(sec==="char") d.units.forEach((u,i)=>u.scans.forEach((s,j)=>visG(TYPES[d.type].groups,s.f).forEach(fd=>{if(!fd.txt) chk(`units.${i}.scans.${j}.f.${fd.k}`,`${u.sample||"substrate "+(i+1)}${u.sub?" "+u.sub:""}, scan ${j+1}: ${fd.l}`,s.f[fd.k])})));
+  else { visG(sharedGroups(d.type),d.f).forEach(fd=>{if(!fd.txt) chk("f."+fd.k,"Device structure: "+fd.l,d.f[fd.k])});
+    d.devs.forEach((dv,i)=>{const nm=T_(dv.id)||"Device "+(i+1);
+      visG(unitGroups(d.type),dv.f).forEach(fd=>{if(!fd.txt) chk(`devs.${i}.f.${fd.k}`,`${nm}: ${fd.l}`,dv.f[fd.k])});
+      dv.meas.forEach((m,j)=>visG(measGroups(d.type,m.m),m.f).forEach(fd=>{if(!fd.txt) chk(`devs.${i}.meas.${j}.f.${fd.k}`,`${nm}, measurement ${j+1}: ${fd.l}`,m.f[fd.k])}))})}
   return out;
 }
+/* the values worth keeping from one set of technique fields */
+function cleanF(t,groups,f,cnt){const o={};
+  visG(groups,f).forEach(fd=>{const x=fd.calc?CALC[fd.calc](f):T_(f[fd.k]); if(!x) return; o[fd.k]=x; if(!fd.seg&&!fd.calc) cnt.n++;
+    if(Array.isArray(fd.u)) o[fd.k+"_u"]=fd.u.includes(f[fd.k+"_u"])?f[fd.k+"_u"]:uPref(t+"."+fd.k,fd.u)}); return o}
 function buildDep(d){
   let filled=0; const v=x=>{x=T_(x); if(x) filled++; return x};
   const xOut=st=>d.route==="hyb"?st.x.map(x=>({k:v(x.k),v:T_(x.v)})).filter(x=>x.k||x.v):[];
@@ -1248,31 +1676,45 @@ form.addEventListener("submit",async e=>{
   e.preventDefault();
   const err=$("#formErr");
   const fail=(m,p)=>{err.textContent=m;err.hidden=false;
-    if(p){const mm=/^stages\.(\d+)/.exec(p); if(mm&&ui.col.has(+mm[1])){ui.col.delete(+mm[1]);rerender()}
-      const el=document.getElementById(pid(p)); if(el){el.setAttribute("aria-invalid","true");el.scrollIntoView({block:"center"});el.focus({preventScroll:true});return}}
+    if(p){let mm=/^stages\.(\d+)/.exec(p); if(mm&&ui.col.has(+mm[1])){ui.col.delete(+mm[1]);rerender()}
+      mm=/^(?:units|devs)\.(\d+)(?:\.(?:scans|meas)\.(\d+))?/.exec(p);
+      if(mm){let ch=false; if(ui.ucol.has(+mm[1])){ui.ucol.delete(+mm[1]);ch=true} if(mm[2]!=null&&ui.scol.has(`${mm[1]}:${mm[2]}`)){ui.scol.delete(`${mm[1]}:${mm[2]}`);ch=true} if(ch) rerender()}
+      mm=/^stages\.(\d+)\.src\.(\d+)/.exec(p); if(mm&&!document.getElementById(pid(p))){ui.srcOpen=`${mm[1]}:${mm[2]}`;rerender()}
+      if(p==="fDate"){ui.dtOpen=true;$("#dtRow").hidden=false;dateHint()}
+      const el=document.getElementById(pid(p))||document.getElementById(p); if(el){el.setAttribute("aria-invalid","true");el.scrollIntoView({block:"center"});el.focus({preventScroll:true});return}}
     err.scrollIntoView({block:"center"})};
   if(!draft.date) return fail("Pick a date for this entry.","fDate");
+  const t=draft.type, sec=secOf(t);
+  if(sec==="char"&&!draft.units.length&&ui.pick.sel.size){const list=[...ui.pick.sel].map(k=>{const [id,sub]=selParts(k), x=entries.get(id); return x?{sample:T_(x.sample)||"(no ID)",sub,dep:x.date}:null}).filter(Boolean); if(list.length) addUnits(list)}
+  if(sec==="char"&&!draft.units.length) return fail("First pick the films: choose the date they were deposited, tick the substrates, then tap Add.");
   const bad=numIssues(draft); if(bad.length) return fail(`${bad[0][1][0].toUpperCase()+bad[0][1].slice(1)}: enter a number (for example 280, 0.5 or 5e-6).`,bad[0][0]);
   let body, filled=0;
-  if(draft.type==="dep"){const r=buildDep(draft); body=r.out; filled=r.filled}
-  else {const f={}; TYPES[draft.type].groups.forEach(g=>{if(g.tog&&draft.f[g.tog]==="1") f[g.tog]="1"});
-    if(secOf(draft.type)==="dev"&&T_(draft.f.devId)){f.devId=T_(draft.f.devId); filled++}
-    visFields(draft.type,draft.f).forEach(fd=>{const x=fd.calc?CALC[fd.calc](draft.f):T_(draft.f[fd.k]); if(!x) return; f[fd.k]=x; if(!fd.seg&&!fd.calc) filled++; if(Array.isArray(fd.u)) f[fd.k+"_u"]=fd.u.includes(draft.f[fd.k+"_u"])?draft.f[fd.k+"_u"]:uPref(draft.type+"."+fd.k,fd.u)}); body={f}}
+  if(t==="dep"){const r=buildDep(draft); body=r.out; filled=r.filled}
+  else if(sec==="char"){const cnt={n:0}, G=TYPES[t].groups;
+    const units=draft.units.map(u=>({sample:T_(u.sample),sub:T_(u.sub),dep:okDate(u.dep),scans:u.scans.map(s=>({f:cleanF(t,G,s.f,cnt)}))}));
+    filled=cnt.n; body={units,sample:[...new Set(units.map(u=>u.sample).filter(Boolean))].join(", "),subs:[...new Set(units.map(u=>u.sub).filter(Boolean))]}}
+  else {const cnt={n:0};
+    const f=cleanF(t,sharedGroups(t),draft.f,cnt);
+    const devs=draft.devs.map((d,i)=>({id:T_(d.id)||"D"+(i+1),f:cleanF(t,unitGroups(t),d.f,cnt),meas:d.meas.map(m=>({m:m.m,f:cleanF(t,measGroups(t,m.m),m.f,cnt)}))}));
+    filled=cnt.n; body={f,devs,...(draft.devDep?{dep:draft.devDep}:{})}}
   const extra=draft.extra.map(x=>({k:T_(x.k),v:T_(x.v)})).filter(x=>x.k||x.v);
   if(!filled&&!extra.length&&!T_(draft.notes)) return fail("Fill in at least one value or a comment before saving.");
   const now=Date.now(), prev=ui.editing?entries.get(ui.editing):null;
-  const entry={id:ui.editing||uid(),date:draft.date,time:draft.time||"",type:draft.type,sample:T_(draft.sample),...(draft.subs&&draft.subs.length&&secOf(draft.type)!=="dev"?{subs:[...draft.subs]}:{}),...body,extra,notes:draft.notes.trim(),created:prev&&prev.created||now,upd:now};
+  const entry={id:ui.editing||uid(),date:draft.date,time:draft.time||"",type:t,sample:T_(draft.sample),...(sec==="dep"&&draft.subs&&draft.subs.length?{subs:[...draft.subs]}:{}),...body,extra,notes:draft.notes.trim(),created:prev&&prev.created||now,upd:now};
+  if(Array.isArray(entry.subs)&&!entry.subs.length) delete entry.subs;
   if(entry.type==="dep"){lsSet(RKEY,entry.route); if(entry.route==="hyb") lsSet(HKEY,entry.stages.map(s=>s.kind))}
   const wasEdit=!!ui.editing;
-  ui.editing=null; ui.col.clear(); dropDraft();
-  const keepDate=draft.date;
-  const old=draft;
+  ui.editing=null; dropDraft();
+  const keepDate=draft.date, old=draft;
   draft=freshDraft(entry.type, keepDate!==ymd(new Date())?keepDate:null);
-  /* device testing: next device on the same sample keeps the sample and settings */
-  let nx="";
-  if(!wasEdit&&secOf(entry.type)==="dev"){draft.sample=old.sample; draft.f={...old.f}; draft.extra=old.extra.map(x=>({...x})); nx=nextDev(old.f.devId); draft.f.devId=nx; draft.touched=true; saveDraft()}
-  renderForm();
-  toast(wasEdit?"Entry updated":`${entry.type==="dep"?ROUTES[entry.route].name:kindName(entry)}${entry.f&&entry.f.devId?" device "+entry.f.devId:""} saved for ${niceDate(entry.date)}${nx&&nx!==entry.f.devId?". Next: device "+nx:""}`);
+  /* the next entry of the same kind starts from these settings (not the results) */
+  if(!wasEdit&&sec==="char") draft.tpl=settingsOnly(TYPES[t].groups,(old.units[0]&&old.units[0].scans[0].f)||{});
+  if(!wasEdit&&sec==="dev"){draft.f={...old.f}; draft.devs=old.devs.slice(0,1).map(d=>({id:"D1",f:{...d.f},meas:d.meas.map(m=>({m:m.m,f:settingsOnly(measGroups(t,m.m),m.f)}))}))}
+  resetFormUI(); renderForm();
+  let what=entry.type==="dep"?ROUTES[entry.route].name:kindName(entry);
+  if(sec==="char") what+=` · ${entry.units.length} substrate${entry.units.length>1?"s":""}`;
+  if(sec==="dev") what+=` · ${entry.devs.length} device${entry.devs.length>1?"s":""}`;
+  toast(wasEdit?"Entry updated":`${what} saved for ${niceDate(entry.date)}`);
   if(wasEdit) setTab("log"); else window.scrollTo(0,0);
   await put(entry);
 });
@@ -1301,30 +1743,60 @@ const itemHTML=x=>`<div${x.prog?' class="wide"':""}><dt>${fmtChem(x.l)}</dt><dd$
 const extraHTML=list=>list.length?`<dl class="params">${list.map(x=>`<div><dt>${esc(x.k||"Other")}</dt><dd>${esc(x.v)}</dd></div>`).join("")}</dl>`:"";
 
 /* ---------- entry cards ---------- */
+const BADGE=e=>{const k=kindOf(e); return k==="dep"?ROUTES[depOf(e).route].short:kindName(e)};
+function entryDetail(e){
+  const k=kindOf(e), sec=secOf(k), g=grpOf(k);
+  const dl=it=>it.length?`<dl class="params">${it.map(itemHTML).join("")}</dl>`:'<div class="hint">No values recorded.</div>';
+  if(k==="dep"){const d=depOf(e);
+    return d.stages.map((s,i)=>`<div class="dstage" data-kind="${s.kind}"><h5>${d.stages.length>1?(i+1)+". ":""}${esc(stageTitle(s))}</h5>${dl(stageItems(s))}</div>`).join("")
+      +(d.extra.length?`<div class="dstage" data-kind="x"><h5>Other parameters${d.route==="hyb"?" · whole run":""}</h5>${extraHTML(d.extra)}</div>`:"")}
+  let h="";
+  if(sec==="char"){const G=TYPES[k].groups;
+    h=charOf(e).map(u=>`<div class="dstage" data-kind="${g}"><h5>${esc(u.sample||"(no ID)")}${u.sub?" · "+esc(u.sub):""}${u.dep?` <span class="muted">· film from ${esc(niceDate(u.dep,true))}</span>`:""}</h5>${u.scans.map((s,j)=>`${u.scans.length>1?`<h6>Scan ${j+1}</h6>`:""}${dl(fItems(k,G,s.f))}`).join("")}</div>`).join("")}
+  else {const D=devOf(e), sh=fItems(k,sharedGroups(k),D.f);
+    h=(sh.length?`<div class="dstage" data-kind="dev"><h5>Device structure</h5>${dl(sh)}</div>`:"")
+      +D.devs.map(d=>{const un=fItems(k,unitGroups(k),d.f);
+        return `<div class="dstage" data-kind="dev"><h5>Device ${esc(d.id)}${un.length?` <span class="muted">· ${esc(un.map(x=>`${x.l} ${x.v}${x.u?" "+x.u:""}`).join(" · "))}</span>`:""}</h5>${d.meas.map((m,j)=>`<h6>${d.meas.length>1?`Measurement ${j+1}`:"Measurement"}${measName(k,m.m)?" · "+esc(measName(k,m.m)):""}</h6>${dl(fItems(k,measGroups(k,m.m),m.f))}`).join("")}</div>`}).join("")}
+  const ex=normExtra(e.extra);
+  return h+(ex.length?`<div class="dstage" data-kind="x"><h5>Other parameters</h5>${extraHTML(ex)}</div>`:"");
+}
+function entryBrief(e){
+  const k=kindOf(e), sec=secOf(k);
+  if(k==="dep"){const d=depOf(e); const flow=d.stages.length>1?d.stages.map((s,i)=>`${i+1}·${STAGE_SHORT[s.kind]}`).join(" → ")+"<br>":"";
+    return flow+d.stages.map(stageBrief).filter(Boolean).map(x=>fmtChem(x)).join("<br>")}
+  if(sec==="char"){const U=charOf(e), G=TYPES[k].groups;
+    if(U.length===1&&U[0].scans.length===1){const b=fBrief(k,G,U[0].scans[0].f,4); return esc([Array.isArray(e.units)?`${U[0].sample}${U[0].sub?" · "+U[0].sub:""}`:"",b].filter(Boolean).join(" · "))}
+    return U.map(u=>esc(`${u.sample||"(no ID)"}${u.sub?" · "+u.sub:""} · ${u.scans.length} scan${u.scans.length>1?"s":""}`)).join("<br>")}
+  const D=devOf(e);
+  return esc(D.devs.map(d=>`${d.id}: ${d.meas.map(m=>measName(k,m.m)).filter(Boolean).join(", ")||d.meas.length+" measurement"+(d.meas.length>1?"s":"")}`).join(" · "))}
 function cardHTML(e){
   const k=kindOf(e); if(!KINDS[k]) return "";
-  let head, sum="", body;
-  if(k==="dep"){const d=depOf(e);
-    head=`<span class="chip">${esc(ROUTES[d.route].name)}</span>`;
-    const flow=d.stages.length>1?`<div class="flow">${d.stages.map((s,i)=>`<span class="fstep" data-kind="${s.kind}">${i+1} · ${STAGE_SHORT[s.kind]}${s.kind==="te"?" "+(s.mode==="seq"?"seq":"co"):""}</span>`).join('<span class="arr" aria-hidden="true">→</span>')}</div>`:"";
-    const brief=d.stages.map(stageBrief).filter(Boolean);
-    sum=flow+(brief.length?`<div class="brief">${brief.map(x=>fmtChem(x)).join('<br>')}</div>`:"");
-    body=`<details class="more"><summary>All parameters</summary>${d.stages.map((s,i)=>{const it=stageItems(s);return `<div class="dstage" data-kind="${s.kind}"><h5>${d.stages.length>1?(i+1)+". ":""}${esc(stageTitle(s))}</h5>${it.length?`<dl class="params">${it.map(itemHTML).join("")}</dl>`:'<div class="hint">No values recorded.</div>'}</div>`}).join("")}${d.extra.length?`<div class="dstage" data-kind="x"><h5>Other parameters${d.route==="hyb"?" · whole run":""}</h5>${extraHTML(d.extra)}</div>`:""}</details>`;
-  } else {
-    head=`<span class="chip">${esc(kindName(e))}</span>`;
-    const it=flatItems(e); body=(it.length?`<dl class="params">${it.map(itemHTML).join("")}</dl>`:"")+extraHTML(normExtra(e.extra));
-  }
-  const confirming=ui.confirmDel===e.id;
+  const confirming=ui.confirmDel===e.id, br=entryBrief(e), subs=k==="dep"||!Array.isArray(e.units)?subsOf(e):[];
   return `<article class="entry" data-type="${grpOf(k)}" data-id="${esc(e.id)}">
-    <div class="entry-h">${head}${e.time?`<time>${esc(e.time)}</time>`:""}${e.sample?`<span class="sample">${esc(e.sample)}</span>`:""}${T_(obj(e.f).devId)&&k!=="dep"?`<span class="chip sub">Device ${esc(T_(obj(e.f).devId))}</span>`:""}${subsOf(e).map(x=>`<span class="chip sub">${esc(x)}</span>`).join("")}</div>
-    ${sum}${body}
+    <div class="entry-h"><span class="badge">${esc(BADGE(e))}</span>${e.sample?`<span class="sample">${esc(e.sample)}</span>`:""}${T_(obj(e.f).devId)&&!Array.isArray(e.devs)&&k!=="dep"?`<span class="chip sub">Device ${esc(T_(obj(e.f).devId))}</span>`:""}${subs.map(x=>`<span class="chip sub">${esc(x)}</span>`).join("")}<span class="spacer" style="flex:1"></span>${e.time?`<time>${esc(e.time)}</time>`:""}</div>
+    ${br?`<div class="ebrief">${br}</div>`:""}
+    <details class="more"${confirming?" open":""}><summary>Details${e.notes?" · note":""}</summary>${entryDetail(e)}
     ${e.notes?`<div class="notes">${esc(e.notes)}</div>`:""}
-    <div class="actions">${confirming
+    <div class="actions" style="margin-top:10px">${confirming
       ?`<span class="hint">Delete this entry?</span><button class="btn sm danger solid" data-act="del-yes">Delete</button><button class="btn sm" data-act="del-no">Keep</button>`
-      :`<button class="btn sm" data-act="edit">Edit</button><button class="btn sm" data-act="repeat" title="Start a new entry with the same settings">Repeat</button><button class="btn sm ghost danger" data-act="del">Delete</button>`}</div>
+      :`<button class="btn sm" data-act="edit">Edit</button><button class="btn sm" data-act="repeat" title="Start a new entry with the same settings">Repeat</button><button class="btn sm ghost danger" data-act="del">Delete</button>`}</div></details>
   </article>`;
 }
 function sorted(){return [...entries.values()].sort((a,b)=>(str(b.date)+str(b.time)).localeCompare(str(a.date)+str(a.time))||(b.created||0)-(a.created||0))}
+/* open an entry in the form: edit it, or start a new one from its settings */
+function loadEntry(e,ed){
+  const now=new Date(), k=kindOf(e), sec=secOf(k), r=ROUTES[lsGet(RKEY,"co")]?lsGet(RKEY,"co"):"co";
+  const base={date:ed?str(e.date):ymd(now),time:ed?str(e.time):hm(now),sample:ed?str(e.sample):"",subs:[...subsOf(e)],type:k,notes:ed?String(e.notes||""):"",touched:true,f:{},units:[],devs:[],tpl:null,devDep:"",extra:[]};
+  if(k==="dep"){const d=depOf(e); draft={...base,route:d.route,stages:d.stages.length?JSON.parse(JSON.stringify(d.stages)):stagesFor(d.route,[]),extra:d.extra}}
+  else if(sec==="char"){const U=charOf(e); draft={...base,route:r,stages:stagesFor(r,[]),subs:lastSubs(),units:ed?U:[],tpl:ed?null:settingsOnly(TYPES[k].groups,U[0].scans[0].f),extra:normExtra(e.extra)}}
+  else {const D=devOf(e); draft={...base,route:r,stages:stagesFor(r,[]),subs:lastSubs(),f:{...D.f},devDep:ed?D.dep:"",extra:normExtra(e.extra),
+    devs:ed?D.devs:D.devs.map(d=>({id:d.id,f:{...d.f},meas:d.meas.map(m=>({m:m.m,f:settingsOnly(measGroups(k,m.m),m.f)}))}))}}
+  ui.editing=ed?e.id:null; resetFormUI();
+  if(ed&&sec==="char") draft.units.forEach((u,i)=>focusOne(i,u.scans.length-1,u.scans.length));
+  if(ed&&sec==="dev") draft.devs.forEach((d,i)=>focusOne(i,d.meas.length-1,d.meas.length));
+  saveDraft(); renderForm(); setTab("new");
+  if(!ed) toast(sec==="char"?"Scan settings copied. Pick the films, then save.":sec==="dev"?"Device settings copied. Pick the sample, then save.":"Settings copied. Adjust and save as a new entry.");
+}
 function onCardAction(ev){
   const b=ev.target.closest("[data-act]"); if(!b) return;
   const id=b.closest(".entry").dataset.id, e=entries.get(id); if(!e) return;
@@ -1332,28 +1804,26 @@ function onCardAction(ev){
   if(a==="del"){ui.confirmDel=id;renderLists()}
   else if(a==="del-no"){ui.confirmDel=null;renderLists()}
   else if(a==="del-yes"){ui.confirmDel=null;remove(id);toast("Entry deleted")}
-  else if(a==="edit"||a==="repeat"){
-    const now=new Date(), k=kindOf(e), ed=a==="edit";
-    const base={date:ed?str(e.date):ymd(now),time:ed?str(e.time):hm(now),sample:ed||secOf(k)==="dev"?str(e.sample):"",subs:[...subsOf(e)],type:k,notes:ed?String(e.notes||""):"",touched:true,f:{},extra:[]};
-    if(k==="dep"){const d=depOf(e); draft={...base,route:d.route,stages:d.stages.length?JSON.parse(JSON.stringify(d.stages)):stagesFor(d.route,[]),extra:d.extra}}
-    else {const r=ROUTES[lsGet(RKEY,"co")]?lsGet(RKEY,"co"):"co"; draft={...base,route:r,stages:stagesFor(r,[]),f:Object.fromEntries(Object.entries(obj(e.f)).map(([k2,v])=>[k2,str(v)])),extra:normExtra(e.extra)}}
-    if(!ed&&secOf(k)==="dev") draft.f.devId=nextDev(draft.f.devId);
-    ui.editing=ed?id:null; ui.col.clear(); saveDraft(); renderForm(); setTab("new");
-    if(!ed) toast("Settings copied. Adjust and save as a new entry.");
-  }
+  else if(a==="edit"||a==="repeat") loadEntry(e,a==="edit");
 }
 $("#logList").addEventListener("click",onCardAction);
 $("#dayList").addEventListener("click",onCardAction);
 
 /* ---------- entries view ---------- */
 function searchText(e){
-  const p=[e.sample,subsOf(e).join(" "),e.notes,obj(e.f).devId];
-  if(kindOf(e)==="dep"){const d=depOf(e); p.push(ROUTES[d.route].name); d.stages.forEach(s=>{p.push(STAGE_NAME[s.kind]); if(s.kind==="te") s.src.forEach(c=>p.push(c.chem,chemPlain(c.chem))); else s.sol.forEach(x=>{p.push(x.name,x.solv); x.prog.forEach(r=>p.push(r.asName))}); s.x.forEach(x=>p.push(x.k,x.v))}); d.extra.forEach(x=>p.push(x.k,x.v))}
-  else {const k=kindOf(e); p.push(kindName(e),TECH_GROUPS[grpOf(k)].name,SEC_NAME[secOf(k)]); fieldsOf(k).forEach(fd=>{if(fd.txt) p.push(obj(e.f)[fd.k])}); normExtra(e.extra).forEach(x=>p.push(x.k,x.v))}
+  const p=[e.sample,subsOf(e).join(" "),e.notes,obj(e.f).devId], k=kindOf(e), sec=secOf(k);
+  if(k==="dep"){const d=depOf(e); p.push(ROUTES[d.route].name); d.stages.forEach(s=>{p.push(STAGE_NAME[s.kind]); if(s.kind==="te") s.src.forEach(c=>p.push(c.chem,chemPlain(c.chem))); else s.sol.forEach(x=>{p.push(x.name,x.solv); x.prog.forEach(r=>p.push(r.asName))}); s.x.forEach(x=>p.push(x.k,x.v))}); d.extra.forEach(x=>p.push(x.k,x.v))}
+  else {const txt=f=>fieldsOf(k).forEach(fd=>{if(fd.txt) p.push(obj(f)[fd.k])});
+    p.push(kindName(e),TECH_GROUPS[grpOf(k)].name,SEC_NAME[sec]);
+    if(sec==="char") charOf(e).forEach(u=>{p.push(u.sample,u.sub); u.scans.forEach(s=>txt(s.f))});
+    else {const D=devOf(e); txt(D.f); D.devs.forEach(d=>{p.push(d.id); d.meas.forEach(m=>{p.push(measName(k,m.m)); txt(m.f)})})}
+    normExtra(e.extra).forEach(x=>p.push(x.k,x.v))}
   return p.map(str).join(" ").toLowerCase();
 }
+const FILTER_L={all:"All",dep:"Deposition",char:"Characterisation",dev:"Devices"};
 function renderLog(){
-  const q=ui.q.trim().toLowerCase();
+  const q=ui.q.trim().toLowerCase(), cnt={all:entries.size,dep:0,char:0,dev:0}; entries.forEach(e=>{cnt[secOf(kindOf(e))]++});
+  document.querySelectorAll("#filterSeg button").forEach(b=>{b.textContent=`${FILTER_L[b.dataset.f]} ${cnt[b.dataset.f]}`});
   const list=sorted().filter(e=>{const k=kindOf(e); return (ui.filter==="all"||(secOf(k)===ui.filter&&(ui.filter==="dep"||!ui.tech||k===ui.tech)))&&(!q||searchText(e).includes(q))});
   const el=$("#logList");
   if(!entries.size){el.innerHTML=`<div class="empty"><b>No experiments logged yet</b>Your saved entries appear here, newest first, grouped by day.</div>`;return}
@@ -1402,15 +1872,19 @@ function buildCSV(){
   const q=v=>{v=v==null?"":String(v); if(/^[=+@\t\r]/.test(v)||/^-[^0-9.]/.test(v)) v="'"+v; return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v};
   const list=sorted().reverse(), deps=list.filter(e=>kindOf(e)==="dep").map(e=>[e.id,depOf(e)]), dmap=new Map(deps);
   const nS=Math.max(1,...deps.map(([,d])=>d.stages.length));
-  const head=["Date","Time","Experiment","Route / technique","Sample","Substrates"];
+  const head=["Date","Time","Experiment","Route / technique","Sample","Substrates","Film deposited","Scan / device"];
   for(let i=1;i<=nS;i++) head.push(`Stage ${i}`);
   head.push("Measurement","Other parameters","Comments");
-  const rows=list.map(e=>{const k=kindOf(e), d=dmap.get(e.id);
-    const r=[e.date,e.time,SEC_NAME[secOf(k)],d?ROUTES[d.route].name+(d.stages.length>1?" ("+d.stages.map(s=>STAGE_SHORT[s.kind]).join(" → ")+")":""):kindName(e),e.sample+(T_(obj(e.f).devId)&&k!=="dep"?" · device "+T_(obj(e.f).devId):""),subsOf(e).join("; ")];
-    for(let i=0;i<nS;i++) r.push(d&&d.stages[i]?stageText(d.stages[i]):"");
-    r.push(d?"":flatItems(e).map(x=>`${x.l} ${x.v}${x.u?" "+x.u:""}`).join("; "));
-    r.push((d?d.extra:normExtra(e.extra)).map(x=>`${x.k}=${x.v}`).join("; ")); r.push(e.notes);
-    return r.map(q).join(",")});
+  const txt=it=>it.map(x=>`${x.l} ${x.v}${x.u?" "+x.u:""}`).join("; ");
+  const rows=[];
+  list.forEach(e=>{const k=kindOf(e), sec=secOf(k), d=dmap.get(e.id), extra=(d?d.extra:normExtra(e.extra)).map(x=>`${x.k}=${x.v}`).join("; ");
+    const row=(sample,subs,film,scan,meas)=>{const r=[e.date,e.time,SEC_NAME[sec],d?ROUTES[d.route].name+(d.stages.length>1?" ("+d.stages.map(s=>STAGE_SHORT[s.kind]).join(" → ")+")":""):kindName(e),sample,subs,film,scan];
+      for(let i=0;i<nS;i++) r.push(d&&d.stages[i]?stageText(d.stages[i]):""); r.push(meas,extra,e.notes); rows.push(r.map(q).join(","))};
+    if(d) row(e.sample,subsOf(e).join("; "),"","","");
+    else if(sec==="char"){const G=TYPES[k].groups; charOf(e).forEach(u=>u.scans.forEach((s,j)=>row(u.sample,u.sub,u.dep,u.scans.length>1||Array.isArray(e.units)?`Scan ${j+1}`:"",txt(fItems(k,G,s.f)))))}
+    else {const D=devOf(e), sh=fItems(k,sharedGroups(k),D.f);
+      D.devs.forEach(dv=>dv.meas.forEach((m,j)=>row(e.sample,"",D.dep,`${dv.id}${dv.meas.length>1?" · measurement "+(j+1):""}${measName(k,m.m)?" · "+measName(k,m.m):""}`,txt([...sh,...fItems(k,unitGroups(k),dv.f),...fItems(k,measGroups(k,m.m),m.f)]))))}
+  });
   return "﻿"+[head.map(q).join(","),...rows].join("\n");
 }
 $("#exportBtn").addEventListener("click",()=>{
@@ -1582,7 +2056,7 @@ $("#recForm").addEventListener("submit",e=>{e.preventDefault();
 let tt; function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2600)}
 
 /* ---------- start ---------- */
-$("#subtitle").textContent=niceDate(ymd(new Date()),true);
+$("#subtitle").textContent=niceDate(ymd(new Date()));
 renderForm(); setTab("new");
 if(draft.touched&&!ui.editing) setTimeout(()=>toast("Your unsaved entry was restored"),500);
 /* One-tap connect: opening the app with #LAB1-… only fills in the code; the user taps Connect */
@@ -1604,7 +2078,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
 document.addEventListener("visibilitychange",()=>{
   if(document.visibilityState!=="visible"||ui.editing) return;
   if(!draft.touched){const now=new Date();draft.date=ymd(now);draft.time=hm(now);$("#fDate").value=draft.date;$("#fTime").value=draft.time;dateHint()}
-  $("#subtitle").textContent=niceDate(ymd(new Date()),true);
+  $("#subtitle").textContent=niceDate(ymd(new Date()));
   if(cloudOn()) cloudSync(false);
 });
 })();
